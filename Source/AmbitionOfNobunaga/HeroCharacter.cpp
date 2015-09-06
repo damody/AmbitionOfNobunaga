@@ -2,74 +2,66 @@
 
 #include "AmbitionOfNobunaga.h"
 #include "HeroCharacter.h"
+#include "GameFramework/Character.h"
+// for GEngine
+#include "Engine.h"
 
-
-// Sets default values
-AHeroCharacter::AHeroCharacter()
+AHeroCharacter::AHeroCharacter(const FObjectInitializer& ObjectInitializer)
+	: Super(FObjectInitializer::Get())
 {
-    // Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-    PrimaryActorTick.bCanEverTick = true;
-	Skill_CDing_1 = false;
-	Skill_CDing_2 = false;
-	Skill_CDing_3 = false;
-	Skill_CDing_4 = false;
+	PrimaryActorTick.bCanEverTick = true;
+	SelectionDecal = ObjectInitializer.CreateDefaultSubobject<UDecalComponent>(this, TEXT("SelectionDecal0"));
+	SelectionDecal->SetWorldLocation(FVector(0, 0, -90));
+	// FRotator = rotation Y Z X
+	SelectionDecal->SetWorldRotation(FQuat(FRotator(90, 0, 0)));
+	SelectionDecal->SetWorldScale3D(FVector(10, 50, 50));
+	SelectionDecal->AttachParent = GetCapsuleComponent();
+// 	FTransform f;
+// 	f.SetLocation(FVector(0, 0, -90));
+// 	f.SetRotation(FQuat(FRotator(0, 90, 0)));
+// 	f.SetScale3D(FVector(10, 50, 50));
+// 	SelectionDecal->SetRelativeTransform(f);
 }
 
 // Called when the game starts or when spawned
 void AHeroCharacter::BeginPlay()
 {
     Super::BeginPlay();
-	Skill_MaxCD_1 = Skill_BaseCD_1;
-	Skill_MaxCD_2 = Skill_BaseCD_2;
-	Skill_MaxCD_3 = Skill_BaseCD_3;
-	Skill_MaxCD_4 = Skill_BaseCD_4;
-	Skill_CurrentCD_1 = Skill_BaseCD_1;
-	Skill_CurrentCD_2 = Skill_BaseCD_2;
-	Skill_CurrentCD_3 = Skill_BaseCD_3;
-	Skill_CurrentCD_4 = Skill_BaseCD_4;
+    CheckSelf(Skill_MaxCD.Num() == Skill_Amount, TEXT("Skill_MaxCD is invalid"));
+    CheckSelf(Skill_Description.Num() == Skill_Amount, TEXT("Skill_Description is invalid"));
+    CheckSelf(Skill_Texture.Num() == Skill_Amount, TEXT("Skill_Texture is invalid"));
+    CheckSelf(Skill_LevelCDs.Num() == Skill_Amount, TEXT("Skill_LevelCDs is invalid"));
+    CheckSelf(Skill_CDing.Num() == Skill_Amount, TEXT("Skill_CDing is invalid"));
+    CheckSelf(Skill_CurrentCD.Num() == Skill_Amount, TEXT("Skill_CurrentCD is invalid"));
+    CheckSelf(Skill_BaseCD.Num() == Skill_Amount, TEXT("Skill_BaseCD is invalid"));
+    CheckSelf(Skill_Level.Num() == Skill_Amount, TEXT("Skill_Level is invalid"));
+
+    for(int32 i = 0; i < Skill_MaxCD.Num(); ++i)
+    {
+        if(Skill_MaxCD.Num() > 0)
+        {
+            Skill_MaxCD[i] = Skill_BaseCD[i];
+            Skill_CurrentCD[i] = Skill_BaseCD[i];
+        }
+    }
 }
 
 // Called every frame
 void AHeroCharacter::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
-
-    if(Skill_CDing_1)
+	for (int32 i = 0; i < Skill_CDing.Num(); ++i)
     {
-        Skill_CurrentCD_1 += DeltaTime;
-		if (Skill_CurrentCD_1 > Skill_MaxCD_1)
-		{
-			Skill_CurrentCD_1 = Skill_MaxCD_1;
-			Skill_CDing_1 = false;
-		}
+        if(Skill_CDing[i])
+        {
+            Skill_CurrentCD[i] += DeltaTime;
+            if(Skill_CurrentCD[i] > Skill_MaxCD[i])
+            {
+                Skill_CurrentCD[i] = Skill_MaxCD[i];
+                Skill_CDing[i] = false;
+            }
+        }
     }
-	if (Skill_CDing_2)
-	{
-		Skill_CurrentCD_2 += DeltaTime;
-		if (Skill_CurrentCD_2 > Skill_MaxCD_2)
-		{
-			Skill_CurrentCD_2 = Skill_MaxCD_2;
-			Skill_CDing_2 = false;
-		}
-	}
-	if (Skill_CDing_3)
-	{
-		Skill_CurrentCD_3 += DeltaTime;
-		if (Skill_CurrentCD_3 > Skill_MaxCD_3)
-		{
-			Skill_CurrentCD_3 = Skill_MaxCD_3;
-			Skill_CDing_3 = false;
-		}
-	}
-	if (Skill_CDing_4)
-	{
-		Skill_CurrentCD_4 += DeltaTime;
-		if (Skill_CurrentCD_4 > Skill_MaxCD_4)
-		{
-			Skill_CurrentCD_4 = Skill_MaxCD_4;
-			Skill_CDing_4 = false;
-		}
-	}
 }
 
 // Called to bind functionality to input
@@ -81,62 +73,62 @@ void AHeroCharacter::SetupPlayerInputComponent(class UInputComponent* InputCompo
 
 void AHeroCharacter::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
-	if (Skill_LevelCDs1.Num() > 0)
-	{
-		Skill_BaseCD_1 = Skill_LevelCDs1[0];
-	}
-	if (Skill_LevelCDs2.Num() > 0)
-	{
-		Skill_BaseCD_2 = Skill_LevelCDs2[0];
-	}
-	if (Skill_LevelCDs3.Num() > 0)
-	{
-		Skill_BaseCD_3 = Skill_LevelCDs3[0];
-	}
-	if (Skill_LevelCDs4.Num() > 0)
-	{
-		Skill_BaseCD_4 = Skill_LevelCDs4[0];
-	}
-	Skill_MaxCD_1 = Skill_BaseCD_1;
-	Skill_MaxCD_2 = Skill_BaseCD_2;
-	Skill_MaxCD_3 = Skill_BaseCD_3;
-	Skill_MaxCD_4 = Skill_BaseCD_4;
-	Super::PostEditChangeProperty(PropertyChangedEvent);
+    //Get the name of the property that was changed
+    FName PropertyName = (PropertyChangedEvent.Property != nullptr) ? PropertyChangedEvent.Property->GetFName() : NAME_None;
+
+    if((PropertyName == GET_MEMBER_NAME_CHECKED(AHeroCharacter, Skill_LevelCDs)))
+    {
+        Skill_BaseCD.SetNum(Skill_LevelCDs.Num());
+        Skill_MaxCD.SetNum(Skill_LevelCDs.Num());
+        Skill_CDing.SetNum(Skill_LevelCDs.Num());
+        Skill_CurrentCD.SetNum(Skill_LevelCDs.Num());
+        Skill_Level.SetNum(Skill_LevelCDs.Num());
+        for(int32 i = 0; i < Skill_LevelCDs.Num(); ++i)
+        {
+            if(Skill_LevelCDs[i].CDs.Num() > 0)
+            {
+                Skill_BaseCD[i] = Skill_LevelCDs[i][0];
+                Skill_MaxCD[i] = Skill_BaseCD[i];
+            }
+        }
+    }
+    Super::PostEditChangeProperty(PropertyChangedEvent);
 }
 
-float AHeroCharacter::GetSkillCD1()
+void AHeroCharacter::PostEditChangeChainProperty(FPropertyChangedChainEvent& PropertyChangedEvent)
 {
-	if (Skill_CDing_1)
+	const FName TailPropName = PropertyChangedEvent.PropertyChain.GetTail()->GetValue()->GetFName();
+	static FName Mobility_NAME(TEXT("CDs"));
+	if (TailPropName == Mobility_NAME)
 	{
-		return Skill_CurrentCD_1 / Skill_MaxCD_1;
+		for (int32 i = 0; i < Skill_LevelCDs.Num(); ++i)
+		{
+			if (Skill_LevelCDs[i].CDs.Num() > 0)
+			{
+				Skill_BaseCD[i] = Skill_LevelCDs[i][0];
+				Skill_MaxCD[i] = Skill_BaseCD[i];
+			}
+		}
 	}
-	return 1.f;
+	Super::PostEditChangeChainProperty(PropertyChangedEvent);
 }
 
-float AHeroCharacter::GetSkillCD2()
+void AHeroCharacter::CheckSelf(bool res, FString msg)
 {
-	if (Skill_CDing_2)
-	{
-		return Skill_CurrentCD_2 / Skill_MaxCD_2;
-	}
-	return 1.f;
+    if(!res)
+    {
+        GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, HeroName + TEXT(" ") + msg);
+    }
 }
 
-float AHeroCharacter::GetSkillCD3()
+float AHeroCharacter::GetSkillCD(int32 n)
 {
-	if (Skill_CDing_3)
-	{
-		return Skill_CurrentCD_3 / Skill_MaxCD_3;
-	}
-	return 1.f;
+    if(n > 0 && n < Skill_Amount)
+    {
+        if(Skill_CDing[n])
+        {
+            return Skill_CurrentCD[n] / Skill_MaxCD[n];
+        }
+    }
+    return 1.f;
 }
-
-float AHeroCharacter::GetSkillCD4()
-{
-	if (Skill_CDing_4)
-	{
-		return Skill_CurrentCD_4 / Skill_MaxCD_4;
-	}
-	return 1.f;
-}
-
