@@ -5,28 +5,29 @@
 #include "GameFramework/Character.h"
 // for GEngine
 #include "Engine.h"
+#include "RTS_HUD.h"
 
 AHeroCharacter::AHeroCharacter(const FObjectInitializer& ObjectInitializer)
-	: Super(FObjectInitializer::Get())
+    : Super(FObjectInitializer::Get())
 {
-	PrimaryActorTick.bCanEverTick = true;
-	SelectionDecal = ObjectInitializer.CreateDefaultSubobject<UDecalComponent>(this, TEXT("SelectionDecal0"));
-	SelectionDecal->SetWorldLocation(FVector(0, 0, -90));
-	// FRotator = rotation Y Z X
-	SelectionDecal->SetWorldRotation(FQuat(FRotator(90, 0, 0)));
-	SelectionDecal->SetWorldScale3D(FVector(10, 50, 50));
-	SelectionDecal->AttachParent = GetCapsuleComponent();
-// 	FTransform f;
-// 	f.SetLocation(FVector(0, 0, -90));
-// 	f.SetRotation(FQuat(FRotator(0, 90, 0)));
-// 	f.SetScale3D(FVector(10, 50, 50));
-// 	SelectionDecal->SetRelativeTransform(f);
+    PrimaryActorTick.bCanEverTick = true;
+    SelectionDecal = ObjectInitializer.CreateDefaultSubobject<UDecalComponent>(this, TEXT("SelectionDecal0"));
+    SelectionDecal->SetWorldLocation(FVector(0, 0, -90));
+    // FRotator = rotation Y Z X
+    SelectionDecal->SetWorldRotation(FQuat(FRotator(90, 0, 0)));
+    SelectionDecal->SetWorldScale3D(FVector(10, 50, 50));
+    SelectionDecal->AttachParent = GetCapsuleComponent();
+
+	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+	GetMesh()->SetWorldRotation(FQuat(FRotator(0, -90, 0)));
 }
 
 // Called when the game starts or when spawned
 void AHeroCharacter::BeginPlay()
 {
     Super::BeginPlay();
+    GetCapsuleComponent()->OnClicked.AddDynamic(this, &AHeroCharacter::OnMouseClicked);
+    SelectionDecal->SetVisibility(false);
     CheckSelf(Skill_MaxCD.Num() == Skill_Amount, TEXT("Skill_MaxCD is invalid"));
     CheckSelf(Skill_Description.Num() == Skill_Amount, TEXT("Skill_Description is invalid"));
     CheckSelf(Skill_Texture.Num() == Skill_Amount, TEXT("Skill_Texture is invalid"));
@@ -50,7 +51,7 @@ void AHeroCharacter::BeginPlay()
 void AHeroCharacter::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
-	for (int32 i = 0; i < Skill_CDing.Num(); ++i)
+    for(int32 i = 0; i < Skill_CDing.Num(); ++i)
     {
         if(Skill_CDing[i])
         {
@@ -97,20 +98,51 @@ void AHeroCharacter::PostEditChangeProperty(FPropertyChangedEvent& PropertyChang
 
 void AHeroCharacter::PostEditChangeChainProperty(FPropertyChangedChainEvent& PropertyChangedEvent)
 {
-	const FName TailPropName = PropertyChangedEvent.PropertyChain.GetTail()->GetValue()->GetFName();
-	static FName Mobility_NAME(TEXT("CDs"));
-	if (TailPropName == Mobility_NAME)
-	{
-		for (int32 i = 0; i < Skill_LevelCDs.Num(); ++i)
-		{
-			if (Skill_LevelCDs[i].CDs.Num() > 0)
-			{
-				Skill_BaseCD[i] = Skill_LevelCDs[i][0];
-				Skill_MaxCD[i] = Skill_BaseCD[i];
-			}
-		}
-	}
-	Super::PostEditChangeChainProperty(PropertyChangedEvent);
+    const FName TailPropName = PropertyChangedEvent.PropertyChain.GetTail()->GetValue()->GetFName();
+    static FName Mobility_NAME(TEXT("CDs"));
+    if(TailPropName == Mobility_NAME)
+    {
+        for(int32 i = 0; i < Skill_LevelCDs.Num(); ++i)
+        {
+            if(Skill_LevelCDs[i].CDs.Num() > 0)
+            {
+                Skill_BaseCD[i] = Skill_LevelCDs[i][0];
+                Skill_MaxCD[i] = Skill_BaseCD[i];
+            }
+        }
+    }
+    Super::PostEditChangeChainProperty(PropertyChangedEvent);
+}
+
+void AHeroCharacter::OnMouseClicked(UPrimitiveComponent* TouchComp)
+{
+    ARTS_HUD* hud = Cast<ARTS_HUD>(UGameplayStatics::GetPlayerController(this, 0)->GetHUD());
+    if(hud)
+    {
+		GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, HeroName + TEXT(" ClearAllSelection"));
+        hud->ClearAllSelection();
+    }
+    SelectionOn();
+}
+
+void AHeroCharacter::SelectionOn()
+{
+    SelectionDecal->SetVisibility(true);
+    ARTS_HUD* hud = Cast<ARTS_HUD>(UGameplayStatics::GetPlayerController(this, 0)->GetHUD());
+    if(hud)
+    {
+        hud->CurrentSelection.Add(this);
+    }
+}
+
+void AHeroCharacter::SelectionOff()
+{
+    SelectionDecal->SetVisibility(false);
+    ARTS_HUD* hud = Cast<ARTS_HUD>(UGameplayStatics::GetPlayerController(this, 0)->GetHUD());
+    if(hud)
+    {
+        hud->CurrentSelection.Remove(this);
+    }
 }
 
 void AHeroCharacter::CheckSelf(bool res, FString msg)

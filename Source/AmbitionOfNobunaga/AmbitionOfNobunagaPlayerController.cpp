@@ -3,6 +3,8 @@
 #include "AmbitionOfNobunaga.h"
 #include "AmbitionOfNobunagaPlayerController.h"
 #include "AI/Navigation/NavigationSystem.h"
+#include "RTS_HUD.h"
+#include "HeroCharacter.h"
 
 AAmbitionOfNobunagaPlayerController::AAmbitionOfNobunagaPlayerController()
 {
@@ -65,16 +67,19 @@ void AAmbitionOfNobunagaPlayerController::MoveToTouchLocation(const ETouchIndex:
 
 void AAmbitionOfNobunagaPlayerController::SetNewMoveDestination(const FVector DestLocation)
 {
-	APawn* const Pawn = GetPawn();
-	if (Pawn)
+	ARTS_HUD* hud = Cast<ARTS_HUD>(UGameplayStatics::GetPlayerController(this, 0)->GetHUD());
+	if (hud)
 	{
-		UNavigationSystem* const NavSys = GetWorld()->GetNavigationSystem();
-		float const Distance = FVector::Dist(DestLocation, Pawn->GetActorLocation());
-
-		// We need to issue move command only if far enough in order for walk animation to play correctly
-		if (NavSys && (Distance > 120.0f))
+		for (AHeroCharacter* EachHero : hud->CurrentSelection)
 		{
-			NavSys->SimpleMoveToLocation(this, DestLocation);
+			UNavigationSystem* const NavSys = GetWorld()->GetNavigationSystem();
+			float const Distance = FVector::Dist(DestLocation, EachHero->GetActorLocation());
+
+			// We need to issue move command only if far enough in order for walk animation to play correctly
+			if (NavSys && (Distance > 120.0f))
+			{
+				NavSys->SimpleMoveToLocation(EachHero->GetController(), DestLocation);
+			}
 		}
 	}
 }

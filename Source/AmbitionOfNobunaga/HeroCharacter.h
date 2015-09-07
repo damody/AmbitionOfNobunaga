@@ -56,6 +56,15 @@ public:
 
 	virtual void PostEditChangeChainProperty(FPropertyChangedChainEvent& PropertyChangedEvent) override;
 
+	UFUNCTION()
+	void OnMouseClicked(UPrimitiveComponent* TouchComp);
+
+	UFUNCTION(BlueprintCallable, Category = "Hero")
+    void SelectionOn();
+
+	UFUNCTION(BlueprintCallable, Category = "Hero")
+    void SelectionOff();
+
 	void CheckSelf(bool res, FString msg);
 
     UFUNCTION(BlueprintCallable, Category = "Hero")
