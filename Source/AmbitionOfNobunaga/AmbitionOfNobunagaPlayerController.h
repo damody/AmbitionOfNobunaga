@@ -3,6 +3,8 @@
 #include "GameFramework/PlayerController.h"
 #include "AmbitionOfNobunagaPlayerController.generated.h"
 
+class ARTS_HUD;
+
 UCLASS()
 class AAmbitionOfNobunagaPlayerController : public APlayerController
 {
@@ -12,8 +14,14 @@ public:
 	AAmbitionOfNobunagaPlayerController();
 
 protected:
+	ARTS_HUD* Hud;
+
+	virtual void BeginPlay() override;
+
 	/** True if the controlled character should navigate to the mouse cursor. */
 	uint32 bMoveToMouseCursor : 1;
+	uint32 bMouseRButton : 1;
+	uint32 bMouseLButton : 1;
 
 	// Begin PlayerController interface
 	virtual void PlayerTick(float DeltaTime) override;
@@ -32,9 +40,17 @@ protected:
 	/** Navigate player to the given world location. */
 	void SetNewMoveDestination(const FVector DestLocation);
 
+	FVector2D GetMouseScreenPosition();
+
 	/** Input handlers for SetDestination action. */
 	void OnSetDestinationPressed();
 	void OnSetDestinationReleased();
+
+	void OnMouseRButtonPressed();
+	void OnMouseRButtonReleased();
+
+	void OnMouseLButtonPressed();
+	void OnMouseLButtonReleased();
 };
 
 

@@ -18,8 +18,8 @@ AHeroCharacter::AHeroCharacter(const FObjectInitializer& ObjectInitializer)
     SelectionDecal->SetWorldScale3D(FVector(10, 50, 50));
     SelectionDecal->AttachParent = GetCapsuleComponent();
 
-	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
-	GetMesh()->SetWorldRotation(FQuat(FRotator(0, -90, 0)));
+    AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+    GetMesh()->SetWorldRotation(FQuat(FRotator(0, -90, 0)));
 }
 
 // Called when the game starts or when spawned
@@ -28,6 +28,7 @@ void AHeroCharacter::BeginPlay()
     Super::BeginPlay();
     GetCapsuleComponent()->OnClicked.AddDynamic(this, &AHeroCharacter::OnMouseClicked);
     SelectionDecal->SetVisibility(false);
+    isSelection = false;
     CheckSelf(Skill_MaxCD.Num() == Skill_Amount, TEXT("Skill_MaxCD is invalid"));
     CheckSelf(Skill_Description.Num() == Skill_Amount, TEXT("Skill_Description is invalid"));
     CheckSelf(Skill_Texture.Num() == Skill_Amount, TEXT("Skill_Texture is invalid"));
@@ -119,14 +120,22 @@ void AHeroCharacter::OnMouseClicked(UPrimitiveComponent* TouchComp)
     ARTS_HUD* hud = Cast<ARTS_HUD>(UGameplayStatics::GetPlayerController(this, 0)->GetHUD());
     if(hud)
     {
-		GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, HeroName + TEXT(" ClearAllSelection"));
-        hud->ClearAllSelection();
+        if(hud->CurrentSelection.Num() == 1)
+        {
+            if(hud->CurrentSelection[0] == this)
+            {
+                return;
+            }
+        }
+		hud->ClickedSelected = true;
+		hud->ClearAllSelection();
     }
     SelectionOn();
 }
 
 void AHeroCharacter::SelectionOn()
 {
+    isSelection = true;
     SelectionDecal->SetVisibility(true);
     ARTS_HUD* hud = Cast<ARTS_HUD>(UGameplayStatics::GetPlayerController(this, 0)->GetHUD());
     if(hud)
@@ -137,11 +146,12 @@ void AHeroCharacter::SelectionOn()
 
 void AHeroCharacter::SelectionOff()
 {
+    isSelection = false;
     SelectionDecal->SetVisibility(false);
     ARTS_HUD* hud = Cast<ARTS_HUD>(UGameplayStatics::GetPlayerController(this, 0)->GetHUD());
     if(hud)
     {
-        hud->CurrentSelection.Remove(this);
+        hud->RemoveSelection.Add(this);
     }
 }
 

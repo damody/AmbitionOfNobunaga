@@ -55,7 +55,7 @@ public:
     virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 
 	virtual void PostEditChangeChainProperty(FPropertyChangedChainEvent& PropertyChangedEvent) override;
-
+	
 	UFUNCTION()
 	void OnMouseClicked(UPrimitiveComponent* TouchComp);
 
@@ -128,4 +128,7 @@ public:
 	// 可以使用的技能點數
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero")
     int32 Skill_Points;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero")
+	bool isSelection;
 };
