@@ -3,6 +3,7 @@
 #pragma once
 
 #include "GameFramework/HUD.h"
+#include "RTSHitBox.h"
 #include "RTS_HUD.generated.h"
 
 UENUM(BlueprintType)
@@ -10,10 +11,12 @@ enum class ERTSStatusEnum : uint8
 {
 	Normal,
 	Move,
-	Attack
+	Attack,
+	ThrowEquipment
 };
-
+class AAmbitionOfNobunagaPlayerController;
 class AHeroCharacter;
+class AEquipment;
 /**
  * 
  */
@@ -37,18 +40,63 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "RTS")
 	void ClearAllSelection();
 
-	void OnMouseMove(FVector2D pos);
+	TArray<FRTSHitBox>	RTS_HitBoxMap;
+
+	FRTSHitBox* FindHitBoxByName(const FString& name);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void RTS_HitBoxRButtonPressed(const FString& name);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void RTS_HitBoxRButtonReleased(const FString& name);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void RTS_HitBoxLButtonPressed(const FString& name);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void RTS_HitBoxLButtonReleased(const FString& name);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void RTS_MouseRButtonPressed();
+
+	UFUNCTION(BlueprintCallable, Category = "RTS")
+	void RTS_AddHitBox(FVector2D Position, FVector2D Size, const FString& Name, bool bConsumesInput, int32 Priority);
+
+	UFUNCTION(BlueprintCallable, Category = "RTS")
+	bool IsGameRegion(FVector2D pos);
+
+	UFUNCTION(BlueprintCallable, Category = "RTS")
+	bool IsUIRegion(FVector2D pos);
+
+	UFUNCTION(BlueprintCallable, Category = "RTS")
+	void AssignSelectionHeroPickup(AEquipment* equ);
+
+	UFUNCTION(BlueprintCallable, Category = "RTS")
+	void StopMovementHero(AHeroCharacter* hero);
+
+		
+	void OnSize();
+
+	void OnMouseMove(FVector2D pos, FVector pos3d);
+	void OnRMouseDown(FVector2D pos);
 	void OnRMousePressed(FVector2D pos);
 	void OnRMouseReleased(FVector2D pos);
+	void OnLMouseDown(FVector2D pos);
 	void OnLMousePressed(FVector2D pos);
-	void OnLMouseReleased(FVector2D pos);
-		
+	void OnLMouseReleased(FVector2D pos);	
+
 	UFUNCTION(BlueprintImplementableEvent)
 	void SelectedHero(AHeroCharacter* hero);
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void UnSelectHero();
+	
+	UFUNCTION(BlueprintImplementableEvent)
+	void GetEquipmentPosition(int32 n, FVector2D& pos, FVector2D& size);
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void GetSkillPosition(int32 n, FVector2D& pos, FVector2D& size);
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RTS")
 	TArray<AHeroCharacter*> HeroCanSelection;
 	
@@ -64,14 +112,58 @@ public:
 	FVector2D CurrentMouseXY;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RTS")
+	FVector CurrentMouseHit;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RTS")
 	FLinearColor	SelectionBoxLineColor;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RTS")
 	FLinearColor	SelectionBoxFillColor;
 
 	bool ClickedSelected;
 
-protected:
-	uint32 bMouseRButton : 1;
-	uint32 bMouseLButton : 1;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "RTS")
+	bool bMouseRButton;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "RTS")
+	bool bMouseLButton;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "RTS")
+	UTexture2D* NothingTexture;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "RTS")
+	UMaterialInterface* SkillMaterial;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "RTS")
+	TArray<UMaterialInstanceDynamic*> SkillDMaterials;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "RTS")
+	UMaterialInterface* EquipmentMaterial;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "RTS")
+	TArray<UMaterialInstanceDynamic*> EquipmentDMaterials;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "RTS")
+	UMaterialInterface* ThrowMaterial;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "RTS")
+	UMaterialInstanceDynamic* ThrowDMaterial;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "RTS")
+	ERTSStatusEnum RTSStatus;
+
+	FString RButtonDownHitBox;
+	FString RButtonUpHitBox;
+
+	FString LButtonDownHitBox;
+	FString LButtonUpHitBox;
+
+	AAmbitionOfNobunagaPlayerController* localController;
+
+	AEquipment* WantPickup;
+
+	int32 EquipmentIndex;
+
+	UTexture2D* ThrowTexture;
+
+	float ViewportScale;
 };

@@ -1,15 +1,19 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "AmbitionOfNobunaga.h"
-#include "HeroCharacter.h"
 #include "GameFramework/Character.h"
 // for GEngine
 #include "Engine.h"
+
 #include "RTS_HUD.h"
+#include "HeroCharacter.h"
+#include "Equipment.h"
+#include "UnrealNetwork.h"
 
 AHeroCharacter::AHeroCharacter(const FObjectInitializer& ObjectInitializer)
     : Super(FObjectInitializer::Get())
 {
+	bReplicates = true;
     PrimaryActorTick.bCanEverTick = true;
     SelectionDecal = ObjectInitializer.CreateDefaultSubobject<UDecalComponent>(this, TEXT("SelectionDecal0"));
     SelectionDecal->SetWorldLocation(FVector(0, 0, -90));
@@ -20,6 +24,8 @@ AHeroCharacter::AHeroCharacter(const FObjectInitializer& ObjectInitializer)
 
     AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
     GetMesh()->SetWorldRotation(FQuat(FRotator(0, -90, 0)));
+
+    PickupObjectDistance = 500;
 }
 
 // Called when the game starts or when spawned
@@ -46,12 +52,21 @@ void AHeroCharacter::BeginPlay()
             Skill_CurrentCD[i] = Skill_BaseCD[i];
         }
     }
+
+    Equipments.SetNum(6);
+    for(int32 idx = 0; idx < Equipments.Num(); ++idx)
+    {
+        Equipments[idx] = NULL;
+    }
+    WantThrow = NULL;
+    WantPickup = NULL;
 }
 
 // Called every frame
 void AHeroCharacter::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
+    // ºâCD
     for(int32 i = 0; i < Skill_CDing.Num(); ++i)
     {
         if(Skill_CDing[i])
@@ -64,6 +79,50 @@ void AHeroCharacter::Tick(float DeltaTime)
             }
         }
     }
+    // ¾ßª««~
+    if(WantPickup)
+    {
+        // §PÂ_¶ZÂ÷
+        if(FVector::Dist(GetActorLocation(), WantPickup->GetActorLocation()) < PickupObjectDistance)
+        {
+            if(Pickup(WantPickup))
+            {
+                WantPickup->SetActorLocation(FVector(FMath::Rand(), 99999, 99999));
+            }
+            WantPickup = NULL;
+            // °±¤î²¾°Ê
+            ARTS_HUD* hud = Cast<ARTS_HUD>(UGameplayStatics::GetPlayerController(this, 0)->GetHUD());
+            if(hud)
+            {
+				hud->StopMovementHero(this);
+            }
+        }
+    }
+    // ¥áª««~
+    else if(WantThrow)
+    {
+        if(FVector::Dist(GetActorLocation(), ThrowDestination) < PickupObjectDistance)
+        {
+            FVector origin, extent;
+            WantThrow->GetActorBounds(true, origin, extent);
+            ThrowDestination.Z += extent.Z;
+            WantThrow->SetActorLocation(ThrowDestination);
+            for(int32 idx = 0; idx < Equipments.Num(); ++idx)
+            {
+                if(Equipments[idx] == WantThrow)
+                {
+                    Equipments[idx] = NULL;
+                }
+            }
+            WantThrow = NULL;
+            // °±¤î²¾°Ê
+			ARTS_HUD* hud = Cast<ARTS_HUD>(UGameplayStatics::GetPlayerController(this, 0)->GetHUD());
+			if (hud)
+			{
+				hud->StopMovementHero(this);
+			}
+        }
+    }
 }
 
 // Called to bind functionality to input
@@ -72,6 +131,7 @@ void AHeroCharacter::SetupPlayerInputComponent(class UInputComponent* InputCompo
     Super::SetupPlayerInputComponent(InputComponent);
 
 }
+#if WITH_EDITOR
 
 void AHeroCharacter::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
@@ -114,6 +174,20 @@ void AHeroCharacter::PostEditChangeChainProperty(FPropertyChangedChainEvent& Pro
     }
     Super::PostEditChangeChainProperty(PropertyChangedEvent);
 }
+#endif // WITH_EDITOR
+
+bool AHeroCharacter::Pickup(AEquipment* equ)
+{
+    for(int32 idx = 0; idx < Equipments.Num(); ++idx)
+    {
+        if(Equipments[idx] == NULL)
+        {
+            Equipments[idx] = equ;
+            return true;
+        }
+    }
+    return false;
+}
 
 void AHeroCharacter::OnMouseClicked(UPrimitiveComponent* TouchComp)
 {
@@ -127,8 +201,8 @@ void AHeroCharacter::OnMouseClicked(UPrimitiveComponent* TouchComp)
                 return;
             }
         }
-		hud->ClickedSelected = true;
-		hud->ClearAllSelection();
+        hud->ClickedSelected = true;
+        hud->ClearAllSelection();
     }
     SelectionOn();
 }
@@ -163,7 +237,7 @@ void AHeroCharacter::CheckSelf(bool res, FString msg)
     }
 }
 
-float AHeroCharacter::GetSkillCD(int32 n)
+float AHeroCharacter::GetSkillCDPercent(int32 n)
 {
     if(n > 0 && n < Skill_Amount)
     {
@@ -173,4 +247,13 @@ float AHeroCharacter::GetSkillCD(int32 n)
         }
     }
     return 1.f;
+}
+
+void AHeroCharacter::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(AHeroCharacter, WantPickup);
+	DOREPLIFETIME(AHeroCharacter, WantThrow);
+	DOREPLIFETIME(AHeroCharacter, Equipments);
+	DOREPLIFETIME(AHeroCharacter, ThrowDestination);
 }

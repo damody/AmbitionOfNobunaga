@@ -36,6 +36,8 @@ struct FSkillDescription
 	}
 };
 
+class AEquipment;
+
 UCLASS()
 class AMBITIONOFNOBUNAGA_API AHeroCharacter : public ACharacter
 {
@@ -51,11 +53,13 @@ public:
 
     // Called to bind functionality to input
     virtual void SetupPlayerInputComponent(class UInputComponent* InputComponent) override;
-
+#if WITH_EDITOR
     virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 
 	virtual void PostEditChangeChainProperty(FPropertyChangedChainEvent& PropertyChangedEvent) override;
-	
+#endif // WITH_EDITOR
+	bool Pickup(AEquipment* equ);
+
 	UFUNCTION()
 	void OnMouseClicked(UPrimitiveComponent* TouchComp);
 
@@ -68,17 +72,24 @@ public:
 	void CheckSelf(bool res, FString msg);
 
     UFUNCTION(BlueprintCallable, Category = "Hero")
-    float GetSkillCD(int32 n);
+    float GetSkillCDPercent(int32 n);
 
 	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly)
 	UDecalComponent* SelectionDecal;
 
+	// 英雄名
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
     FString HeroName;
 
+	// 歷史說明
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
     FString HeroHistoryDescription;
 
+	// 裝備
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero", Replicated)
+	TArray<AEquipment*> Equipments;
+
+	// 大頭貼
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
     UTexture2D * Head;
 
@@ -131,4 +142,16 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero")
 	bool isSelection;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
+	float PickupObjectDistance;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero", Replicated)
+	AEquipment* WantPickup;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero", Replicated)
+	AEquipment* WantThrow;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero", Replicated)
+	FVector ThrowDestination;
 };
