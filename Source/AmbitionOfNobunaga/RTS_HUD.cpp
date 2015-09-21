@@ -72,6 +72,7 @@ void ARTS_HUD::Tick(float DeltaSeconds)
         }
         RemoveSelection.Empty();
     }
+	OnSize();
 }
 
 void ARTS_HUD::DrawHUD()

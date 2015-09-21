@@ -5,6 +5,7 @@
 // for GEngine
 #include "Engine.h"
 
+#include "AONGameState.h"
 #include "RTS_HUD.h"
 #include "HeroCharacter.h"
 #include "Equipment.h"
@@ -16,6 +17,12 @@ AHeroCharacter::AHeroCharacter(const FObjectInitializer& ObjectInitializer)
 	bReplicates = true;
     PrimaryActorTick.bCanEverTick = true;
     SelectionDecal = ObjectInitializer.CreateDefaultSubobject<UDecalComponent>(this, TEXT("SelectionDecal0"));
+	PositionOnHead = ObjectInitializer.CreateDefaultSubobject<UArrowComponent>(this, TEXT("PositionOnHead0"));
+	PositionUnderFoot = ObjectInitializer.CreateDefaultSubobject<UArrowComponent>(this, TEXT("PositionUnderFoot0"));
+
+	PositionOnHead->AttachParent = GetCapsuleComponent();
+	PositionUnderFoot->AttachParent = GetCapsuleComponent();
+
     SelectionDecal->SetWorldLocation(FVector(0, 0, -90));
     // FRotator = rotation Y Z X
     SelectionDecal->SetWorldRotation(FQuat(FRotator(90, 0, 0)));
@@ -25,7 +32,16 @@ AHeroCharacter::AHeroCharacter(const FObjectInitializer& ObjectInitializer)
     AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
     GetMesh()->SetWorldRotation(FQuat(FRotator(0, -90, 0)));
 
+	// 基礎血量
+	BaseHP = 450;
+	// 基礎魔力
+	BaseMP = 100;
+	// 基礎撿物品距離
     PickupObjectDistance = 500;
+	// 基礎等級
+	CurrentLevel = 1;
+	// 基礎攻速
+	BaseAttackSpeed = 1.8;
 }
 
 // Called when the game starts or when spawned
@@ -87,7 +103,7 @@ void AHeroCharacter::Tick(float DeltaTime)
         {
             if(Pickup(WantPickup))
             {
-                WantPickup->SetActorLocation(FVector(FMath::Rand(), 99999, 99999));
+				WantPickup->ServerSetLocation(FVector(FMath::Rand(), 99999, 99999));
             }
             WantPickup = NULL;
             // 停止移動
@@ -106,7 +122,7 @@ void AHeroCharacter::Tick(float DeltaTime)
             FVector origin, extent;
             WantThrow->GetActorBounds(true, origin, extent);
             ThrowDestination.Z += extent.Z;
-            WantThrow->SetActorLocation(ThrowDestination);
+			WantThrow->ServerSetLocation(ThrowDestination);
             for(int32 idx = 0; idx < Equipments.Num(); ++idx)
             {
                 if(Equipments[idx] == WantThrow)
@@ -247,6 +263,46 @@ float AHeroCharacter::GetSkillCDPercent(int32 n)
         }
     }
     return 1.f;
+}
+
+void AHeroCharacter::UpdateHPMPAS()
+{
+	AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
+	CurrentHP = BaseHP + BaseStrength * ags->StrengthToHP;
+	CurrentHealingHP = BaseHealingHP + BaseStrength * ags->StrengthToHealingHP;
+	CurrentMP = BaseMP + BaseIntelligence * ags->IntelligenceToMP;
+	CurrentHealingMP = BaseHealingMP + BaseIntelligence * ags->IntelligenceToHealingMP;
+
+	CurrentAttackSpeed = BaseMP + BaseAgility * ags->AgilityToAttackSpeed;
+	CurrentDefense = BaseDefense + BaseAgility * ags->AgilityToDefense;
+}
+
+void AHeroCharacter::UpdateSAI()
+{
+	if (CurrentLevel <= LevelProperty_Strength.Num())
+	{
+		Strength = BaseStrength + LevelProperty_Strength[CurrentLevel - 1];
+	}
+	else
+	{
+		Strength = BaseStrength + LevelProperty_Strength.Last();
+	}
+	if (CurrentLevel <= LevelProperty_Agility.Num())
+	{
+		Agility = BaseAgility + LevelProperty_Agility[CurrentLevel - 1];
+	}
+	else
+	{
+		Agility = BaseAgility + LevelProperty_Agility.Last();
+	}
+	if (CurrentLevel <= LevelProperty_Intelligence.Num())
+	{
+		Intelligence = BaseIntelligence + LevelProperty_Intelligence[CurrentLevel - 1];
+	}
+	else
+	{
+		Intelligence = BaseIntelligence + LevelProperty_Intelligence.Last();
+	}
 }
 
 void AHeroCharacter::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
