@@ -12,7 +12,13 @@ enum class ERTSStatusEnum : uint8
 	Normal,
 	Move,
 	Attack,
-	ThrowEquipment
+	ThrowEquipment,
+};
+UENUM(BlueprintType)
+enum class ERTSClickEnum : uint8
+{
+	LastRightClick,
+	LastLeftClick
 };
 class AAmbitionOfNobunagaPlayerController;
 class AHeroCharacter;
@@ -74,6 +80,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "RTS")
 	void StopMovementHero(AHeroCharacter* hero);
 
+	UFUNCTION(BlueprintCallable, Category = "RTS")
+	void ToAttackHero(AHeroCharacter* hero);
+
 		
 	void OnSize();
 
@@ -118,6 +127,20 @@ public:
 	FLinearColor	SelectionBoxLineColor;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RTS")
 	FLinearColor	SelectionBoxFillColor;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RTS")
+	FLinearColor	HPBarForeColor;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RTS")
+	FLinearColor	HPBarBackColor;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RTS")
+	ERTSClickEnum	ClickStatus;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RTS")
+	float	HPBarHeight;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RTS")
+	FVector2D	HPBarOffset;
 
 	bool ClickedSelected;
 

@@ -72,7 +72,7 @@ void ARTS_HUD::Tick(float DeltaSeconds)
         }
         RemoveSelection.Empty();
     }
-	OnSize();
+    OnSize();
 }
 
 void ARTS_HUD::DrawHUD()
@@ -113,6 +113,18 @@ void ARTS_HUD::DrawHUD()
 
             DrawRect(SelectionBoxFillColor, minX, minY, maxX - minX - 1, maxY - minY - 1);
         }
+    }
+    for(AHeroCharacter* EachHero : HeroCanSelection)
+    {
+        FVector2D headpos = FVector2D(this->Project(EachHero->PositionOnHead->GetComponentLocation()));
+        FVector2D footpos = FVector2D(this->Project(EachHero->PositionUnderFoot->GetComponentLocation()));
+        footpos.Y += 35;
+        float  hpBarLength = EachHero->HPBarLength;
+        float  halfHPBarLength = hpBarLength * .5f;
+        headpos += HPBarOffset;
+        DrawRect(HPBarBackColor, headpos.X - halfHPBarLength - 1, headpos.Y - 1, hpBarLength + 2, HPBarHeight + 2);
+        DrawRect(HPBarForeColor, headpos.X - halfHPBarLength, headpos.Y, hpBarLength * EachHero->GetHPPercent(), HPBarHeight);
+        DrawText(EachHero->HeroName, FLinearColor(1, 1, 1), footpos.X - EachHero->HeroName.Len()*.5f * 15, footpos.Y);
     }
     if(CurrentSelection.Num() > 0)
     {
@@ -248,9 +260,17 @@ void ARTS_HUD::AssignSelectionHeroPickup(AEquipment* equ)
 
 void ARTS_HUD::StopMovementHero(AHeroCharacter* hero)
 {
+    if(localController)
+    {
+        localController->AddHeroToStopMoveQueue(hero);
+    }
+}
+
+void ARTS_HUD::ToAttackHero(AHeroCharacter* hero)
+{
 	if (localController)
 	{
-		localController->AddHeroToStopMoveQueue(hero);
+		localController->AddHeroToAttackQueue(CurrentSelection, hero);
 	}
 }
 
@@ -262,7 +282,7 @@ void ARTS_HUD::OnSize()
 void ARTS_HUD::OnMouseMove(FVector2D pos, FVector pos3d)
 {
     CurrentMouseXY = pos;
-	CurrentMouseHit = pos3d;
+    CurrentMouseHit = pos3d;
 }
 
 void ARTS_HUD::OnRMouseDown(FVector2D pos)
@@ -277,8 +297,8 @@ void ARTS_HUD::OnRMouseDown(FVector2D pos)
         }
     }
     // 右鍵事件
-	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Cyan, FString::Printf(TEXT("localController %d"), !!localController));
-	if (IsGameRegion(pos) && localController)
+    GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Cyan, FString::Printf(TEXT("localController %d"), !!localController));
+    if(IsGameRegion(pos) && localController)
     {
         switch(RTSStatus)
         {
@@ -286,15 +306,15 @@ void ARTS_HUD::OnRMouseDown(FVector2D pos)
         {
             if(CurrentSelection.Num() > 0)
             {
-				GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("localController->AddHeroToMoveQueue"));
+                GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("localController->AddHeroToMoveQueue"));
                 if(WantPickup)
                 {
-					localController->AddHeroToPickupQueue(WantPickup->GetActorLocation(), CurrentSelection[0], WantPickup);
+                    localController->AddHeroToPickupQueue(WantPickup->GetActorLocation(), CurrentSelection[0], WantPickup);
                     WantPickup = NULL;
                 }
                 else
                 {
-					localController->AddHeroToMoveQueue(CurrentMouseHit, CurrentSelection);
+                    localController->AddHeroToMoveQueue(CurrentMouseHit, CurrentSelection);
                 }
             }
         }
@@ -314,6 +334,7 @@ void ARTS_HUD::OnRMouseDown(FVector2D pos)
 
 void ARTS_HUD::OnRMousePressed(FVector2D pos)
 {
+	ClickStatus = ERTSClickEnum::LastRightClick;
     if(!bMouseRButton)
     {
         OnRMouseDown(pos);
@@ -392,6 +413,7 @@ void ARTS_HUD::OnLMouseDown(FVector2D pos)
 
 void ARTS_HUD::OnLMousePressed(FVector2D pos)
 {
+	ClickStatus = ERTSClickEnum::LastLeftClick;
     if(!bMouseLButton)
     {
         OnLMouseDown(pos);
@@ -451,11 +473,11 @@ void ARTS_HUD::OnLMouseReleased(FVector2D pos)
     // 丟物品
     if(RTSStatus == ERTSStatusEnum::ThrowEquipment)
     {
-		GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Cyan, FString::Printf(TEXT("CurrentSelection.Num %d"), CurrentSelection.Num()));
+        GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Cyan, FString::Printf(TEXT("CurrentSelection.Num %d"), CurrentSelection.Num()));
         if(CurrentSelection.Num() > 0)
         {
-			GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("localController->SetNewMoveDestination"));
-			localController->AddHeroToThrowQueue(CurrentMouseHit, CurrentSelection[0], EquipmentIndex);
+            GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("localController->SetNewMoveDestination"));
+            localController->AddHeroToThrowQueue(CurrentMouseHit, CurrentSelection[0], EquipmentIndex);
             RTSStatus = ERTSStatusEnum::Normal;
             ThrowTexture = NULL;
         }

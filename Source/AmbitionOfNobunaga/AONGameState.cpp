@@ -6,11 +6,16 @@
 
 bool AAONGameState::SetObjectLocation_Validate(AActor* actor, FVector pos)
 {
-	return true;
+    return true;
 }
 
 
 void AAONGameState::SetObjectLocation_Implementation(AActor* actor, FVector pos)
 {
-	actor->SetActorLocation(pos);
+    actor->SetActorLocation(pos);
+}
+
+float AAONGameState::ArmorConvertToInjuryPersent(float armor)
+{
+    return 1.f / (1.f + 0.06f * armor);
 }

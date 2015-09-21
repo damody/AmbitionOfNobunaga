@@ -9,6 +9,18 @@ class AHeroCharacter;
 class AEquipment;
 
 USTRUCT()
+struct AMBITIONOFNOBUNAGA_API FHeroAttack
+{
+	GENERATED_USTRUCT_BODY()
+
+	FHeroAttack(){}
+	FHeroAttack(AHeroCharacter* heros, AHeroCharacter* dst) :
+		Heros(heros), beAttack(dst){}
+	AHeroCharacter* Heros;
+	AHeroCharacter* beAttack;
+};
+
+USTRUCT()
 struct AMBITIONOFNOBUNAGA_API FHeroThrow
 {
 	GENERATED_USTRUCT_BODY()
@@ -82,6 +94,7 @@ protected:
 	TArray<AHeroCharacter*> HeroStopMoveQueue;
 	TArray<FHeroThrow> HeroThrowQueue;
 	TArray<FHeroPickup> HeroPickupQueue;
+	TArray<FHeroAttack> HeroAttackQueue;
 
 	// Begin PlayerController interface
 	virtual void PlayerTick(float DeltaTime) override;
@@ -117,7 +130,10 @@ public:
 	void AddHeroToMoveQueue2D(const FVector2D DestLocation, const TArray<AHeroCharacter*>& heros);
 	
 	UFUNCTION(Server, WithValidation, Reliable, BlueprintCallable, Category = "RTS")
-	void AddHeroToStopMoveQueue(AHeroCharacter* hero);	
+	void AddHeroToStopMoveQueue(AHeroCharacter* hero);
+
+	UFUNCTION(Server, WithValidation, Reliable, BlueprintCallable, Category = "RTS")
+	void AddHeroToAttackQueue(const TArray<AHeroCharacter*>& heros, AHeroCharacter* dst);
 
 	FVector2D GetMouseScreenPosition();
 

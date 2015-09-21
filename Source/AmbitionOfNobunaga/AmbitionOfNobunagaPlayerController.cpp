@@ -53,6 +53,15 @@ bool AAmbitionOfNobunagaPlayerController::InputKey(FKey Key, EInputEvent EventTy
         // TODO: Allow click key(s?) to be defined
         if(bEnableClickEvents && (Key == EKeys::LeftMouseButton || Key == EKeys::RightMouseButton))
         {
+            if(Key == EKeys::LeftMouseButton)
+            {
+                AAmbitionOfNobunagaPlayerController::OnMouseLButtonPressed();
+            }
+            else if(Key == EKeys::RightMouseButton)
+            {
+                AAmbitionOfNobunagaPlayerController::OnMouseRButtonPressed();
+            }
+
             FVector2D MousePosition;
             if(CastChecked<ULocalPlayer>(Player)->ViewportClient->GetMousePosition(MousePosition))
             {
@@ -128,9 +137,9 @@ void AAmbitionOfNobunagaPlayerController::SetupInputComponent()
     // set up gameplay key bindings
     Super::SetupInputComponent();
 
-    InputComponent->BindAction("MouseRButton", IE_Pressed, this, &AAmbitionOfNobunagaPlayerController::OnMouseRButtonPressed);
+    //InputComponent->BindAction("MouseRButton", IE_Pressed, this, &AAmbitionOfNobunagaPlayerController::OnMouseRButtonPressed);
     InputComponent->BindAction("MouseRButton", IE_Released, this, &AAmbitionOfNobunagaPlayerController::OnMouseRButtonReleased);
-    InputComponent->BindAction("MouseLButton", IE_Pressed, this, &AAmbitionOfNobunagaPlayerController::OnMouseLButtonPressed);
+    //InputComponent->BindAction("MouseLButton", IE_Pressed, this, &AAmbitionOfNobunagaPlayerController::OnMouseLButtonPressed);
     InputComponent->BindAction("MouseLButton", IE_Released, this, &AAmbitionOfNobunagaPlayerController::OnMouseLButtonReleased);
 
     // support touch devices
@@ -206,6 +215,20 @@ void AAmbitionOfNobunagaPlayerController::ServerUpdateMove_Implementation()
             TArray<AHeroCharacter*> oneHero;
             oneHero.Add(EachMove.Heros);
             ServerMoveHeros(EachMove.DestLocation, oneHero);
+        }
+    }
+    if(HeroAttackQueue.Num() > 0)
+    {
+        TArray<FHeroAttack> TmpQueue;
+        TmpQueue = HeroAttackQueue;
+        HeroAttackQueue.Empty();
+        for(FHeroAttack& EachMove : TmpQueue)
+        {
+            AHeroCharacter* Selection = EachMove.Heros;
+            Selection->WantAttack = EachMove.beAttack;
+            TArray<AHeroCharacter*> oneHero;
+            oneHero.Add(EachMove.Heros);
+            ServerMoveHeros(EachMove.beAttack->GetActorLocation(), oneHero);
         }
     }
 }
@@ -291,6 +314,19 @@ bool AAmbitionOfNobunagaPlayerController::AddHeroToPickupQueue_Validate(const FV
 void AAmbitionOfNobunagaPlayerController::AddHeroToPickupQueue_Implementation(const FVector DestLocation, AHeroCharacter* heros, AEquipment* equ)
 {
     HeroPickupQueue.Add(FHeroPickup(heros, DestLocation, equ));
+}
+
+bool AAmbitionOfNobunagaPlayerController::AddHeroToAttackQueue_Validate(const TArray<AHeroCharacter*>& heros, AHeroCharacter* dst)
+{
+    return true;
+}
+
+void AAmbitionOfNobunagaPlayerController::AddHeroToAttackQueue_Implementation(const TArray<AHeroCharacter*>& heros, AHeroCharacter* dst)
+{
+    for(AHeroCharacter* eachHero : heros)
+    {
+        HeroAttackQueue.Add(FHeroAttack(eachHero, dst));
+    }
 }
 
 FVector2D AAmbitionOfNobunagaPlayerController::GetMouseScreenPosition()

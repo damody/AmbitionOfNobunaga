@@ -76,6 +76,12 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Hero")
     float GetSkillCDPercent(int32 n);
 
+	UFUNCTION(BlueprintCallable, Category = "Hero")
+    float GetHPPercent();
+
+	UFUNCTION(BlueprintCallable, Category = "Hero")
+    float GetMPPercent();
+
 	// 依等級更新血魔攻速
 	UFUNCTION(BlueprintCallable, Category = "Hero")
     void UpdateHPMPAS();
@@ -96,7 +102,9 @@ public:
 	// 英雄名
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
     FString HeroName;
-
+	// 移動速度
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero|Current")
+	int32 TeamId;
 	// 歷史說明
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
     FString HeroHistoryDescription;
@@ -108,34 +116,47 @@ public:
 	float CurrentMoveSpeed;
 	// 血量
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero|Current")
-	float CurrentHP;
+	float CurrentMaxHP;
 	// 魔力
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero|Current")
+	float CurrentMaxMP;
+	// 血量
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero|Current", Replicated)
+	float CurrentHP;
+	// 魔力
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero|Current")
 	float CurrentMP;
 	// 回血
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero|Current")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero|Current")
 	float CurrentHealingHP;
 	// 回魔
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero|Current")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero|Current")
 	float CurrentHealingMP;
 	// 攻速
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero|Current")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero|Current")
 	float CurrentAttackSpeed;
 	// 攻擊力
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero|Current")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero|Current")
 	float CurrentAttack;
 	// 防禦力
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero|Current")
-	float CurrentDefense;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero|Current")
+	float CurrentArmor;
 	// 外加力量
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero|Current")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero|Current")
 	float AdditionStrength;
 	// 外加敏捷
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero|Current")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero|Current")
 	float AdditionAgility;
 	// 外加智力
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero|Current")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero|Current")
 	float AdditionIntelligence;
+	// 目前攻擊距離
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero|Current")
+	float CurrentAttackRadius;
+
+	// 血條長度
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
+	float HPBarLength;
 
 	// 裝備
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero", Replicated)
@@ -153,6 +174,9 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
     int32 Skill_Amount;
 
+	// 目前攻擊距離
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
+	float BaseAttackRadius;
 	// 攻速加乘
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
 	float AdditionAttackSpeed;
@@ -165,9 +189,9 @@ public:
 	// 基礎物理受傷倍率
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
 	float BasePhysicsInjuredRatio;
-	// 基礎防禦力
+	// 基礎裝甲
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
-	float BaseDefense;
+	float BaseArmor;
 	// 基礎攻擊力
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
 	float BaseAttack;
@@ -276,4 +300,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero", Replicated)
 	FVector ThrowDestination;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero", Replicated)
+	AHeroCharacter* WantAttack;
 };
