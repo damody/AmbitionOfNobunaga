@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -34,6 +34,16 @@ struct FSkillDescription
 	{
 		return DescriptionLevel[n];
 	}
+};
+
+UENUM(BlueprintType)
+enum class EHeroStatusEnum : uint8
+{
+	Stand,
+	Walk,
+	AttackBegin,
+	Attacking,
+	AttackEnd,
 };
 
 class AEquipment;
@@ -82,11 +92,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Hero")
     float GetMPPercent();
 
-	// ¨Ìµ¥¯Å§ó·s¦åÅ]§ğ³t
+	// ä¾ç­‰ç´šæ›´æ–°è¡€é­”æ”»é€Ÿ
 	UFUNCTION(BlueprintCallable, Category = "Hero")
     void UpdateHPMPAS();
 
-	// ¨Ìµ¥¯Å§ó·s¤O±Ó´¼
+	// ä¾ç­‰ç´šæ›´æ–°åŠ›æ•æ™º
 	UFUNCTION(BlueprintCallable, Category = "Hero")
     void UpdateSAI();
 
@@ -99,70 +109,86 @@ public:
 	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly)
 	UArrowComponent* PositionUnderFoot;
 
-	// ­^¶¯¦W
+	UPROPERTY(Category = Character, EditAnywhere, BlueprintReadWrite, Replicated)
+	EHeroStatusEnum HeroStatus;
+
+	// è‹±é›„å
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
     FString HeroName;
-	// ²¾°Ê³t«×
+	// ç§»å‹•é€Ÿåº¦
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero|Current")
 	int32 TeamId;
-	// ¾ú¥v»¡©ú
+	// æ­·å²èªªæ˜
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
     FString HeroHistoryDescription;
 
+	// ç›®å‰æ”»æ“Šå‹•ç•«æ™‚é–“é•·åº¦
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero|Current")
+	bool PlayAttack;
+	// ç›®å‰æ”»æ“Šå‹•ç•«æ™‚é–“é•·åº¦
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero|Current")
+	float CurrentAttackTime;
+	// ç›®å‰æ”»æ“Šè¨ˆæ™‚å™¨
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero|Current")
+	float CurrentAttackSpeedCount;
+	// ç›®å‰ç­‰ç´š
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero|Current")
 	int32 CurrentLevel;
-	// ²¾°Ê³t«×
+	// ç§»å‹•é€Ÿåº¦
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero|Current")
 	float CurrentMoveSpeed;
-	// ¦å¶q
+	// è¡€é‡
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero|Current")
 	float CurrentMaxHP;
-	// Å]¤O
+	// é­”åŠ›
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero|Current")
 	float CurrentMaxMP;
-	// ¦å¶q
+	// è¡€é‡
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero|Current", Replicated)
 	float CurrentHP;
-	// Å]¤O
+	// é­”åŠ›
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero|Current")
 	float CurrentMP;
-	// ¦^¦å
+	// å›è¡€
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero|Current")
 	float CurrentHealingHP;
-	// ¦^Å]
+	// å›é­”
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero|Current")
 	float CurrentHealingMP;
-	// §ğ³t
+	// æ”»é€Ÿ
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero|Current")
 	float CurrentAttackSpeed;
-	// §ğÀ»¤O
+	// æ”»é€Ÿç§’æ•¸
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero|Current")
+	float CurrentAttackSpeedSecond;
+	// æ”»æ“ŠåŠ›
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero|Current")
 	float CurrentAttack;
-	// ¨¾¿m¤O
+	// é˜²ç¦¦åŠ›
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero|Current")
 	float CurrentArmor;
-	// ¥~¥[¤O¶q
+	// å¤–åŠ åŠ›é‡
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero|Current")
 	float AdditionStrength;
-	// ¥~¥[±Ó±¶
+	// å¤–åŠ æ•æ·
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero|Current")
 	float AdditionAgility;
-	// ¥~¥[´¼¤O
+	// å¤–åŠ æ™ºåŠ›
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero|Current")
 	float AdditionIntelligence;
-	// ¥Ø«e§ğÀ»¶ZÂ÷
+	// ç›®å‰æ”»æ“Šè·é›¢
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero|Current")
 	float CurrentAttackRadius;
 
-	// ¦å±øªø«×
+	// è¡€æ¢é•·åº¦
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
 	float HPBarLength;
 
-	// ¸Ë³Æ
+	// è£å‚™
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero", Replicated)
 	TArray<AEquipment*> Equipments;
 
-	// ¤jÀY¶K
+	// å¤§é ­è²¼
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
     UTexture2D * Head;
 
@@ -170,119 +196,119 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
 	FVector2D	ScreenPosition;
 
-	// ¸Ó­^¶¯ªº§Ş¯à¼Æ¶q
+	// è©²è‹±é›„çš„æŠ€èƒ½æ•¸é‡
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
     int32 Skill_Amount;
 
-	// ¥Ø«e§ğÀ»¶ZÂ÷
+	// ç›®å‰æ”»æ“Šè·é›¢
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
 	float BaseAttackRadius;
-	// §ğ³t¥[­¼
+	// æ”»é€ŸåŠ ä¹˜
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
 	float AdditionAttackSpeed;
-	// °òÂ¦§ğ³t
+	// åŸºç¤æ”»é€Ÿ
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
-	float BaseAttackSpeed;
-	// °òÂ¦Å]ªk¨ü¶Ë­¿²v
+	float BaseAttackSpeedSecond;
+	// åŸºç¤é­”æ³•å—å‚·å€ç‡
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
 	float BaseMagicInjuredRatio;
-	// °òÂ¦ª«²z¨ü¶Ë­¿²v
+	// åŸºç¤ç‰©ç†å—å‚·å€ç‡
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
 	float BasePhysicsInjuredRatio;
-	// °òÂ¦¸Ë¥Ò
+	// åŸºç¤è£ç”²
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
 	float BaseArmor;
-	// °òÂ¦§ğÀ»¤O
+	// åŸºç¤æ”»æ“ŠåŠ›
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
 	float BaseAttack;
-	// °òÂ¦²¾°Ê³t«×
+	// åŸºç¤ç§»å‹•é€Ÿåº¦
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
 	float BaseMoveSpeed;
 
-	// °òÂ¦¦^¦å
+	// åŸºç¤å›è¡€
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
 	float BaseHealingHP;
-	// °òÂ¦¦^Å]
+	// åŸºç¤å›é­”
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
 	float BaseHealingMP;
-	// °òÂ¦¦å¶q
+	// åŸºç¤è¡€é‡
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
 	float BaseHP;
-	// °òÂ¦Å]¤O
+	// åŸºç¤é­”åŠ›
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
 	float BaseMP;
-	// °òÂ¦¤O¶q
+	// åŸºç¤åŠ›é‡
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
 	float BaseStrength;
-	// °òÂ¦±Ó±¶
+	// åŸºç¤æ•æ·
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
 	float BaseAgility;
-	// °òÂ¦´¼¤O
+	// åŸºç¤æ™ºåŠ›
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
 	float BaseIntelligence;
 
-	// ¤O¶q
+	// åŠ›é‡
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
 	float Strength;
-	// ±Ó±¶
+	// æ•æ·
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
 	float Agility;
-	// ´¼¤O
+	// æ™ºåŠ›
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
 	float Intelligence;
 	
-	// ¨C­Óµ¥¯Å´£¤ÉªºXXX¤£²Ö¥[
-	// ¨C­Óµ¥¯Å´£¤Éªº§ğÀ»¤O
+	// æ¯å€‹ç­‰ç´šæå‡çš„XXXä¸ç´¯åŠ 
+	// æ¯å€‹ç­‰ç´šæå‡çš„æ”»æ“ŠåŠ›
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Hero")
 	TArray<float> LevelProperty_Attack;
-	// ¨C­Óµ¥¯Å´£¤Éªº¤O¶q
+	// æ¯å€‹ç­‰ç´šæå‡çš„åŠ›é‡
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Hero")
 	TArray<float> LevelProperty_Strength;
-	// ¨C­Óµ¥¯Å´£¤Éªº±Ó±¶
+	// æ¯å€‹ç­‰ç´šæå‡çš„æ•æ·
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Hero")
 	TArray<float> LevelProperty_Agility;
-	// ¨C­Óµ¥¯Å´£¤Éªº´¼¤O
+	// æ¯å€‹ç­‰ç´šæå‡çš„æ™ºåŠ›
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Hero")
 	TArray<float> LevelProperty_Intelligence;
 
-	// §Ş¯à¦W¦r
+	// æŠ€èƒ½åå­—
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Hero")
     TArray<FString> Skill_Name;
 
-	// §Ş¯à´y­z
+	// æŠ€èƒ½æè¿°
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Hero")
     TArray<FSkillDescription> Skill_Description;
     
-	// §Ş¯à¹Ï¤ù
+	// æŠ€èƒ½åœ–ç‰‡
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Hero")
     TArray<UTexture2D*> Skill_Texture;
 
-	// Àx¦s©Ò¦³§Ş¯à¨C­Óµ¥¯ÅªºCD®É¶¡
+	// å„²å­˜æ‰€æœ‰æŠ€èƒ½æ¯å€‹ç­‰ç´šçš„CDæ™‚é–“
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Hero")
     TArray<FLevelCDs> Skill_LevelCDs;
 
-	// ¬O§_¦bCD¤¤
+	// æ˜¯å¦åœ¨CDä¸­
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero")
     TArray<bool> Skill_CDing;
 
-	// ·í«eCD¬í¼Æ¡ACD¬í¼Æµ¥©óSkill_MaxCD®É´N¬OCDµ²§ô
+	// ç•¶å‰CDç§’æ•¸ï¼ŒCDç§’æ•¸ç­‰æ–¼Skill_MaxCDæ™‚å°±æ˜¯CDçµæŸ
     // Skill_CurrentCD will accumulation every frame
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero")
     TArray<float> Skill_CurrentCD;
 
-	// ·í«e§Ş¯àCD®É¶¡
+	// ç•¶å‰æŠ€èƒ½CDæ™‚é–“
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero")
     TArray<float> Skill_MaxCD;
 
-	// ·í«e©Ò¦³§Ş¯à­ì©lCD®É¶¡
+	// ç•¶å‰æ‰€æœ‰æŠ€èƒ½åŸå§‹CDæ™‚é–“
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero")
     TArray<float> Skill_BaseCD;
 
-	// ·í«e©Ò¦³ªº§Ş¯àµ¥¯Å
+	// ç•¶å‰æ‰€æœ‰çš„æŠ€èƒ½ç­‰ç´š
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero")
     TArray<int32> Skill_Level;
 
-	// ¥i¥H¨Ï¥Îªº§Ş¯àÂI¼Æ
+	// å¯ä»¥ä½¿ç”¨çš„æŠ€èƒ½é»æ•¸
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero")
     int32 Skill_Points;
 

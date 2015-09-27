@@ -121,6 +121,9 @@ public:
 	void AddHeroToMoveQueue(const FVector DestLocation, const TArray<AHeroCharacter*>& heros);
 
 	UFUNCTION(Server, WithValidation, Reliable, BlueprintCallable, Category = "RTS")
+	void AddHeroToClearWantQueue(const TArray<AHeroCharacter*>& heros);
+
+	UFUNCTION(Server, WithValidation, Reliable, BlueprintCallable, Category = "RTS")
 	void AddHeroToPickupQueue(const FVector DestLocation, AHeroCharacter* heros, AEquipment* equ);
 		
 	UFUNCTION(Server, WithValidation, Reliable, BlueprintCallable, Category = "RTS")
@@ -137,10 +140,12 @@ public:
 
 	FVector2D GetMouseScreenPosition();
 
-	void OnMouseRButtonPressed();
+	void OnMouseRButtonPressed1();
+	void OnMouseRButtonPressed2();
 	void OnMouseRButtonReleased();
 
-	void OnMouseLButtonPressed();
+	void OnMouseLButtonPressed1();
+	void OnMouseLButtonPressed2();
 	void OnMouseLButtonReleased();
 };
 

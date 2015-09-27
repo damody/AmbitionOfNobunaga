@@ -58,6 +58,10 @@ void ARTS_HUD::BeginPlay()
         ThrowDMaterial = UMaterialInstanceDynamic::Create(ThrowMaterial, this);
     }
     OnSize();
+	bClickHero = false;
+	bNeedMouseRDown = false;
+	bNeedMouseLDown = false;
+
 }
 
 void ARTS_HUD::Tick(float DeltaSeconds)
@@ -124,6 +128,23 @@ void ARTS_HUD::DrawHUD()
         headpos += HPBarOffset;
         DrawRect(HPBarBackColor, headpos.X - halfHPBarLength - 1, headpos.Y - 1, hpBarLength + 2, HPBarHeight + 2);
         DrawRect(HPBarForeColor, headpos.X - halfHPBarLength, headpos.Y, hpBarLength * EachHero->GetHPPercent(), HPBarHeight);
+        float maxhp = EachHero->CurrentMaxHP;
+        if(maxhp < 1500)
+        {
+            for(float i = 100; i < maxhp; i += 100)
+            {
+                float xpos = headpos.X - halfHPBarLength + hpBarLength * (i / maxhp);
+                DrawLine(xpos, headpos.Y, xpos, headpos.Y + HPBarHeight, HPBarBackColor);
+            }
+        }
+        else
+        {
+            for(float i = 500; i < maxhp; i += 500)
+            {
+                float xpos = headpos.X - halfHPBarLength + hpBarLength * (i / maxhp);
+                DrawLine(xpos, headpos.Y, xpos, headpos.Y + HPBarHeight, HPBarBackColor);
+            }
+        }
         DrawText(EachHero->HeroName, FLinearColor(1, 1, 1), footpos.X - EachHero->HeroName.Len()*.5f * 15, footpos.Y);
     }
     if(CurrentSelection.Num() > 0)
@@ -266,11 +287,43 @@ void ARTS_HUD::StopMovementHero(AHeroCharacter* hero)
     }
 }
 
-void ARTS_HUD::ToAttackHero(AHeroCharacter* hero)
+void ARTS_HUD::HeroAttack(AHeroCharacter* hero)
+{
+	bClickHero = true;
+    if(localController)
+    {
+        TArray<AHeroCharacter*> HeroGoAttack;
+        for(AHeroCharacter* EachHero : CurrentSelection)
+        {
+            if(EachHero->TeamId != hero->TeamId)
+            {
+                HeroGoAttack.Add(EachHero);
+            }
+        }
+        if(HeroGoAttack.Num() > 0)
+        {
+            localController->AddHeroToAttackQueue(HeroGoAttack, hero);
+        }
+    }
+}
+
+void ARTS_HUD::HeroMove(AHeroCharacter* hero, FVector dst)
+{
+    if(localController)
+    {
+        TArray<AHeroCharacter*> oneHero;
+        oneHero.Add(hero);
+        localController->AddHeroToMoveQueue(dst, oneHero);
+    }
+}
+
+void ARTS_HUD::ClearHeroWant(AHeroCharacter* hero)
 {
 	if (localController)
 	{
-		localController->AddHeroToAttackQueue(CurrentSelection, hero);
+		TArray<AHeroCharacter*> oneHero;
+		oneHero.Add(hero);
+		localController->AddHeroToClearWantQueue(oneHero);
 	}
 }
 
@@ -297,8 +350,11 @@ void ARTS_HUD::OnRMouseDown(FVector2D pos)
         }
     }
     // 右鍵事件
-    GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Cyan, FString::Printf(TEXT("localController %d"), !!localController));
-    if(IsGameRegion(pos) && localController)
+	if (!bClickHero)
+	{ 
+		localController->AddHeroToClearWantQueue(CurrentSelection);
+	}
+	if (IsGameRegion(pos) && localController && !bClickHero)
     {
         switch(RTSStatus)
         {
@@ -328,17 +384,26 @@ void ARTS_HUD::OnRMouseDown(FVector2D pos)
         default:
             break;
         }
-
     }
 }
 
-void ARTS_HUD::OnRMousePressed(FVector2D pos)
+void ARTS_HUD::OnRMousePressed1(FVector2D pos)
 {
+	bClickHero = false;
 	ClickStatus = ERTSClickEnum::LastRightClick;
-    if(!bMouseRButton)
+	if (!bMouseRButton)
+	{
+		bNeedMouseRDown = true;
+	}
+	bMouseRButton = true;	
+}
+
+void ARTS_HUD::OnRMousePressed2(FVector2D pos)
+{
+	if (bNeedMouseRDown)
     {
+		bNeedMouseRDown = false;
         OnRMouseDown(pos);
-        bMouseRButton = true;
         return;
     }
     bMouseRButton = true;
@@ -396,6 +461,7 @@ void ARTS_HUD::OnRMouseReleased(FVector2D pos)
             RButtonUpHitBox = RButtonDownHitBox = FString();
         }
     }
+	bClickHero = false;
 }
 
 void ARTS_HUD::OnLMouseDown(FVector2D pos)
@@ -409,30 +475,51 @@ void ARTS_HUD::OnLMouseDown(FVector2D pos)
             break;
         }
     }
-}
 
-void ARTS_HUD::OnLMousePressed(FVector2D pos)
-{
-	ClickStatus = ERTSClickEnum::LastLeftClick;
-    if(!bMouseLButton)
-    {
-        OnLMouseDown(pos);
-    }
-    bMouseLButton = true;
-    // 選英雄
+    // 取消選英雄
     if(RTSStatus == ERTSStatusEnum::Normal)
     {
-        if(localController && IsGameRegion(localController->GetMouseScreenPosition()))
-        {
-            InitialMouseXY = pos;
-            if(!ClickedSelected)
-            {
-                ClearAllSelection();
-            }
-            ClickedSelected = false;
-            UnSelectHero();
+		if (localController && IsGameRegion(localController->GetMouseScreenPosition()))
+		{
+            
         }
     }
+}
+
+void ARTS_HUD::OnLMousePressed1(FVector2D pos)
+{
+	bClickHero = false;
+	ClickStatus = ERTSClickEnum::LastLeftClick;
+	if (!bMouseLButton)
+	{
+		bNeedMouseLDown = true;
+	}
+	bMouseLButton = true;
+}
+
+void ARTS_HUD::OnLMousePressed2(FVector2D pos)
+{
+	if (bNeedMouseLDown)
+	{
+		bNeedMouseLDown = false;
+		OnLMouseDown(pos);
+		// 設定SelectionBox初始位置
+		if (RTSStatus == ERTSStatusEnum::Normal)
+		{
+			if (localController && IsGameRegion(localController->GetMouseScreenPosition()))
+			{
+				InitialMouseXY = pos;
+				if (!ClickedSelected)
+				{
+					ClearAllSelection();
+				}
+				ClickedSelected = false;
+				UnSelectHero();
+			}
+		}
+		return;
+	}
+	
     // 發事件給BP
     for(FRTSHitBox& HitBox : RTS_HitBoxMap)
     {

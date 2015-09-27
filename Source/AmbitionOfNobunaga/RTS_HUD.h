@@ -81,17 +81,24 @@ public:
 	void StopMovementHero(AHeroCharacter* hero);
 
 	UFUNCTION(BlueprintCallable, Category = "RTS")
-	void ToAttackHero(AHeroCharacter* hero);
+	void HeroAttack(AHeroCharacter* hero);
 
+	UFUNCTION(BlueprintCallable, Category = "RTS")
+	void HeroMove(AHeroCharacter* hero, FVector dst);
+
+	UFUNCTION(BlueprintCallable, Category = "RTS")
+	void ClearHeroWant(AHeroCharacter* hero);
 		
 	void OnSize();
 
 	void OnMouseMove(FVector2D pos, FVector pos3d);
 	void OnRMouseDown(FVector2D pos);
-	void OnRMousePressed(FVector2D pos);
+	void OnRMousePressed1(FVector2D pos);
+	void OnRMousePressed2(FVector2D pos);
 	void OnRMouseReleased(FVector2D pos);
 	void OnLMouseDown(FVector2D pos);
-	void OnLMousePressed(FVector2D pos);
+	void OnLMousePressed1(FVector2D pos);
+	void OnLMousePressed2(FVector2D pos);
 	void OnLMouseReleased(FVector2D pos);	
 
 	UFUNCTION(BlueprintImplementableEvent)
@@ -145,10 +152,16 @@ public:
 	bool ClickedSelected;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "RTS")
+	bool bClickHero;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "RTS")
 	bool bMouseRButton;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "RTS")
 	bool bMouseLButton;
+
+	bool bNeedMouseRDown;
+	bool bNeedMouseLDown;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "RTS")
 	UTexture2D* NothingTexture;

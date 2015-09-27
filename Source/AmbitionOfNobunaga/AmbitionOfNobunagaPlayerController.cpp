@@ -53,14 +53,14 @@ bool AAmbitionOfNobunagaPlayerController::InputKey(FKey Key, EInputEvent EventTy
         // TODO: Allow click key(s?) to be defined
         if(bEnableClickEvents && (Key == EKeys::LeftMouseButton || Key == EKeys::RightMouseButton))
         {
-            if(Key == EKeys::LeftMouseButton)
-            {
-                AAmbitionOfNobunagaPlayerController::OnMouseLButtonPressed();
-            }
-            else if(Key == EKeys::RightMouseButton)
-            {
-                AAmbitionOfNobunagaPlayerController::OnMouseRButtonPressed();
-            }
+			if (Key == EKeys::LeftMouseButton)
+			{
+				AAmbitionOfNobunagaPlayerController::OnMouseLButtonPressed1();
+			}
+			else if (Key == EKeys::RightMouseButton)
+			{
+				AAmbitionOfNobunagaPlayerController::OnMouseRButtonPressed1();
+			}
 
             FVector2D MousePosition;
             if(CastChecked<ULocalPlayer>(Player)->ViewportClient->GetMousePosition(MousePosition))
@@ -108,6 +108,14 @@ bool AAmbitionOfNobunagaPlayerController::InputKey(FKey Key, EInputEvent EventTy
 
                 bResult = true;
             }
+			if (Key == EKeys::LeftMouseButton)
+			{
+				AAmbitionOfNobunagaPlayerController::OnMouseLButtonPressed2();
+			}
+			else if (Key == EKeys::RightMouseButton)
+			{
+				AAmbitionOfNobunagaPlayerController::OnMouseRButtonPressed2();
+			}
         }
     }
 
@@ -197,6 +205,8 @@ void AAmbitionOfNobunagaPlayerController::ServerUpdateMove_Implementation()
             AHeroCharacter* Selection = EachMove.Heros;
             Selection->WantThrow = Selection->Equipments[EachMove.EquIndex];
             Selection->ThrowDestination = EachMove.DestLocation;
+			Selection->WantAttack = NULL;
+			Selection->WantPickup = NULL;
             TArray<AHeroCharacter*> oneHero;
             oneHero.Add(EachMove.Heros);
             ServerMoveHeros(EachMove.DestLocation, oneHero);
@@ -212,6 +222,8 @@ void AAmbitionOfNobunagaPlayerController::ServerUpdateMove_Implementation()
             AHeroCharacter* Selection = EachMove.Heros;
             Selection->WantPickup = EachMove.Equptr;
             Selection->ThrowDestination = EachMove.DestLocation;
+			Selection->WantAttack = NULL;
+			Selection->WantThrow = NULL;
             TArray<AHeroCharacter*> oneHero;
             oneHero.Add(EachMove.Heros);
             ServerMoveHeros(EachMove.DestLocation, oneHero);
@@ -226,11 +238,28 @@ void AAmbitionOfNobunagaPlayerController::ServerUpdateMove_Implementation()
         {
             AHeroCharacter* Selection = EachMove.Heros;
             Selection->WantAttack = EachMove.beAttack;
+			Selection->WantPickup = NULL;
+			Selection->WantThrow = NULL;
             TArray<AHeroCharacter*> oneHero;
             oneHero.Add(EachMove.Heros);
             ServerMoveHeros(EachMove.beAttack->GetActorLocation(), oneHero);
         }
     }
+}
+
+bool AAmbitionOfNobunagaPlayerController::AddHeroToClearWantQueue_Validate(const TArray<AHeroCharacter*>& heros)
+{
+	return true;
+}
+
+void AAmbitionOfNobunagaPlayerController::AddHeroToClearWantQueue_Implementation(const TArray<AHeroCharacter*>& heros)
+{
+	for (AHeroCharacter* EachHero : heros)
+	{
+		EachHero->WantAttack = NULL;
+		EachHero->WantPickup = NULL;
+		EachHero->WantThrow = NULL;
+	}
 }
 
 bool AAmbitionOfNobunagaPlayerController::ServerMoveHeros_Validate(const FVector DestLocation, const TArray<AHeroCharacter*>& heros)
@@ -249,6 +278,7 @@ void AAmbitionOfNobunagaPlayerController::ServerMoveHeros_Implementation(const F
         if(NavSys && (Distance > 120.0f))
         {
             NavSys->SimpleMoveToLocation(EachHero->GetController(), DestLocation);
+			EachHero->HeroStatus = EHeroStatusEnum::Walk;
         }
     }
 }
@@ -263,6 +293,7 @@ void AAmbitionOfNobunagaPlayerController::ServerStopMovement_Implementation(cons
     for(AHeroCharacter* EachHero : heros)
     {
         EachHero->GetController()->StopMovement();
+		EachHero->HeroStatus = EHeroStatusEnum::Stand;
     }
 }
 
@@ -339,12 +370,21 @@ FVector2D AAmbitionOfNobunagaPlayerController::GetMouseScreenPosition()
     return FVector2D(-1, -1);
 }
 
-void AAmbitionOfNobunagaPlayerController::OnMouseRButtonPressed()
+void AAmbitionOfNobunagaPlayerController::OnMouseRButtonPressed1()
+{
+	bMouseRButton = true;
+	if (Hud)
+	{
+		Hud->OnRMousePressed1(GetMouseScreenPosition());
+	}
+}
+
+void AAmbitionOfNobunagaPlayerController::OnMouseRButtonPressed2()
 {
     bMouseRButton = true;
     if(Hud)
     {
-        Hud->OnRMousePressed(GetMouseScreenPosition());
+        Hud->OnRMousePressed2(GetMouseScreenPosition());
     }
 }
 
@@ -357,12 +397,20 @@ void AAmbitionOfNobunagaPlayerController::OnMouseRButtonReleased()
     }
 }
 
-void AAmbitionOfNobunagaPlayerController::OnMouseLButtonPressed()
+void AAmbitionOfNobunagaPlayerController::OnMouseLButtonPressed1()
+{
+	if (Hud)
+	{
+		Hud->OnLMousePressed1(GetMouseScreenPosition());
+	}
+}
+
+void AAmbitionOfNobunagaPlayerController::OnMouseLButtonPressed2()
 {
     bMouseLButton = true;
     if(Hud)
     {
-        Hud->OnLMousePressed(GetMouseScreenPosition());
+        Hud->OnLMousePressed2(GetMouseScreenPosition());
     }
 }
 

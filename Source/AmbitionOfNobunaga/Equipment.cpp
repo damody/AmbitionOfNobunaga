@@ -65,7 +65,7 @@ void AEquipment::OnRep_RotChange()
 void AEquipment::OnMouseClicked(UPrimitiveComponent* TouchComp)
 {
     ARTS_HUD* hud = Cast<ARTS_HUD>(UGameplayStatics::GetPlayerController(this, 0)->GetHUD());
-    if(hud)
+    if(hud && hud->bMouseRButton)
     {
         hud->AssignSelectionHeroPickup(this);
     }

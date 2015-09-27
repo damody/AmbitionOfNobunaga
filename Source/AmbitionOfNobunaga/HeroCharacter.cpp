@@ -14,14 +14,14 @@
 AHeroCharacter::AHeroCharacter(const FObjectInitializer& ObjectInitializer)
     : Super(FObjectInitializer::Get())
 {
-	bReplicates = true;
+    bReplicates = true;
     PrimaryActorTick.bCanEverTick = true;
     SelectionDecal = ObjectInitializer.CreateDefaultSubobject<UDecalComponent>(this, TEXT("SelectionDecal0"));
-	PositionOnHead = ObjectInitializer.CreateDefaultSubobject<UArrowComponent>(this, TEXT("PositionOnHead0"));
-	PositionUnderFoot = ObjectInitializer.CreateDefaultSubobject<UArrowComponent>(this, TEXT("PositionUnderFoot0"));
+    PositionOnHead = ObjectInitializer.CreateDefaultSubobject<UArrowComponent>(this, TEXT("PositionOnHead0"));
+    PositionUnderFoot = ObjectInitializer.CreateDefaultSubobject<UArrowComponent>(this, TEXT("PositionUnderFoot0"));
 
-	PositionOnHead->AttachParent = GetCapsuleComponent();
-	PositionUnderFoot->AttachParent = GetCapsuleComponent();
+    PositionOnHead->AttachParent = GetCapsuleComponent();
+    PositionUnderFoot->AttachParent = GetCapsuleComponent();
 
     SelectionDecal->SetWorldLocation(FVector(0, 0, -90));
     // FRotator = rotation Y Z X
@@ -30,18 +30,19 @@ AHeroCharacter::AHeroCharacter(const FObjectInitializer& ObjectInitializer)
     SelectionDecal->AttachParent = GetCapsuleComponent();
 
     AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+    HeroStatus = EHeroStatusEnum::Stand;
     GetMesh()->SetWorldRotation(FQuat(FRotator(0, -90, 0)));
 
-	// 基礎血量
-	BaseHP = 450;
-	// 基礎魔力
-	BaseMP = 100;
-	// 基礎撿物品距離
+    // 基礎血量
+    BaseHP = 450;
+    // 基礎魔力
+    BaseMP = 100;
+    // 基礎撿物品距離
     PickupObjectDistance = 500;
-	// 基礎等級
-	CurrentLevel = 1;
-	// 基礎攻速
-	BaseAttackSpeed = 1.8;
+    // 基礎等級
+    CurrentLevel = 1;
+    // 基礎攻速
+    BaseAttackSpeedSecond = 1.8;
 }
 
 // Called when the game starts or when spawned
@@ -76,16 +77,16 @@ void AHeroCharacter::BeginPlay()
     }
     WantThrow = NULL;
     WantPickup = NULL;
-	WantAttack = NULL;
-	// 依等級更新力敏智
-	UpdateSAI();
-	// 依等級更新血魔攻速
-	UpdateHPMPAS();
-	CurrentHP = CurrentMaxHP;
-	CurrentMP = CurrentMaxMP;
-	CurrentAttackRadius = BaseAttackRadius;
-	CurrentAttack = BaseAttack;
-	CurrentArmor = BaseArmor;
+    WantAttack = NULL;
+    // 依等級更新力敏智
+    UpdateSAI();
+    // 依等級更新血魔攻速
+    UpdateHPMPAS();
+    CurrentHP = CurrentMaxHP;
+    CurrentMP = CurrentMaxMP;
+    CurrentAttackRadius = BaseAttackRadius;
+    CurrentAttack = BaseAttack;
+    CurrentArmor = BaseArmor;
 
 }
 
@@ -93,6 +94,7 @@ void AHeroCharacter::BeginPlay()
 void AHeroCharacter::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
+    CurrentAttackSpeedCount += DeltaTime;
     // 算CD
     for(int32 i = 0; i < Skill_CDing.Num(); ++i)
     {
@@ -114,15 +116,16 @@ void AHeroCharacter::Tick(float DeltaTime)
         {
             if(Pickup(WantPickup))
             {
-				WantPickup->ServerSetLocation(FVector(FMath::Rand(), 99999, 99999));
+                WantPickup->ServerSetLocation(FVector(FMath::Rand(), 99999, 99999));
             }
             WantPickup = NULL;
             // 停止移動
             ARTS_HUD* hud = Cast<ARTS_HUD>(UGameplayStatics::GetPlayerController(this, 0)->GetHUD());
             if(hud)
             {
-				hud->StopMovementHero(this);
+                hud->StopMovementHero(this);
             }
+            HeroStatus = EHeroStatusEnum::Stand;
         }
     }
     // 丟物品
@@ -133,7 +136,7 @@ void AHeroCharacter::Tick(float DeltaTime)
             FVector origin, extent;
             WantThrow->GetActorBounds(true, origin, extent);
             ThrowDestination.Z += extent.Z;
-			WantThrow->ServerSetLocation(ThrowDestination);
+            WantThrow->ServerSetLocation(ThrowDestination);
             for(int32 idx = 0; idx < Equipments.Num(); ++idx)
             {
                 if(Equipments[idx] == WantThrow)
@@ -143,36 +146,80 @@ void AHeroCharacter::Tick(float DeltaTime)
             }
             WantThrow = NULL;
             // 停止移動
-			ARTS_HUD* hud = Cast<ARTS_HUD>(UGameplayStatics::GetPlayerController(this, 0)->GetHUD());
-			if (hud)
-			{
-				hud->StopMovementHero(this);
-			}
+            ARTS_HUD* hud = Cast<ARTS_HUD>(UGameplayStatics::GetPlayerController(this, 0)->GetHUD());
+            if(hud)
+            {
+                hud->StopMovementHero(this);
+            }
+            HeroStatus = EHeroStatusEnum::Stand;
         }
     }
-	// 打人啦~
-	else if (WantAttack)
-	{
-		if (FVector::Dist(GetActorLocation(), WantAttack->GetActorLocation()) < CurrentAttackRadius)
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, HeroName + TEXT(" 打人啦"));
-			ARTS_HUD* hud = Cast<ARTS_HUD>(UGameplayStatics::GetPlayerController(this, 0)->GetHUD());
-			if (hud)
-			{
-				hud->StopMovementHero(this);
-			}
-			// 播放攻擊動畫
-			// 如果播完了就攻擊
-			AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
-			float Injury = ags->ArmorConvertToInjuryPersent(WantAttack->CurrentArmor);
-			WantAttack->CurrentHP -= this->CurrentAttack * Injury;
-			WantAttack = NULL;
-		}
-		else
-		{
-
-		}
-	}
+    // 打人啦~
+    else if(WantAttack)
+    {
+        switch(HeroStatus)
+        {
+        case EHeroStatusEnum::Stand:
+        {
+            if(FVector::Dist(GetActorLocation(), WantAttack->GetActorLocation()) > CurrentAttackRadius)
+            {
+                ARTS_HUD* hud = Cast<ARTS_HUD>(UGameplayStatics::GetPlayerController(this, 0)->GetHUD());
+                if(hud)
+                {
+                    hud->HeroMove(this, WantAttack->GetActorLocation());
+                }
+            }
+            else
+            {
+                HeroStatus = EHeroStatusEnum::AttackBegin;
+            }
+        }
+        break;
+        case EHeroStatusEnum::Walk:
+        {
+            if(FVector::Dist(GetActorLocation(), WantAttack->GetActorLocation()) < CurrentAttackRadius)
+            {
+                GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, HeroName + TEXT(" 打人啦"));
+                ARTS_HUD* hud = Cast<ARTS_HUD>(UGameplayStatics::GetPlayerController(this, 0)->GetHUD());
+                if(hud)
+                {
+                    hud->StopMovementHero(this);
+                }
+                HeroStatus = EHeroStatusEnum::AttackBegin;
+            }
+        }
+        break;
+        case EHeroStatusEnum::AttackBegin:
+        {
+			if (CurrentAttackSpeedCount > CurrentAttackSpeedSecond)
+            {
+                CurrentAttackSpeedCount = 0;
+				HeroStatus = EHeroStatusEnum::Attacking;
+            }
+            // 播放攻擊動畫
+            // ...
+			PlayAttack = true;
+        }
+        break;
+        case EHeroStatusEnum::Attacking:
+        {
+            if(CurrentAttackSpeedCount > CurrentAttackTime)
+            {
+                HeroStatus = EHeroStatusEnum::AttackEnd;
+            }
+        }
+        break;
+        case EHeroStatusEnum::AttackEnd:
+        {
+            // 如果播完了就攻擊
+            AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
+            float Injury = ags->ArmorConvertToInjuryPersent(WantAttack->CurrentArmor);
+            WantAttack->CurrentHP -= this->CurrentAttack * Injury;
+            HeroStatus = EHeroStatusEnum::Stand;
+        }
+        break;
+        }
+    }
 }
 
 // Called to bind functionality to input
@@ -244,27 +291,27 @@ void AHeroCharacter::OnMouseClicked(UPrimitiveComponent* TouchComp)
     ARTS_HUD* hud = Cast<ARTS_HUD>(UGameplayStatics::GetPlayerController(this, 0)->GetHUD());
     if(hud)
     {
-		// 按下左鍵
-		if (hud->bMouseLButton)
-		{
-			if (hud->CurrentSelection.Num() == 1)
-			{
-				if (hud->CurrentSelection[0] == this)
-				{
-					return;
-				}
-			}
-			hud->ClickedSelected = true;
-			hud->ClearAllSelection();
-			SelectionOn();
-		}
-		else if (hud->bMouseRButton)
-		{
-			if (hud->CurrentSelection.Num() > 0)
-			{
-				hud->ToAttackHero(this);
-			}
-		}
+        // 按下左鍵
+        if(hud->bMouseLButton)
+        {
+            if(hud->CurrentSelection.Num() == 1)
+            {
+                if(hud->CurrentSelection[0] == this)
+                {
+                    return;
+                }
+            }
+            hud->ClickedSelected = true;
+            hud->ClearAllSelection();
+            SelectionOn();
+        }
+        else if(hud->bMouseRButton)
+        {
+            if(hud->CurrentSelection.Num() > 0)
+            {
+                hud->HeroAttack(this);
+            }
+        }
     }
 }
 
@@ -312,61 +359,63 @@ float AHeroCharacter::GetSkillCDPercent(int32 n)
 
 float AHeroCharacter::GetHPPercent()
 {
-	return CurrentHP / CurrentMaxHP;
+    return CurrentHP / CurrentMaxHP;
 }
 
 float AHeroCharacter::GetMPPercent()
 {
-	return CurrentMP / CurrentMaxMP;
+    return CurrentMP / CurrentMaxMP;
 }
 
 void AHeroCharacter::UpdateHPMPAS()
 {
-	AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
-	CurrentMaxHP = BaseHP + BaseStrength * ags->StrengthToHP;
-	CurrentHealingHP = BaseHealingHP + BaseStrength * ags->StrengthToHealingHP;
-	CurrentMaxMP = BaseMP + BaseIntelligence * ags->IntelligenceToMP;
-	CurrentHealingMP = BaseHealingMP + BaseIntelligence * ags->IntelligenceToHealingMP;
+    AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
+    CurrentMaxHP = BaseHP + BaseStrength * ags->StrengthToHP;
+    CurrentHealingHP = BaseHealingHP + BaseStrength * ags->StrengthToHealingHP;
+    CurrentMaxMP = BaseMP + BaseIntelligence * ags->IntelligenceToMP;
+    CurrentHealingMP = BaseHealingMP + BaseIntelligence * ags->IntelligenceToHealingMP;
 
-	CurrentAttackSpeed = BaseMP + BaseAgility * ags->AgilityToAttackSpeed;
-	CurrentArmor = BaseArmor + BaseAgility * ags->AgilityToDefense;
+    CurrentAttackSpeed = BaseMP + BaseAgility * ags->AgilityToAttackSpeed;
+    CurrentAttackSpeedSecond = BaseAttackSpeedSecond / (1 + CurrentAttackSpeed * 0.01);
+    CurrentArmor = BaseArmor + BaseAgility * ags->AgilityToDefense;
 }
 
 void AHeroCharacter::UpdateSAI()
 {
-	if (CurrentLevel <= LevelProperty_Strength.Num())
-	{
-		Strength = BaseStrength + LevelProperty_Strength[CurrentLevel - 1];
-	}
-	else if (LevelProperty_Strength.Num() > 0)
-	{
-		Strength = BaseStrength + LevelProperty_Strength.Last();
-	}
-	if (CurrentLevel <= LevelProperty_Agility.Num())
-	{
-		Agility = BaseAgility + LevelProperty_Agility[CurrentLevel - 1];
-	}
-	else if (LevelProperty_Intelligence.Num() > 0)
-	{
-		Agility = BaseAgility + LevelProperty_Agility.Last();
-	}
-	if (CurrentLevel <= LevelProperty_Intelligence.Num())
-	{
-		Intelligence = BaseIntelligence + LevelProperty_Intelligence[CurrentLevel - 1];
-	}
-	else if (LevelProperty_Intelligence.Num() > 0)
-	{
-		Intelligence = BaseIntelligence + LevelProperty_Intelligence.Last();
-	}
+    if(CurrentLevel <= LevelProperty_Strength.Num())
+    {
+        Strength = BaseStrength + LevelProperty_Strength[CurrentLevel - 1];
+    }
+    else if(LevelProperty_Strength.Num() > 0)
+    {
+        Strength = BaseStrength + LevelProperty_Strength.Last();
+    }
+    if(CurrentLevel <= LevelProperty_Agility.Num())
+    {
+        Agility = BaseAgility + LevelProperty_Agility[CurrentLevel - 1];
+    }
+    else if(LevelProperty_Intelligence.Num() > 0)
+    {
+        Agility = BaseAgility + LevelProperty_Agility.Last();
+    }
+    if(CurrentLevel <= LevelProperty_Intelligence.Num())
+    {
+        Intelligence = BaseIntelligence + LevelProperty_Intelligence[CurrentLevel - 1];
+    }
+    else if(LevelProperty_Intelligence.Num() > 0)
+    {
+        Intelligence = BaseIntelligence + LevelProperty_Intelligence.Last();
+    }
 }
 
-void AHeroCharacter::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
+void AHeroCharacter::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
 {
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME(AHeroCharacter, WantPickup);
-	DOREPLIFETIME(AHeroCharacter, WantThrow);
-	DOREPLIFETIME(AHeroCharacter, Equipments);
-	DOREPLIFETIME(AHeroCharacter, ThrowDestination);
-	DOREPLIFETIME(AHeroCharacter, WantAttack);
-	DOREPLIFETIME(AHeroCharacter, CurrentHP);
+    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+    DOREPLIFETIME(AHeroCharacter, WantPickup);
+    DOREPLIFETIME(AHeroCharacter, WantThrow);
+    DOREPLIFETIME(AHeroCharacter, Equipments);
+    DOREPLIFETIME(AHeroCharacter, ThrowDestination);
+    DOREPLIFETIME(AHeroCharacter, WantAttack);
+    DOREPLIFETIME(AHeroCharacter, CurrentHP);
+    DOREPLIFETIME(AHeroCharacter, HeroStatus);
 }
