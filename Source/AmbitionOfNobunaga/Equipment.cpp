@@ -72,6 +72,22 @@ void AEquipment::OnMouseClicked(UPrimitiveComponent* TouchComp)
 }
 
 
+void AEquipment::IgnoreCollision()
+{
+	CapsuleComponent->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Ignore);
+	CapsuleComponent->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Ignore);
+	CapsuleComponent->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
+	CapsuleComponent->SetCollisionResponseToChannel(ECC_PhysicsBody, ECR_Ignore);
+	CapsuleComponent->SetCollisionResponseToChannel(ECC_Vehicle, ECR_Ignore);
+	CapsuleComponent->SetCollisionResponseToChannel(ECC_Destructible, ECR_Ignore);
+}
+
+void AEquipment::RestoreCollision()
+{
+	static FName CollisionProfileName(TEXT("BlockAllDynamic"));
+	CapsuleComponent->SetCollisionProfileName(CollisionProfileName);
+}
+
 // if (GEngine->GetNetMode(GetWorld()) == ENetMode::NM_Client)
 // if (Role == ROLE_Authority)
 

@@ -10,10 +10,12 @@
 #include "HeroCharacter.h"
 #include "Equipment.h"
 #include "UnrealNetwork.h"
+#include "BulletActor.h"
 
 AHeroCharacter::AHeroCharacter(const FObjectInitializer& ObjectInitializer)
     : Super(FObjectInitializer::Get())
 {
+    HeroBullet = NULL;
     bReplicates = true;
     PrimaryActorTick.bCanEverTick = true;
     SelectionDecal = ObjectInitializer.CreateDefaultSubobject<UDecalComponent>(this, TEXT("SelectionDecal0"));
@@ -33,6 +35,10 @@ AHeroCharacter::AHeroCharacter(const FObjectInitializer& ObjectInitializer)
     HeroStatus = EHeroStatusEnum::Stand;
     GetMesh()->SetWorldRotation(FQuat(FRotator(0, -90, 0)));
 
+	// 攻擊動畫播到幾秒時發出攻擊
+	AnimationInstantAttack = 0.2;
+	// 目前攻擊動畫時間長度
+	CurrentAttackTime = 0.5;
     // 基礎血量
     BaseHP = 450;
     // 基礎魔力
@@ -94,6 +100,10 @@ void AHeroCharacter::BeginPlay()
 void AHeroCharacter::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
+	if (CurrentHP < 0)
+	{
+		CurrentHP = 0;
+	}
     CurrentAttackSpeedCount += DeltaTime;
     // 算CD
     for(int32 i = 0; i < Skill_CDing.Num(); ++i)
@@ -136,14 +146,19 @@ void AHeroCharacter::Tick(float DeltaTime)
             FVector origin, extent;
             WantThrow->GetActorBounds(true, origin, extent);
             ThrowDestination.Z += extent.Z;
-            WantThrow->ServerSetLocation(ThrowDestination);
             for(int32 idx = 0; idx < Equipments.Num(); ++idx)
             {
                 if(Equipments[idx] == WantThrow)
                 {
+					if (idx == 0)
+					{
+						Equipments[0]->DetachRootComponentFromParent();
+						Equipments[0]->RestoreCollision();
+					}
                     Equipments[idx] = NULL;
                 }
             }
+			WantThrow->ServerSetLocation(ThrowDestination);
             WantThrow = NULL;
             // 停止移動
             ARTS_HUD* hud = Cast<ARTS_HUD>(UGameplayStatics::GetPlayerController(this, 0)->GetHUD());
@@ -157,6 +172,8 @@ void AHeroCharacter::Tick(float DeltaTime)
     // 打人啦~
     else if(WantAttack)
     {
+		FVector dir = WantAttack->GetActorLocation() - GetActorLocation();
+		SetActorRotation(dir.Rotation());
         switch(HeroStatus)
         {
         case EHeroStatusEnum::Stand:
@@ -172,6 +189,7 @@ void AHeroCharacter::Tick(float DeltaTime)
             else
             {
                 HeroStatus = EHeroStatusEnum::AttackBegin;
+				IsAttacked = false;
             }
         }
         break;
@@ -186,19 +204,45 @@ void AHeroCharacter::Tick(float DeltaTime)
                     hud->StopMovementHero(this);
                 }
                 HeroStatus = EHeroStatusEnum::AttackBegin;
+				IsAttacked = false;
             }
         }
         break;
         case EHeroStatusEnum::AttackBegin:
         {
-			if (CurrentAttackSpeedCount > CurrentAttackSpeedSecond)
+			// 時間到就攻擊
+			if (!IsAttacked && CurrentAttackSpeedCount > AnimationInstantAttack)
+			{
+				IsAttacked = true;
+				AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
+				float Injury = ags->ArmorConvertToInjuryPersent(WantAttack->CurrentArmor);
+				float Damage = this->CurrentAttack * Injury;
+
+				
+				if (HeroBullet)
+				{
+					FVector pos = GetActorLocation();
+					ABulletActor* bullet = GetWorld()->SpawnActor<ABulletActor>(HeroBullet);
+					if (bullet)
+					{
+						bullet->SetActorLocation(pos);
+						bullet->SetTartgetActor(WantAttack);
+						bullet->Damage = Damage;
+					}
+				}
+				else
+				{
+					WantAttack->CurrentHP -= Damage;
+				}
+			}
+            if(CurrentAttackSpeedCount > CurrentAttackSpeedSecond)
             {
                 CurrentAttackSpeedCount = 0;
-				HeroStatus = EHeroStatusEnum::Attacking;
+                HeroStatus = EHeroStatusEnum::Attacking;
             }
             // 播放攻擊動畫
             // ...
-			PlayAttack = true;
+            PlayAttack = true;
         }
         break;
         case EHeroStatusEnum::Attacking:
@@ -211,11 +255,8 @@ void AHeroCharacter::Tick(float DeltaTime)
         break;
         case EHeroStatusEnum::AttackEnd:
         {
-            // 如果播完了就攻擊
-            AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
-            float Injury = ags->ArmorConvertToInjuryPersent(WantAttack->CurrentArmor);
-            WantAttack->CurrentHP -= this->CurrentAttack * Injury;
-            HeroStatus = EHeroStatusEnum::Stand;
+            // 如果播完了攻擊
+			HeroStatus = EHeroStatusEnum::Stand;
         }
         break;
         }
@@ -275,11 +316,24 @@ void AHeroCharacter::PostEditChangeChainProperty(FPropertyChangedChainEvent& Pro
 
 bool AHeroCharacter::Pickup(AEquipment* equ)
 {
+	for (int32 idx = 0; idx < Equipments.Num(); ++idx)
+	{
+		if (Equipments[idx] == equ)
+		{
+			return false;
+		}
+	}
     for(int32 idx = 0; idx < Equipments.Num(); ++idx)
     {
         if(Equipments[idx] == NULL)
         {
             Equipments[idx] = equ;
+			if (idx == 0)
+			{
+				Equipments[0]->AttachRootComponentTo(GetMesh(), TEXT("hand_rSocket"), EAttachLocation::SnapToTarget);
+				Equipments[0]->IgnoreCollision();
+				return false;
+			}
             return true;
         }
     }

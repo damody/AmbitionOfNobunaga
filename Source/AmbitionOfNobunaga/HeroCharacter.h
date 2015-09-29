@@ -47,6 +47,7 @@ enum class EHeroStatusEnum : uint8
 };
 
 class AEquipment;
+class ABulletActor;
 
 UCLASS()
 class AMBITIONOFNOBUNAGA_API AHeroCharacter : public ACharacter
@@ -109,6 +110,9 @@ public:
 	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly)
 	UArrowComponent* PositionUnderFoot;
 
+	UPROPERTY(Category = Character, EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<ABulletActor> HeroBullet;
+
 	UPROPERTY(Category = Character, EditAnywhere, BlueprintReadWrite, Replicated)
 	EHeroStatusEnum HeroStatus;
 
@@ -122,9 +126,16 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
     FString HeroHistoryDescription;
 
-	// 目前攻擊動畫時間長度
+	// 攻擊動畫播到幾秒時發出攻擊
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
+	float AnimationInstantAttack;
+
+	// 目前是否攻擊
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero|Current")
 	bool PlayAttack;
+	// 當前普攻是否打出來了
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero|Current")
+	bool IsAttacked;
 	// 目前攻擊動畫時間長度
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero|Current")
 	float CurrentAttackTime;
