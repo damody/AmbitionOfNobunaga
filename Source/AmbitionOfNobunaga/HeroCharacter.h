@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "SkillHintActor.h"
 #include "GameFramework/Character.h"
 #include "HeroCharacter.generated.h"
 
@@ -101,6 +102,18 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Hero")
     void UpdateSAI();
 
+	UFUNCTION(BlueprintCallable, Category = "Hero")
+    bool ShowSkillHint(int32 index);
+	
+	UFUNCTION(BlueprintCallable, Category = "Hero")
+    void HideSkillHint();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void BP_ImplementSkill(int32 index, FRotator RFaceTo, FVector VFaceTo, FVector Pos);
+	
+	UFUNCTION(BlueprintCallable, Category = "Hero")
+    virtual bool UseSkill(int32 index, FRotator RFaceTo, FVector VFaceTo, FVector Pos);
+
 	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly)
 	UDecalComponent* SelectionDecal;
 
@@ -190,6 +203,9 @@ public:
 	// 目前攻擊距離
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero|Current")
 	float CurrentAttackRadius;
+	// 準備要用的技能索引
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero|Current")
+	int32 CurrentSkillIndex;
 
 	// 血條長度
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
@@ -293,6 +309,14 @@ public:
 	// 技能圖片
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Hero")
     TArray<UTexture2D*> Skill_Texture;
+
+	// 所有技能提示
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Hero")
+    TArray<TSubclassOf<ASkillHintActor>> Skill_HintActor;
+
+	// 當前技能提示
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Hero")
+	ASkillHintActor* CurrentSkillHint;
 
 	// 儲存所有技能每個等級的CD時間
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Hero")

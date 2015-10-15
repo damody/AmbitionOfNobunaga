@@ -24,9 +24,6 @@ public:
 	UFUNCTION()
 	void OnMouseClicked(UPrimitiveComponent* TouchComp);
 
-	void IgnoreCollision();
-
-	void RestoreCollision();
 
 	UPROPERTY(Category = "Equipment", VisibleAnywhere, BlueprintReadOnly)
 	class UCapsuleComponent* CapsuleComponent;

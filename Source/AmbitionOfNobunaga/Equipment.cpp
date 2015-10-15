@@ -16,8 +16,6 @@ AEquipment::AEquipment(const FObjectInitializer& ObjectInitializer)
 
     CapsuleComponent = CreateDefaultSubobject<UCapsuleComponent>(ACharacter::CapsuleComponentName);
     CapsuleComponent->InitCapsuleSize(34.0f, 88.0f);
-    static FName CollisionProfileName(TEXT("Pawn"));
-    CapsuleComponent->SetCollisionProfileName(CollisionProfileName);
     CapsuleComponent->CanCharacterStepUpOn = ECB_No;
     CapsuleComponent->bShouldUpdatePhysicsVolume = true;
     CapsuleComponent->bCheckAsyncSceneOnMove = false;
@@ -34,7 +32,23 @@ AEquipment::AEquipment(const FObjectInitializer& ObjectInitializer)
         StaticMesh->bAffectDynamicIndirectLighting = true;
         StaticMesh->PrimaryComponentTick.TickGroup = TG_PrePhysics;
         StaticMesh->AttachParent = CapsuleComponent;
+		StaticMesh->SetCollisionResponseToChannel(ECC_Visibility, ECR_Ignore);
+		StaticMesh->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+		StaticMesh->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Ignore);
+		StaticMesh->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Ignore);
+		StaticMesh->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
+		StaticMesh->SetCollisionResponseToChannel(ECC_PhysicsBody, ECR_Ignore);
+		StaticMesh->SetCollisionResponseToChannel(ECC_Vehicle, ECR_Ignore);
+		StaticMesh->SetCollisionResponseToChannel(ECC_Destructible, ECR_Ignore);
     }
+	CapsuleComponent->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
+	CapsuleComponent->SetCollisionResponseToChannel(ECC_Camera, ECR_Block);
+	CapsuleComponent->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Ignore);
+	CapsuleComponent->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Ignore);
+	CapsuleComponent->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
+	CapsuleComponent->SetCollisionResponseToChannel(ECC_PhysicsBody, ECR_Ignore);
+	CapsuleComponent->SetCollisionResponseToChannel(ECC_Vehicle, ECR_Ignore);
+	CapsuleComponent->SetCollisionResponseToChannel(ECC_Destructible, ECR_Ignore);
     RootComponent = CapsuleComponent;
 }
 
@@ -69,23 +83,6 @@ void AEquipment::OnMouseClicked(UPrimitiveComponent* TouchComp)
     {
         hud->AssignSelectionHeroPickup(this);
     }
-}
-
-
-void AEquipment::IgnoreCollision()
-{
-	CapsuleComponent->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Ignore);
-	CapsuleComponent->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Ignore);
-	CapsuleComponent->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
-	CapsuleComponent->SetCollisionResponseToChannel(ECC_PhysicsBody, ECR_Ignore);
-	CapsuleComponent->SetCollisionResponseToChannel(ECC_Vehicle, ECR_Ignore);
-	CapsuleComponent->SetCollisionResponseToChannel(ECC_Destructible, ECR_Ignore);
-}
-
-void AEquipment::RestoreCollision()
-{
-	static FName CollisionProfileName(TEXT("BlockAllDynamic"));
-	CapsuleComponent->SetCollisionProfileName(CollisionProfileName);
 }
 
 // if (GEngine->GetNetMode(GetWorld()) == ENetMode::NM_Client)

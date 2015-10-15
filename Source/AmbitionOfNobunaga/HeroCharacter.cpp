@@ -35,10 +35,10 @@ AHeroCharacter::AHeroCharacter(const FObjectInitializer& ObjectInitializer)
     HeroStatus = EHeroStatusEnum::Stand;
     GetMesh()->SetWorldRotation(FQuat(FRotator(0, -90, 0)));
 
-	// 攻擊動畫播到幾秒時發出攻擊
-	AnimationInstantAttack = 0.2;
-	// 目前攻擊動畫時間長度
-	CurrentAttackTime = 0.5;
+    // 攻擊動畫播到幾秒時發出攻擊
+    AnimationInstantAttack = 0.2;
+    // 目前攻擊動畫時間長度
+    CurrentAttackTime = 0.5;
     // 基礎血量
     BaseHP = 450;
     // 基礎魔力
@@ -49,6 +49,7 @@ AHeroCharacter::AHeroCharacter(const FObjectInitializer& ObjectInitializer)
     CurrentLevel = 1;
     // 基礎攻速
     BaseAttackSpeedSecond = 1.8;
+    IsAttacked = false;	
 }
 
 // Called when the game starts or when spawned
@@ -84,6 +85,8 @@ void AHeroCharacter::BeginPlay()
     WantThrow = NULL;
     WantPickup = NULL;
     WantAttack = NULL;
+	CurrentSkillHint = NULL;
+	CurrentSkillIndex = -1;
     // 依等級更新力敏智
     UpdateSAI();
     // 依等級更新血魔攻速
@@ -100,10 +103,18 @@ void AHeroCharacter::BeginPlay()
 void AHeroCharacter::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
-	if (CurrentHP < 0)
+	if (CurrentSkillHint)
 	{
-		CurrentHP = 0;
+		ARTS_HUD* hud = Cast<ARTS_HUD>(UGameplayStatics::GetPlayerController(this, 0)->GetHUD());
+		if (hud)
+		{
+			CurrentSkillHint->UpdatePos(GetActorLocation(), hud->CurrentMouseHit);
+		}
 	}
+    if(CurrentHP < 0)
+    {
+        CurrentHP = 0;
+    }
     CurrentAttackSpeedCount += DeltaTime;
     // 算CD
     for(int32 i = 0; i < Skill_CDing.Num(); ++i)
@@ -150,15 +161,14 @@ void AHeroCharacter::Tick(float DeltaTime)
             {
                 if(Equipments[idx] == WantThrow)
                 {
-					if (idx == 0)
-					{
-						Equipments[0]->DetachRootComponentFromParent();
-						Equipments[0]->RestoreCollision();
-					}
+                    if(idx == 0)
+                    {
+                        Equipments[0]->DetachRootComponentFromParent();
+                    }
                     Equipments[idx] = NULL;
                 }
             }
-			WantThrow->ServerSetLocation(ThrowDestination);
+            WantThrow->ServerSetLocation(ThrowDestination);
             WantThrow = NULL;
             // 停止移動
             ARTS_HUD* hud = Cast<ARTS_HUD>(UGameplayStatics::GetPlayerController(this, 0)->GetHUD());
@@ -172,8 +182,8 @@ void AHeroCharacter::Tick(float DeltaTime)
     // 打人啦~
     else if(WantAttack)
     {
-		FVector dir = WantAttack->GetActorLocation() - GetActorLocation();
-		SetActorRotation(dir.Rotation());
+        FVector dir = WantAttack->GetActorLocation() - GetActorLocation();
+        SetActorRotation(dir.Rotation());
         switch(HeroStatus)
         {
         case EHeroStatusEnum::Stand:
@@ -189,7 +199,9 @@ void AHeroCharacter::Tick(float DeltaTime)
             else
             {
                 HeroStatus = EHeroStatusEnum::AttackBegin;
-				IsAttacked = false;
+                CurrentAttackSpeedCount = 0;
+                IsAttacked = false;
+                PlayAttack = true;
             }
         }
         break;
@@ -204,37 +216,38 @@ void AHeroCharacter::Tick(float DeltaTime)
                     hud->StopMovementHero(this);
                 }
                 HeroStatus = EHeroStatusEnum::AttackBegin;
-				IsAttacked = false;
+                CurrentAttackSpeedCount = 0;
+                IsAttacked = false;
+                PlayAttack = true;
             }
         }
         break;
         case EHeroStatusEnum::AttackBegin:
         {
-			// 時間到就攻擊
-			if (!IsAttacked && CurrentAttackSpeedCount > AnimationInstantAttack)
-			{
-				IsAttacked = true;
-				AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
-				float Injury = ags->ArmorConvertToInjuryPersent(WantAttack->CurrentArmor);
-				float Damage = this->CurrentAttack * Injury;
+            // 時間到就攻擊
+            if(!IsAttacked && CurrentAttackSpeedCount > AnimationInstantAttack)
+            {
+                IsAttacked = true;
+                AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
+                float Injury = ags->ArmorConvertToInjuryPersent(WantAttack->CurrentArmor);
+                float Damage = this->CurrentAttack * Injury;
 
-				
-				if (HeroBullet)
-				{
-					FVector pos = GetActorLocation();
-					ABulletActor* bullet = GetWorld()->SpawnActor<ABulletActor>(HeroBullet);
-					if (bullet)
-					{
-						bullet->SetActorLocation(pos);
-						bullet->SetTartgetActor(WantAttack);
-						bullet->Damage = Damage;
-					}
-				}
-				else
-				{
-					WantAttack->CurrentHP -= Damage;
-				}
-			}
+                if(HeroBullet)
+                {
+                    FVector pos = GetActorLocation();
+                    ABulletActor* bullet = GetWorld()->SpawnActor<ABulletActor>(HeroBullet);
+                    if(bullet)
+                    {
+                        bullet->SetActorLocation(pos);
+                        bullet->SetTartgetActor(WantAttack);
+                        bullet->Damage = Damage;
+                    }
+                }
+                else
+                {
+                    WantAttack->CurrentHP -= Damage;
+                }
+            }
             if(CurrentAttackSpeedCount > CurrentAttackSpeedSecond)
             {
                 CurrentAttackSpeedCount = 0;
@@ -242,7 +255,7 @@ void AHeroCharacter::Tick(float DeltaTime)
             }
             // 播放攻擊動畫
             // ...
-            PlayAttack = true;
+
         }
         break;
         case EHeroStatusEnum::Attacking:
@@ -256,7 +269,7 @@ void AHeroCharacter::Tick(float DeltaTime)
         case EHeroStatusEnum::AttackEnd:
         {
             // 如果播完了攻擊
-			HeroStatus = EHeroStatusEnum::Stand;
+            HeroStatus = EHeroStatusEnum::Stand;
         }
         break;
         }
@@ -316,24 +329,23 @@ void AHeroCharacter::PostEditChangeChainProperty(FPropertyChangedChainEvent& Pro
 
 bool AHeroCharacter::Pickup(AEquipment* equ)
 {
-	for (int32 idx = 0; idx < Equipments.Num(); ++idx)
-	{
-		if (Equipments[idx] == equ)
-		{
-			return false;
-		}
-	}
+    for(int32 idx = 0; idx < Equipments.Num(); ++idx)
+    {
+        if(Equipments[idx] == equ)
+        {
+            return false;
+        }
+    }
     for(int32 idx = 0; idx < Equipments.Num(); ++idx)
     {
         if(Equipments[idx] == NULL)
         {
             Equipments[idx] = equ;
-			if (idx == 0)
-			{
-				Equipments[0]->AttachRootComponentTo(GetMesh(), TEXT("hand_rSocket"), EAttachLocation::SnapToTarget);
-				Equipments[0]->IgnoreCollision();
-				return false;
-			}
+            if(idx == 0)
+            {
+                Equipments[0]->AttachRootComponentTo(GetMesh(), TEXT("hand_rSocket"), EAttachLocation::SnapToTarget);
+                return false;
+            }
             return true;
         }
     }
@@ -389,6 +401,7 @@ void AHeroCharacter::SelectionOff()
     {
         hud->RemoveSelection.Add(this);
     }
+	HideSkillHint();
 }
 
 void AHeroCharacter::CheckSelf(bool res, FString msg)
@@ -460,6 +473,45 @@ void AHeroCharacter::UpdateSAI()
     {
         Intelligence = BaseIntelligence + LevelProperty_Intelligence.Last();
     }
+}
+
+bool AHeroCharacter::ShowSkillHint(int32 index)
+{
+	if (CurrentSkillHint)
+	{
+		CurrentSkillHint->Destroy();
+	}
+    if(index < Skill_HintActor.Num())
+    {
+		CurrentSkillHint = GetWorld()->SpawnActor<ASkillHintActor>(Skill_HintActor[index]);
+        FVector pos = GetActorLocation();
+		if (CurrentSkillHint)
+        {
+			CurrentSkillIndex = index;
+			CurrentSkillHint->SetActorLocation(pos);
+        }
+		return true;
+    }
+	return false;
+}
+
+void AHeroCharacter::HideSkillHint()
+{
+	if (CurrentSkillHint)
+	{
+		CurrentSkillHint->Destroy();
+	}
+	CurrentSkillHint = NULL;
+}
+
+bool AHeroCharacter::UseSkill(int32 index, FRotator RFaceTo, FVector VFaceTo, FVector Pos)
+{
+	if (index < 0)
+	{
+		index = CurrentSkillIndex;
+	}
+	BP_ImplementSkill(index, RFaceTo, VFaceTo, Pos);
+	return true;
 }
 
 void AHeroCharacter::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const

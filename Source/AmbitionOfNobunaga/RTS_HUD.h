@@ -13,6 +13,8 @@ enum class ERTSStatusEnum : uint8
 	Move,
 	Attack,
 	ThrowEquipment,
+	SkillHint,
+	ToNormal
 };
 UENUM(BlueprintType)
 enum class ERTSClickEnum : uint8
@@ -88,6 +90,15 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "RTS")
 	void ClearHeroWant(AHeroCharacter* hero);
+
+	UFUNCTION(BlueprintCallable, Category = "RTS")
+	void ShowHeroSkillHint(int32 index);
+	
+	UFUNCTION(BlueprintCallable, Category = "RTS")
+	FVector GetCurrentDirection();
+
+	UFUNCTION(BlueprintCallable, Category = "RTS")
+	FRotator GetCurrentRotator();
 		
 	void OnSize();
 

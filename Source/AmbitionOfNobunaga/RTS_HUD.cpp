@@ -70,6 +70,7 @@ void ARTS_HUD::Tick(float DeltaSeconds)
 
     if(RemoveSelection.Num() > 0)
     {
+		RTSStatus = ERTSStatusEnum::Normal;
         for(AHeroCharacter* EachHero : RemoveSelection)
         {
             CurrentSelection.Remove(EachHero);
@@ -327,6 +328,33 @@ void ARTS_HUD::ClearHeroWant(AHeroCharacter* hero)
 	}
 }
 
+void ARTS_HUD::ShowHeroSkillHint(int32 index)
+{
+	if (CurrentSelection.Num() > 0)
+	{
+		CurrentSelection[0]->ShowSkillHint(index);
+	}
+}
+
+FVector ARTS_HUD::GetCurrentDirection()
+{
+	FVector dir = CurrentMouseHit - CurrentSelection[0]->GetActorLocation();
+	dir.Z = 0;
+	dir.Normalize();
+	return dir;
+}
+
+FRotator ARTS_HUD::GetCurrentRotator()
+{
+	if (CurrentSelection.Num() > 0)
+	{
+		FVector dir = CurrentMouseHit - CurrentSelection[0]->GetActorLocation();
+		dir.Z = 0;
+		return dir.Rotation();
+	}
+	return FRotator();
+}
+
 void ARTS_HUD::OnSize()
 {
     ViewportScale = UWidgetLayoutLibrary::GetViewportScale(GetWorld());
@@ -362,6 +390,7 @@ void ARTS_HUD::OnRMouseDown(FVector2D pos)
         {
             if(CurrentSelection.Num() > 0)
             {
+				CurrentSelection[0]->HideSkillHint();
                 GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("localController->AddHeroToMoveQueue"));
                 if(WantPickup)
                 {
@@ -517,9 +546,34 @@ void ARTS_HUD::OnLMousePressed2(FVector2D pos)
 				UnSelectHero();
 			}
 		}
+		else if (RTSStatus == ERTSStatusEnum::SkillHint)
+		{
+			CurrentSelection[0]->HideSkillHint();
+			// 需要網路同步
+			CurrentSelection[0]->UseSkill(-1, GetCurrentRotator(), GetCurrentDirection(), CurrentMouseHit);
+			RTSStatus = ERTSStatusEnum::ToNormal;
+		}
 		return;
 	}
-	
+	// 顯示技能提示
+	if (CurrentSelection.Num() > 0)
+	{
+		for (FRTSHitBox& HitBox : RTS_HitBoxMap)
+		{
+			if (HitBox.GetName().Left(5) == TEXT("Skill"))
+			{
+				if (HitBox.Contains(pos, ViewportScale))
+				{
+					int32 idx = FCString::Atoi(*HitBox.GetName().Right(1)) - 1;
+					bool res = CurrentSelection[0]->ShowSkillHint(idx);
+					if (res)
+					{
+						RTSStatus = ERTSStatusEnum::SkillHint;
+					}
+				}
+			}
+		}
+	}
     // 發事件給BP
     for(FRTSHitBox& HitBox : RTS_HitBoxMap)
     {
@@ -581,5 +635,9 @@ void ARTS_HUD::OnLMouseReleased(FVector2D pos)
             }
         }
     }
+	if (RTSStatus == ERTSStatusEnum::ToNormal)
+	{
+		RTSStatus = ERTSStatusEnum::Normal;
+	}
 }
 
