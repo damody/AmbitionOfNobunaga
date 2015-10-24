@@ -9,6 +9,21 @@ class AHeroCharacter;
 class AEquipment;
 
 USTRUCT()
+struct AMBITIONOFNOBUNAGA_API FHeroSkill
+{
+	GENERATED_USTRUCT_BODY()
+
+		FHeroSkill(){}
+	FHeroSkill(AHeroCharacter* hero, int32 index, FRotator rFaceTo, FVector vFaceTo, FVector pos) :
+		Hero(hero), SkillIndex(index), RFaceTo(rFaceTo), VFaceTo(vFaceTo), Pos(pos){}
+	AHeroCharacter* Hero;
+	int32 SkillIndex;
+	FRotator RFaceTo;
+	FVector VFaceTo;
+	FVector Pos;
+};
+
+USTRUCT()
 struct AMBITIONOFNOBUNAGA_API FHeroAttack
 {
 	GENERATED_USTRUCT_BODY()
@@ -95,6 +110,7 @@ protected:
 	TArray<FHeroThrow> HeroThrowQueue;
 	TArray<FHeroPickup> HeroPickupQueue;
 	TArray<FHeroAttack> HeroAttackQueue;
+	TArray<FHeroSkill> HeroSkillQueue;
 
 	// Begin PlayerController interface
 	virtual void PlayerTick(float DeltaTime) override;
@@ -128,6 +144,9 @@ public:
 		
 	UFUNCTION(Server, WithValidation, Reliable, BlueprintCallable, Category = "RTS")
 	void AddHeroToThrowQueue(const FVector DestLocation, AHeroCharacter* heros, int32 EquIndex);
+
+	UFUNCTION(Server, WithValidation, Reliable, BlueprintCallable, Category = "RTS")
+	void AddHeroToSkillQueue(AHeroCharacter* hero, int32 index, FRotator RFaceTo, FVector VFaceTo, FVector Pos);
 
 	UFUNCTION(Server, WithValidation, Reliable, BlueprintCallable, Category = "RTS")
 	void AddHeroToMoveQueue2D(const FVector2D DestLocation, const TArray<AHeroCharacter*>& heros);

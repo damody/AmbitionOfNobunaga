@@ -245,6 +245,18 @@ void AAmbitionOfNobunagaPlayerController::ServerUpdateMove_Implementation()
             ServerMoveHeros(EachMove.beAttack->GetActorLocation(), oneHero);
         }
     }
+	if (HeroSkillQueue.Num() > 0)
+	{
+		TArray<FHeroSkill> TmpQueue;
+		TmpQueue = HeroSkillQueue;
+		HeroSkillQueue.Empty();
+		for (FHeroSkill& EachSkill : TmpQueue)
+		{
+			AHeroCharacter* Selection = EachSkill.Hero;
+			GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, EachSkill.VFaceTo.ToString());
+			Selection->UseSkill(EachSkill.SkillIndex, EachSkill.RFaceTo, EachSkill.VFaceTo, EachSkill.Pos);
+		}
+	}
 }
 
 bool AAmbitionOfNobunagaPlayerController::AddHeroToClearWantQueue_Validate(const TArray<AHeroCharacter*>& heros)
@@ -359,6 +371,17 @@ void AAmbitionOfNobunagaPlayerController::AddHeroToAttackQueue_Implementation(co
         HeroAttackQueue.Add(FHeroAttack(eachHero, dst));
     }
 }
+
+bool AAmbitionOfNobunagaPlayerController::AddHeroToSkillQueue_Validate(AHeroCharacter* hero, int32 index, FRotator RFaceTo, FVector VFaceTo, FVector Pos)
+{
+	return true;
+}
+
+void AAmbitionOfNobunagaPlayerController::AddHeroToSkillQueue_Implementation(AHeroCharacter* hero, int32 index, FRotator RFaceTo, FVector VFaceTo, FVector Pos)
+{
+	HeroSkillQueue.Add(FHeroSkill(hero, index, RFaceTo, VFaceTo, Pos));
+}
+
 
 FVector2D AAmbitionOfNobunagaPlayerController::GetMouseScreenPosition()
 {

@@ -7,7 +7,7 @@
 ASkillHintActor::ASkillHintActor(const FObjectInitializer& ObjectInitializer)
 	: Super(FObjectInitializer::Get())
 {
-	bReplicates = true;
+	bReplicates = false;
 	PrimaryActorTick.bCanEverTick = false;
 	Scene = ObjectInitializer.CreateDefaultSubobject<USceneComponent>(this, TEXT("root0"));
 	BodySprite = ObjectInitializer.CreateDefaultSubobject<UPaperSpriteComponent>(this, TEXT("VisualizeBodySprite0"));
@@ -18,7 +18,7 @@ ASkillHintActor::ASkillHintActor(const FObjectInitializer& ObjectInitializer)
 	{
 		BodySprite->AttachParent = Scene;
 		BodySprite->AlwaysLoadOnClient = true;
-		BodySprite->AlwaysLoadOnServer = true;
+		BodySprite->AlwaysLoadOnServer = false;
 		BodySprite->bOwnerNoSee = false;
 		BodySprite->bAffectDynamicIndirectLighting = true;
 		BodySprite->PrimaryComponentTick.TickGroup = TG_PrePhysics;

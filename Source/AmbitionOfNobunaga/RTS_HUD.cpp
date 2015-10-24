@@ -58,9 +58,9 @@ void ARTS_HUD::BeginPlay()
         ThrowDMaterial = UMaterialInstanceDynamic::Create(ThrowMaterial, this);
     }
     OnSize();
-	bClickHero = false;
-	bNeedMouseRDown = false;
-	bNeedMouseLDown = false;
+    bClickHero = false;
+    bNeedMouseRDown = false;
+    bNeedMouseLDown = false;
 
 }
 
@@ -70,7 +70,7 @@ void ARTS_HUD::Tick(float DeltaSeconds)
 
     if(RemoveSelection.Num() > 0)
     {
-		RTSStatus = ERTSStatusEnum::Normal;
+        RTSStatus = ERTSStatusEnum::Normal;
         for(AHeroCharacter* EachHero : RemoveSelection)
         {
             CurrentSelection.Remove(EachHero);
@@ -84,7 +84,7 @@ void ARTS_HUD::DrawHUD()
 {
     Super::DrawHUD();
 
-    if(RTSStatus == ERTSStatusEnum::Normal && bMouseLButton && localController && IsGameRegion(localController->GetMouseScreenPosition()))
+    if(RTSStatus == ERTSStatusEnum::Normal && bMouseLButton && IsGameRegion(CurrentMouseXY))
     {
         // selection box
         if(FVector2D::DistSquared(InitialMouseXY, CurrentMouseXY) > 25)
@@ -290,7 +290,7 @@ void ARTS_HUD::StopMovementHero(AHeroCharacter* hero)
 
 void ARTS_HUD::HeroAttack(AHeroCharacter* hero)
 {
-	bClickHero = true;
+    bClickHero = true;
     if(localController)
     {
         TArray<AHeroCharacter*> HeroGoAttack;
@@ -320,39 +320,39 @@ void ARTS_HUD::HeroMove(AHeroCharacter* hero, FVector dst)
 
 void ARTS_HUD::ClearHeroWant(AHeroCharacter* hero)
 {
-	if (localController)
-	{
-		TArray<AHeroCharacter*> oneHero;
-		oneHero.Add(hero);
-		localController->AddHeroToClearWantQueue(oneHero);
-	}
+    if(localController)
+    {
+        TArray<AHeroCharacter*> oneHero;
+        oneHero.Add(hero);
+        localController->AddHeroToClearWantQueue(oneHero);
+    }
 }
 
 void ARTS_HUD::ShowHeroSkillHint(int32 index)
 {
-	if (CurrentSelection.Num() > 0)
-	{
-		CurrentSelection[0]->ShowSkillHint(index);
-	}
+    if(CurrentSelection.Num() > 0)
+    {
+        CurrentSelection[0]->ShowSkillHint(index);
+    }
 }
 
 FVector ARTS_HUD::GetCurrentDirection()
 {
-	FVector dir = CurrentMouseHit - CurrentSelection[0]->GetActorLocation();
-	dir.Z = 0;
-	dir.Normalize();
-	return dir;
+    FVector dir = CurrentMouseHit - CurrentSelection[0]->GetActorLocation();
+    dir.Z = 0;
+    dir.Normalize();
+    return dir;
 }
 
 FRotator ARTS_HUD::GetCurrentRotator()
 {
-	if (CurrentSelection.Num() > 0)
-	{
-		FVector dir = CurrentMouseHit - CurrentSelection[0]->GetActorLocation();
-		dir.Z = 0;
-		return dir.Rotation();
-	}
-	return FRotator();
+    if(CurrentSelection.Num() > 0)
+    {
+        FVector dir = CurrentMouseHit - CurrentSelection[0]->GetActorLocation();
+        dir.Z = 0;
+        return dir.Rotation();
+    }
+    return FRotator();
 }
 
 void ARTS_HUD::OnSize()
@@ -378,11 +378,11 @@ void ARTS_HUD::OnRMouseDown(FVector2D pos)
         }
     }
     // 右鍵事件
-	if (!bClickHero)
-	{ 
-		localController->AddHeroToClearWantQueue(CurrentSelection);
-	}
-	if (IsGameRegion(pos) && localController && !bClickHero)
+    if(!bClickHero)
+    {
+        localController->AddHeroToClearWantQueue(CurrentSelection);
+    }
+    if(IsGameRegion(pos) && localController && !bClickHero)
     {
         switch(RTSStatus)
         {
@@ -390,7 +390,6 @@ void ARTS_HUD::OnRMouseDown(FVector2D pos)
         {
             if(CurrentSelection.Num() > 0)
             {
-				CurrentSelection[0]->HideSkillHint();
                 GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("localController->AddHeroToMoveQueue"));
                 if(WantPickup)
                 {
@@ -410,6 +409,19 @@ void ARTS_HUD::OnRMouseDown(FVector2D pos)
             break;
         case ERTSStatusEnum::ThrowEquipment:
             break;
+        case ERTSStatusEnum::SkillHint:
+        {
+            // 取消技能
+            if(IsGameRegion(CurrentMouseXY))
+            {
+				if (CurrentSelection.Num() > 0)
+				{
+					CurrentSelection[0]->HideSkillHint();
+					RTSStatus = ERTSStatusEnum::Normal;
+					localController->AddHeroToMoveQueue(CurrentMouseHit, CurrentSelection);
+				}
+            }
+        }
         default:
             break;
         }
@@ -418,20 +430,20 @@ void ARTS_HUD::OnRMouseDown(FVector2D pos)
 
 void ARTS_HUD::OnRMousePressed1(FVector2D pos)
 {
-	bClickHero = false;
-	ClickStatus = ERTSClickEnum::LastRightClick;
-	if (!bMouseRButton)
-	{
-		bNeedMouseRDown = true;
-	}
-	bMouseRButton = true;	
+    bClickHero = false;
+    ClickStatus = ERTSClickEnum::LastRightClick;
+    if(!bMouseRButton)
+    {
+        bNeedMouseRDown = true;
+    }
+    bMouseRButton = true;
 }
 
 void ARTS_HUD::OnRMousePressed2(FVector2D pos)
 {
-	if (bNeedMouseRDown)
+    if(bNeedMouseRDown)
     {
-		bNeedMouseRDown = false;
+        bNeedMouseRDown = false;
         OnRMouseDown(pos);
         return;
     }
@@ -490,7 +502,7 @@ void ARTS_HUD::OnRMouseReleased(FVector2D pos)
             RButtonUpHitBox = RButtonDownHitBox = FString();
         }
     }
-	bClickHero = false;
+    bClickHero = false;
 }
 
 void ARTS_HUD::OnLMouseDown(FVector2D pos)
@@ -505,75 +517,68 @@ void ARTS_HUD::OnLMouseDown(FVector2D pos)
         }
     }
 
-    // 取消選英雄
-    if(RTSStatus == ERTSStatusEnum::Normal)
-    {
-		if (localController && IsGameRegion(localController->GetMouseScreenPosition()))
-		{
-            
-        }
-    }
+
 }
 
 void ARTS_HUD::OnLMousePressed1(FVector2D pos)
 {
-	bClickHero = false;
-	ClickStatus = ERTSClickEnum::LastLeftClick;
-	if (!bMouseLButton)
-	{
-		bNeedMouseLDown = true;
-	}
-	bMouseLButton = true;
+    bClickHero = false;
+    ClickStatus = ERTSClickEnum::LastLeftClick;
+    if(!bMouseLButton)
+    {
+        bNeedMouseLDown = true;
+    }
+    bMouseLButton = true;
 }
 
 void ARTS_HUD::OnLMousePressed2(FVector2D pos)
 {
-	if (bNeedMouseLDown)
-	{
-		bNeedMouseLDown = false;
-		OnLMouseDown(pos);
-		// 設定SelectionBox初始位置
-		if (RTSStatus == ERTSStatusEnum::Normal)
-		{
-			if (localController && IsGameRegion(localController->GetMouseScreenPosition()))
-			{
-				InitialMouseXY = pos;
-				if (!ClickedSelected)
-				{
-					ClearAllSelection();
-				}
-				ClickedSelected = false;
-				UnSelectHero();
-			}
-		}
-		else if (RTSStatus == ERTSStatusEnum::SkillHint)
-		{
-			CurrentSelection[0]->HideSkillHint();
-			// 需要網路同步
-			CurrentSelection[0]->UseSkill(-1, GetCurrentRotator(), GetCurrentDirection(), CurrentMouseHit);
-			RTSStatus = ERTSStatusEnum::ToNormal;
-		}
-		return;
-	}
-	// 顯示技能提示
-	if (CurrentSelection.Num() > 0)
-	{
-		for (FRTSHitBox& HitBox : RTS_HitBoxMap)
-		{
-			if (HitBox.GetName().Left(5) == TEXT("Skill"))
-			{
-				if (HitBox.Contains(pos, ViewportScale))
-				{
-					int32 idx = FCString::Atoi(*HitBox.GetName().Right(1)) - 1;
-					bool res = CurrentSelection[0]->ShowSkillHint(idx);
-					if (res)
-					{
-						RTSStatus = ERTSStatusEnum::SkillHint;
-					}
-				}
-			}
-		}
-	}
+    if(bNeedMouseLDown)
+    {
+        bNeedMouseLDown = false;
+        OnLMouseDown(pos);
+        // 設定SelectionBox初始位置
+        if(RTSStatus == ERTSStatusEnum::Normal)
+        {
+            if(IsGameRegion(CurrentMouseXY)) // 取消選英雄
+            {
+                InitialMouseXY = pos;
+                if(!ClickedSelected)
+                {
+                    ClearAllSelection();
+                }
+                ClickedSelected = false;
+                UnSelectHero();
+            }
+        }
+        else if(RTSStatus == ERTSStatusEnum::SkillHint) // 放技能
+        {
+            CurrentSelection[0]->HideSkillHint();
+			localController->AddHeroToSkillQueue(CurrentSelection[0], CurrentSelection[0]->GetCurrentSkillIndex(),
+				GetCurrentRotator(), GetCurrentDirection(), CurrentMouseHit);
+            RTSStatus = ERTSStatusEnum::ToNormal;
+        }
+        return;
+    }
+    // 顯示技能提示
+    if(CurrentSelection.Num() > 0)
+    {
+        for(FRTSHitBox& HitBox : RTS_HitBoxMap)
+        {
+            if(HitBox.GetName().Left(5) == TEXT("Skill"))
+            {
+                if(HitBox.Contains(pos, ViewportScale))
+                {
+                    int32 idx = FCString::Atoi(*HitBox.GetName().Right(1)) - 1;
+                    bool res = CurrentSelection[0]->ShowSkillHint(idx);
+                    if(res)
+                    {
+                        RTSStatus = ERTSStatusEnum::SkillHint;
+                    }
+                }
+            }
+        }
+    }
     // 發事件給BP
     for(FRTSHitBox& HitBox : RTS_HitBoxMap)
     {
@@ -603,7 +608,7 @@ void ARTS_HUD::OnLMouseReleased(FVector2D pos)
     // 選英雄
     if(RTSStatus == ERTSStatusEnum::Normal)
     {
-        if(localController && IsGameRegion(localController->GetMouseScreenPosition()))
+        if(IsGameRegion(CurrentMouseXY))
         {
             if(CurrentSelection.Num() > 0)
             {
@@ -635,9 +640,9 @@ void ARTS_HUD::OnLMouseReleased(FVector2D pos)
             }
         }
     }
-	if (RTSStatus == ERTSStatusEnum::ToNormal)
-	{
-		RTSStatus = ERTSStatusEnum::Normal;
-	}
+    if(RTSStatus == ERTSStatusEnum::ToNormal)
+    {
+        RTSStatus = ERTSStatusEnum::Normal;
+    }
 }
 

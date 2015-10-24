@@ -296,6 +296,7 @@ void AHeroCharacter::PostEditChangeProperty(FPropertyChangedEvent& PropertyChang
         Skill_CDing.SetNum(Skill_LevelCDs.Num());
         Skill_CurrentCD.SetNum(Skill_LevelCDs.Num());
         Skill_Level.SetNum(Skill_LevelCDs.Num());
+		Skill_FaceSkill.SetNum(Skill_LevelCDs.Num());
         for(int32 i = 0; i < Skill_LevelCDs.Num(); ++i)
         {
             if(Skill_LevelCDs[i].CDs.Num() > 0)
@@ -510,8 +511,21 @@ bool AHeroCharacter::UseSkill(int32 index, FRotator RFaceTo, FVector VFaceTo, FV
 	{
 		index = CurrentSkillIndex;
 	}
+	if (Skill_FaceSkill.Num() > index)
+	{
+		if (Skill_FaceSkill[index])
+		{
+			FVector dir = Pos - GetActorLocation();
+			SetActorRotation(dir.Rotation());
+		}
+	}
 	BP_ImplementSkill(index, RFaceTo, VFaceTo, Pos);
 	return true;
+}
+
+int32 AHeroCharacter::GetCurrentSkillIndex()
+{
+	return CurrentSkillIndex;
 }
 
 void AHeroCharacter::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const

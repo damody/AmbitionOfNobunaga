@@ -55,9 +55,9 @@ public:
 	UPROPERTY(Category = "FlySkill", EditAnywhere, BlueprintReadOnly)
 	bool UseTargetActor;
 
-	UPROPERTY(Category = "FlySkill", EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "UseTargetLocation"))
+	UPROPERTY(Category = "FlySkill", EditAnywhere, BlueprintReadWrite, Replicated, meta = (EditCondition = "UseTargetLocation"))
 	FVector TargetLocation;
 
-	UPROPERTY(Category = "FlySkill", EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "UseTargetActor"))
+	UPROPERTY(Category = "FlySkill", EditAnywhere, BlueprintReadWrite, Replicated, meta = (EditCondition = "UseTargetActor"))
 	AActor* TargetActor;
 };

@@ -114,6 +114,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Hero")
     virtual bool UseSkill(int32 index, FRotator RFaceTo, FVector VFaceTo, FVector Pos);
 
+	UFUNCTION(BlueprintCallable, Category = "Hero")
+	int32 GetCurrentSkillIndex();
+
 	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly)
 	UDecalComponent* SelectionDecal;
 
@@ -301,7 +304,9 @@ public:
 	// 技能名字
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Hero")
     TArray<FString> Skill_Name;
-
+	// 使用了技能後是否面對技能
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
+    TArray<bool> Skill_FaceSkill;
 	// 技能描述
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Hero")
     TArray<FSkillDescription> Skill_Description;
@@ -325,7 +330,7 @@ public:
 	// 是否在CD中
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero")
     TArray<bool> Skill_CDing;
-
+	
 	// 當前CD秒數，CD秒數等於Skill_MaxCD時就是CD結束
     // Skill_CurrentCD will accumulation every frame
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero")

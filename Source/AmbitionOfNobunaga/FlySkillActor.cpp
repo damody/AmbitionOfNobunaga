@@ -2,7 +2,7 @@
 
 #include "AmbitionOfNobunaga.h"
 #include "FlySkillActor.h"
-
+#include "UnrealNetwork.h"
 
 AFlySkillActor::AFlySkillActor(const FObjectInitializer& ObjectInitializer)
 	: Super(FObjectInitializer::Get())
@@ -95,4 +95,11 @@ void AFlySkillActor::Tick( float DeltaTime )
 			this->Destroy();
 		}
 	}
+}
+
+void AFlySkillActor::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(AFlySkillActor, TargetLocation);
+	DOREPLIFETIME(AFlySkillActor, TargetActor);
 }
