@@ -16,6 +16,7 @@ AAmbitionOfNobunagaPlayerController::AAmbitionOfNobunagaPlayerController()
 {
     bShowMouseCursor = true;
     DefaultMouseCursor = EMouseCursor::Crosshairs;
+	FloorActorName = TEXT("Floor");
 }
 
 void AAmbitionOfNobunagaPlayerController::BeginPlay()
@@ -129,13 +130,30 @@ void AAmbitionOfNobunagaPlayerController::PlayerTick(float DeltaTime)
     if(Hud)
     {
         CurrentMouseXY = GetMouseScreenPosition();
-        FHitResult Hit;
-        bool res = GetHitResultAtScreenPosition(CurrentMouseXY, ECC_Visibility, false, Hit);
-//      if (Hit.Actor.IsValid())
-//      {
-//          Hit.Actor->AddActorWorldOffset(FVector(0, 0, 100));
-//      }
-        Hud->OnMouseMove(CurrentMouseXY, Hit.ImpactPoint);
+        TArray<FHitResult> Hits;
+		bool res;
+		FVector WorldOrigin;
+		FVector WorldDirection;
+		FCollisionObjectQueryParams CollisionQuery;
+		CollisionQuery.AddObjectTypesToQuery(ECC_WorldStatic);
+		if (UGameplayStatics::DeprojectScreenToWorld(this, CurrentMouseXY, WorldOrigin, WorldDirection) == true)
+		{
+			res = GetWorld()->LineTraceMultiByObjectType(Hits, WorldOrigin, WorldOrigin + WorldDirection * HitResultTraceDistance, CollisionQuery);
+		}
+		// 只trace 地板的actor
+		// 地板名可以自定義
+		FVector HitPoint(0, 0, 0);
+		if (Hits.Num() > 0)
+		{
+			for (FHitResult Hit : Hits)
+			{
+				if (Hit.Actor.IsValid() && Hit.Actor->GetFName().GetPlainNameString() == FloorActorName)
+				{	
+					HitPoint = Hit.ImpactPoint;
+				}
+			}
+		}
+		Hud->OnMouseMove(CurrentMouseXY, HitPoint);
     }
     ServerUpdateMove();
 }

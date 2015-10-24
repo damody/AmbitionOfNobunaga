@@ -13,11 +13,17 @@ class AMBITIONOFNOBUNAGA_API AFlySkillActor : public AActor
 public:	
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 
+	UFUNCTION()
+	void OnBeginAttackOverlap(AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	
 	// Called every frame
 	virtual void Tick( float DeltaSeconds ) override;
+
+	UPROPERTY(Category = "Equipment", VisibleAnywhere, BlueprintReadOnly)
+	class UCapsuleComponent* CapsuleComponent;
 
 	UPROPERTY(Category = "FlySkill", VisibleAnywhere, BlueprintReadOnly)
 	UParticleSystemComponent* BulletParticle;
@@ -60,4 +66,7 @@ public:
 
 	UPROPERTY(Category = "FlySkill", EditAnywhere, BlueprintReadWrite, Replicated, meta = (EditCondition = "UseTargetActor"))
 	AActor* TargetActor;
+
+	UPROPERTY(Category = "FlySkill", EditAnywhere, BlueprintReadWrite)
+	TArray<AActor*> AlreadyDamageActor;
 };

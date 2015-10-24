@@ -55,16 +55,40 @@ public:
 
 	UPROPERTY(Category = "SkillHint", EditAnywhere, BlueprintReadOnly)
 	ESkillHintEnum SkillType;
+
+	UPROPERTY(Category = "SkillHint", EditAnywhere, BlueprintReadOnly)
+	FVector SkillPos;
+
+	UPROPERTY(Category = "SkillHint", VisibleAnywhere, BlueprintReadOnly)
+	bool UseDirectionSkill;
+
+	UPROPERTY(Category = "SkillHint", VisibleAnywhere, BlueprintReadOnly)
+	bool UseRangeSkill;
 	
 	UPROPERTY(Category = "SkillHint", EditAnywhere, BlueprintReadOnly)
 	UTexture2D* MouseIcon;
 	
-	UPROPERTY(Category = "FlySkill", EditAnywhere, BlueprintReadOnly)
+	// 琌㏕﹚
+	UPROPERTY(Category = "FlySkill", EditAnywhere, BlueprintReadOnly, meta = (EditCondition = "UseDirectionSkill"))
 	bool IsFixdLength;
 
-	UPROPERTY(Category = "FlySkill", EditAnywhere, BlueprintReadOnly)
+	// м程环禯瞒
+	UPROPERTY(Category = "FlySkill", EditAnywhere, BlueprintReadOnly, meta = (EditCondition = "UseDirectionSkill"))
 	float SkillLength;
 
-	UPROPERTY(Category = "FlySkill", EditAnywhere, BlueprintReadOnly)
+	// м程祏禯瞒
+	UPROPERTY(Category = "FlySkill", EditAnywhere, BlueprintReadOnly, meta = (EditCondition = "UseDirectionSkill"))
 	float MinimalLength;
+
+	// 猭砃畖
+	UPROPERTY(Category = "FlySkill", EditAnywhere, BlueprintReadOnly, meta = (EditCondition = "UseRangeSkill"))
+	float SkillDiameter;
+
+	// 琁猭禯瞒
+	UPROPERTY(Category = "FlySkill", EditAnywhere, BlueprintReadOnly, meta = (EditCondition = "UseRangeSkill"))
+	float SkillCastRadius;
+
+	// м程琁猭禯瞒
+	UPROPERTY(Category = "FlySkill", EditAnywhere, BlueprintReadOnly, meta = (EditCondition = "UseRangeSkill"))
+	float MinimalCastRadius;
 };

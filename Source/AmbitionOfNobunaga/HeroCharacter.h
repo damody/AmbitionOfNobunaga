@@ -194,6 +194,9 @@ public:
 	// 防禦力
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero|Current")
 	float CurrentArmor;
+	// 當前魔法減傷
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero|Current")
+	float CurrentMagicInjured;
 	// 外加力量
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero|Current")
 	float AdditionStrength;

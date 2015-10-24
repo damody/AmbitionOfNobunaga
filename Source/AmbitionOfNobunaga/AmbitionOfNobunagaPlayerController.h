@@ -130,6 +130,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RTS")
 	FVector2D CurrentMouseXY;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RTS")
+	FString FloorActorName;
+
 	/** Navigate player to the given world location. */
 	
 
