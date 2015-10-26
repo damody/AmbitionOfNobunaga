@@ -127,9 +127,11 @@ protected:
 	void ServerStopMovement(const TArray<AHeroCharacter*>& heros);
 public:
 		
+	// 當前滑鼠坐標
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RTS")
 	FVector2D CurrentMouseXY;
 
+	// 地板Actor名 滑鼠LineTrace用
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RTS")
 	FString FloorActorName;
 

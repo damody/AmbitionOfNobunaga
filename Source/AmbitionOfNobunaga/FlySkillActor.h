@@ -31,7 +31,7 @@ public:
 	UPROPERTY(Category = "FlySkill", EditAnywhere, BlueprintReadWrite)
 	float MoveSpeed;
 
-	UPROPERTY(Category = "FlySkill", EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Category = "FlySkill", EditAnywhere, BlueprintReadWrite, Replicated)
 	int32 TeamId;	
 
 	UPROPERTY(Category = "FlySkill", VisibleAnywhere, BlueprintReadOnly)

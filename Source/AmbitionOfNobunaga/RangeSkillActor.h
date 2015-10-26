@@ -1,0 +1,80 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "GameFramework/Actor.h"
+#include "RangeSkillActor.generated.h"
+
+class AHeroCharacter;
+
+UCLASS()
+class AMBITIONOFNOBUNAGA_API ARangeSkillActor : public AActor
+{
+	GENERATED_UCLASS_BODY()
+	
+public:	
+	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+
+	UFUNCTION()
+	void OnBeginAttackOverlap(AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION()
+	void OnEndAttackOverlap(AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+	UFUNCTION(Server, WithValidation, Reliable)
+	void Injury();
+
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
+	
+	// Called every frame
+	virtual void Tick( float DeltaSeconds ) override;
+
+	UPROPERTY(Category = "Equipment", VisibleAnywhere, BlueprintReadOnly)
+	class UCapsuleComponent* CapsuleComponent;
+
+	UPROPERTY(Category = "RangeSkill", VisibleAnywhere, BlueprintReadOnly)
+	UParticleSystemComponent* BulletParticle;
+	
+	UPROPERTY(Category = "RangeSkill", EditAnywhere, BlueprintReadWrite, Replicated)
+	int32 TeamId;	
+
+	UPROPERTY(Category = "RangeSkill", VisibleAnywhere, BlueprintReadOnly)
+	USceneComponent* Scene;
+
+	UPROPERTY(Category = "RangeSkill", EditAnywhere, BlueprintReadWrite)
+	float LifeTime;
+
+	UPROPERTY(Category = "RangeSkill", EditAnywhere, BlueprintReadWrite)
+	float LifeCount;
+
+	UPROPERTY(Category = "RangeSkill", EditAnywhere, BlueprintReadOnly)
+	float DamageTime;
+
+	UPROPERTY(Category = "RangeSkill", EditAnywhere, BlueprintReadWrite)
+	bool  HasDamaged;
+
+	UPROPERTY(Category = "RangeSkill", EditAnywhere, BlueprintReadWrite)
+	float DestroyDelay;
+
+	UPROPERTY(Category = "RangeSkill", EditAnywhere, BlueprintReadWrite)
+	float DestoryCount;
+
+	UPROPERTY(Category = "RangeSkill", EditAnywhere, BlueprintReadWrite)
+	bool  PrepareDestory;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "FightRole")
+	TArray<AHeroCharacter*> AttackCollision;
+
+	UPROPERTY(Category = "RangeSkill", EditAnywhere, BlueprintReadOnly)
+	bool IsFixdLength;
+	
+	UPROPERTY(Category = "RangeSkill", EditAnywhere, BlueprintReadOnly)
+	float PhysicalDamage;
+
+	UPROPERTY(Category = "RangeSkill", EditAnywhere, BlueprintReadOnly)
+	float MagicDamage;
+	
+	UPROPERTY(Category = "RangeSkill", EditAnywhere, BlueprintReadWrite)
+	TArray<AHeroCharacter*> AlreadyDamageActor;
+};

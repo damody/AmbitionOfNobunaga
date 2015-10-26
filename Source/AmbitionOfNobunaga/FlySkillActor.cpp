@@ -78,10 +78,9 @@ void AFlySkillActor::OnBeginAttackOverlap(AActor* OtherActor, UPrimitiveComponen
 	}
 	if (hero && MagicDamage > 0)
 	{
-		float Damage = MagicDamage * hero->CurrentMagicInjured;
+		float Damage = MagicDamage * (1 - hero->CurrentMagicInjured);
 		hero->CurrentHP -= Damage;
 	}
-	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString::Printf(TEXT("hero->CurrentHP %f"), hero->CurrentHP));
 }
 
 // Called when the game starts or when spawned
@@ -141,4 +140,5 @@ void AFlySkillActor::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& Out
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(AFlySkillActor, TargetLocation);
 	DOREPLIFETIME(AFlySkillActor, TargetActor);
+	DOREPLIFETIME(AFlySkillActor, TeamId);
 }
