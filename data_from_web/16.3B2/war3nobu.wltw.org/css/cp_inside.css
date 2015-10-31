@@ -1,0 +1,205 @@
+@charset "utf-8";
+/* CSS Document */
+
+/* 背景陣營底圖 */
+div.cp_bk1{
+	width:100%;
+	height:110px;
+	background:url(../img/champion/cp_bk.png) no-repeat top right;
+	position:absolute;
+	top:0;
+	z-index:-20;
+	}
+div.cp_bk2{
+	background:url(../img/champion/cp_bk.png) no-repeat 100% 50%;}
+div.cp_bk3{
+	background:url(../img/champion/cp_bk.png) no-repeat 100% 100%;}
+
+/* 英雄基本能力 */
+div.cp_info{
+	width:630px;
+	height:64px;
+	margin:15px auto 10px auto;
+	}
+
+div.cp_info div{
+	height:64px;
+	line-height:64px;
+	float:left;
+	}
+	
+div.cp_name{
+	font-size:18px;
+	color:#922220;
+	padding:0 15px 0 16px;
+	}
+
+div.cp_data{
+	font-size:12px;
+	padding:0 5px 0 3px;
+	}
+
+div.cp_srt, div.cp_agi, div.cp_int{
+	width:35px;
+	}
+
+div.cp_srt{
+	background:url(../img/champion/cate_icon.png) 0px 50% no-repeat;}
+div.cp_agi{
+	background:url(../img/champion/cate_icon.png) -35px 50% no-repeat;}
+div.cp_int{
+	background:url(../img/champion/cate_icon.png) -70px 50% no-repeat;}
+
+/* 屬性、生平與技能 */
+div.cp_box{
+	width:630px;
+	margin:0 auto;
+	}
+	
+div.lvup{
+	margin-left:80px;
+	}
+
+div.lvup ul li{
+	display:inline-block;
+	font-size:13px;
+	color:#999;
+	line-height:25px;
+	padding-right:15px;
+	}
+
+div.cp_s{
+	margin:15px 0 20px 80px;
+	padding:20px 25px;
+	font-size:14px;
+	color:#666;
+	background-color:#f7f7f7;
+	line-height:1.8em;
+	}
+
+div.cp_skill{
+	height:64px;
+	margin-left:80px;
+	margin-top:7px;
+	}
+
+div.cp_skill ul li{
+	width:auto;
+	height:64px;
+	display:inline-block;
+	float:left;
+	}
+
+/* 技能背景色 a:主動 b:被動 c:屬性點*/
+li.aa{
+	background-color:#a83837;}
+li.ab{
+	background-color:#b04544;}
+li.ac{
+	background-color:#bb514f;}
+li.ba{
+	background-color:#3883a8;}
+li.bb{
+	background-color:#458cb0;}
+li.bc{
+	background-color:#4e96ba;}
+li.ca{
+	background-color:#808080;}
+li.cb{
+	background-color:#8c8c8c;}
+li.cc{
+	background-color:#999999;}
+li.da{
+	background-color:#a84543;}
+li.db{
+	background-color:#b0514f;}
+li.dc{
+	background-color:#ba5f5d;}
+
+/* 技能背景圖 */
+div.cp_s_cm{
+	background:url(../img/champion/cp_skill2.png) 50% 0px no-repeat;}
+div.cp_s_ch{
+	background:url(../img/champion/cp_skill2.png) 50% -34px no-repeat;}
+div.cp_s_cd{
+	background:url(../img/champion/cp_skill2.png) 50% -68px no-repeat;}
+
+/* 技能說明 hotkey:熱鍵*/
+div.cp_hotkey, div.cp_s_i, div.cp_s_cm, div.cp_s_ch, div.cp_s_cd{
+	width:162px;
+	text-align:center;
+	color:#FFF;
+	}
+
+div.cp_hotkey, div.cp_s_cm, div.cp_s_ch, div.cp_s_cd{
+	height:34px;
+	}
+
+div.cp_hotkey{
+	font-size:24px;
+	line-height:40px;
+	text-shadow:1px 1px 1px #4d4d4d;
+	}
+
+div.cp_s_i{
+	height:30px;
+	line-height:30px;
+	font-size:12px;
+	}
+
+div.cp_s_n{
+	font-size:13px !important;
+	line-height:28px !important;
+	}
+
+div.cp_s_info{
+	margin:10px 0 25px 80px;
+	font-size:14px;
+	line-height:2em;
+	color:#4c4c4c;
+	}
+
+div.cp_s_info span{
+	color:#5c8115;
+	}
+
+div.cp_s_ps{
+	margin-left:80px;
+	padding-bottom:5px;
+	text-align:right;
+	color:#5c8115;
+	font-size:14px;
+	}
+
+div.cp_s_ps span{
+	padding-left:15px;
+	border-bottom:solid 1px #d9d9d9;
+	display:inline-block;
+	line-height:1.2em;
+	}
+
+div.footer_hr{
+	width:100%;
+	height:40px;
+	}
+
+div.footer{
+	position:fixed;
+	bottom:0;
+	width:100%;
+	height:30px;
+	background-color:#e5e5e5;
+	}
+
+div.more_info{
+	width:500px;
+	margin-left:80px;
+	padding:10px 25px;
+	color:#4e751b;
+	font-size:15px;
+	line-height:28px;
+	background:#d8e7c5;
+	text-size-adjust: none;
+	-ms-text-size-adjust: none;
+
+	}

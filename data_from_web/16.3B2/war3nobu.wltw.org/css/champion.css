@@ -1,0 +1,113 @@
+@charset "utf-8";
+/* CSS Document */
+
+div.champion_title{
+	width: 240px;
+	height:100px;
+	margin-left:120px;
+	top:310px;
+	float:left;
+	position:absolute;
+	}
+
+div.ct_a{
+	background:url(../img/champion/champion_title.png) 0px 0px no-repeat;}
+div.ct_b{
+	background:url(../img/champion/champion_title.png) 0px -100px no-repeat;}
+div.ct_c{
+	background:url(../img/champion/champion_title.png) 0px -200px no-repeat;}
+	
+div.minimap{
+	width:640px;
+	height:225px;
+	margin:120px auto 0px auto;
+	}
+div.st{
+	height:1px;
+	}
+
+div.cm_a{
+	background-image:url(../img/champion/ct_map1.png);}
+div.cm_b{
+	background-image:url(../img/champion/ct_map2.png);}
+div.cm_c{
+	background-image:url(../img/champion/ct_map3.png);}
+
+div.champion_box{
+	width:620px;
+	height:222px;
+	margin:40px auto;
+	position:relative;
+	}
+
+div.cb{
+	width:620px;
+	height:64px;
+	margin-bottom:10px;
+	}
+
+a.champion{
+	width:153px;
+	height:64px;
+	display:block;
+	position:relative;
+	float:left;
+	margin-right:2px;
+	}
+a.champion:link, a.champion:visited{
+	color:#333;
+	}
+
+a.champion:hover{
+	color:#FFF !important;
+	background-color:#739220;
+	}
+
+a.champion div.l, a.champion div.s, a.champion div.cate{
+	float:left;
+	position:absolute;
+	}
+
+a.champion div.l{
+	left:68px;
+	font-size:32px;
+	line-height:30px;
+	bottom:2px;
+	}
+
+a.champion div.s{
+	left:102px;
+	font-size:14px;
+	line-height:15px;
+	bottom:2px;
+	}
+
+div.cate{
+	width:16px;
+	height:8px;
+	left:42px;
+	top:6px;
+	display:inline-block;
+	}
+
+div.cate_a{
+		background:url(../img/champion/cate.gif) 0px 0px;}
+div.cate_b{
+		background:url(../img/champion/cate.gif) 0px -8px;}
+div.cate_c{
+		background:url(../img/champion/cate.gif) 0px -16px;}
+	
+div.hr{
+	width:485px;
+	height:10px;
+	margin:25px auto 40px auto;
+	border-bottom:solid 1px #CCC;
+	}
+
+div.block{
+	height:30px;
+	}
+
+div.mb_champion_box{
+	display:none;
+	}

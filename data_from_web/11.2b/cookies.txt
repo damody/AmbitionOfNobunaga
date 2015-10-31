@@ -1,0 +1,6 @@
+# HTTrack Website Copier Cookie File
+# This file format is compatible with Netscape cookies
+.hotrank.com.tw	TRUE	/	FALSE	1999999999	HMS	3f417e953a2f65c8
+.hotrank.com.tw	TRUE	/	FALSE	1999999999	HOTID	ef3397ab7f342057fa97ad62e9639a7e
+.hotrank.com.tw	TRUE	/	FALSE	1999999999	SETBY	1444426815.1.44b2bda478861a35
+
