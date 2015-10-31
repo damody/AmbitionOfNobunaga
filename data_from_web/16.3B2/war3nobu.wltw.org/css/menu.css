@@ -1,0 +1,129 @@
+a{
+	text-decoration:none;
+}
+
+ol, ul {
+	list-style: none;
+	padding:0px;
+	margin:0px;
+}
+
+.right {
+	float: right;
+}
+
+.left {
+	float: left;
+}
+
+/* HEADER */
+#navigation {
+	position: relative;
+}
+
+/* HEADER > MENU */
+#main-menu {
+	float: right;
+	font-size: 0;
+	margin-top: 14px;
+}
+
+#main-menu > li {
+	display: inline-block;
+	width: 148px;
+	height: 41px;
+}
+
+#main-menu > li > a {
+	width: 138px;
+	height: 41px;
+	display:block;
+}
+li, li:hover{
+	transition: .3s;
+	}
+
+li.champion{
+	background:url(../img/menu_btn.png) 888px 0px;}
+li.champion:hover{
+	background:url(../img/menu_btn.png) 888px 41px;}
+	
+li.store{
+	background:url(../img/menu_btn.png) 740px 0px;}
+li.store:hover{
+	background:url(../img/menu_btn.png) 740px 41px;}
+	
+li.otherstore{
+	background:url(../img/menu_btn.png) 592px 0px;}
+li.otherstore:hover{
+	background:url(../img/menu_btn.png) 592px 41px;}
+	
+li.compose{
+	background:url(../img/menu_btn.png) 444px 0px;}
+li.compose:hover{
+	background:url(../img/menu_btn.png) 444px 41px;}
+	
+li.army{
+	background:url(../img/menu_btn.png) 296px 0px;}
+li.army:hover{
+	background:url(../img/menu_btn.png) 296px 41px;}
+	
+li.info{
+	background:url(../img/menu_btn.png) 148px 0px;}
+li.info:hover{
+	background:url(../img/menu_btn.png) 148px 41px;}
+
+
+
+
+/* HEADER > MENU > DROPDOWN */
+#main-menu li {
+	position: relative;
+}
+
+ul.sub-menu { /* level 2 */
+	display: none;
+	left: 0px;
+	top: 36px;
+	padding-top: 20px;
+	position: absolute;
+	width: 133px;
+	z-index: 1000;
+
+}
+
+ul.sub-menu > li > a {
+	background-color: #FFF;
+	border: none;
+	color: #343434;
+	display: block;
+	font-size: 14px;
+	line-height: 18px;
+	padding: 12px 20px;
+	box-shadow:0px 2px 3px #999;
+	transition: .3s;
+}
+
+ul.sub-menu > li > a:hover {
+	background:#739220 url(../img/menu_btn_hover.gif) -10px 0px no-repeat; 
+	color: #fff;
+	transition: .3s;
+	z-index:3;
+}
+
+ul.sub-menu > li:first-child {
+	border-top: 3px solid #739220;
+}
+
+ul.sub-menu > li > a.parent {
+	background-image: url(../404.html);
+	background-size: 5px 9px;
+	background-repeat: no-repeat;
+	background-position: 95% center;
+}
+
+#main-menu li:hover > ul.sub-menu {
+	display: block; /* show the submenu */
+	transition: 1s;
+}
+

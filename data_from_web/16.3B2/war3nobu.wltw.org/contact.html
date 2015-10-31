@@ -1,0 +1,127 @@
+<!DOCTYPE HTML>
+<html>
+
+<!-- Mirrored from war3nobu.wltw.org/contact by HTTrack Website Copier/3.x [XR&CO'2014], Fri, 09 Oct 2015 21:46:06 GMT -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="description" content="《魔獸爭霸3》新版信長之野望資訊站，作者WL，提供出場英雄、商人道具、其他商店、合成表單、部隊系統與其他資訊等內容查詢。新站於2013年12月28日正式啟用。"> 
+<meta name="author " content="WL"> 
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>信長之野望資訊站 - About</title>
+<LINK REL="SHORTCUT ICON" HREF="http://localhost/war3nobu/favicon.ico"> 
+<link href="css/reset.css" rel="stylesheet" type="text/css">
+<link href="css/style.css" rel="stylesheet" type="text/css">
+<link href="css/about.css" rel="stylesheet" type="text/css">
+<!--自適應網頁，800px以下-->
+<link rel="stylesheet" media="screen and (max-width: 800px)" href="css/mobile.css" />
+
+<!--jquery alert-->
+<link rel="stylesheet" type="text/css" href="css/easyui.css">
+<script type="text/javascript" src="../code.jquery.com/jquery-1.6.1.min.js"></script>
+<script type='text/javascript'>var contact$=$;</script>
+<script type="text/javascript" src="js/jquery.easyui.min.js"></script>
+<script type="text/javascript">
+contact$(function(){
+contact$('#contact').form({
+success:function(data){
+contact$.messager.alert('訊息', data, 'info');
+}
+});
+});
+</script>
+
+<!--reset form-->
+<script type='text/javascript'>var resetform$=$;</script>
+<script type="text/javascript">
+resetform$(document).ready(function () {
+    resetForms();
+});
+
+function resetForms() {
+    document.forms['contact'].reset();
+}
+</script>
+
+<!--修正IE無法顯示placeholder開始-->
+<script type="text/javascript" src="js/jquery.placeholder.js"></script>
+<script type='text/javascript'>var palceholder$=$;</script>
+<script type="text/javascript">
+	palceholder$(function(){
+		// 幫有 placeholder 屬性的輸入框加上提示效果
+		palceholder$('input[placeholder]').placeholder();
+	});
+</script>
+<!--修正IE無法顯示placeholder結束-->
+
+<!--回到最頂端Jquery開頭-->
+<link rel="stylesheet" media="screen,projection" href="css/ui.totop.css" />
+<script type="text/javascript" src="js/jquery.js"></script>
+<script type="text/javascript" src="js/function.js"></script>
+    <!-- jquery -->	
+<script src="js/jquery-1.7.2.min.js" type="text/javascript"></script>
+    <!-- easing plugin ( optional ) -->
+<script src="js/easing.js" type="text/javascript"></script>
+    <!-- UItoTop plugin -->
+<script src="js/jquery.ui.totop.js" type="text/javascript"></script>
+    <!-- Starting the plugin -->
+<script type="text/javascript">
+        $(document).ready(function() {
+            /*
+            var defaults = {
+                containerID: 'toTop', // fading element id
+                containerHoverID: 'toTopHover', // fading element hover id
+                scrollSpeed: 1200,
+                easingType: 'linear' 
+            };
+            */
+        
+            $().UItoTop({ easingType: 'easeOutQuart' });
+        
+        });
+    </script>
+<!--回到最頂端Jquery結束-->
+
+
+</head>
+<body style="background-color:#f6ede0 !important;">
+	<div id="top_bar">
+    	<div class="gohome"><a href="index.html">回首頁</a></div>
+    </div>
+    <div class="contact">
+        <div class="contact_box">
+        	<div id="center_box">
+		    	<div class="contact_title"></div>
+                <div class="contact_img">
+                </div>
+               	<p class="contact">hello! 有任何意見或想法嗎？我很高興收到你的訊息！<br/>請記得留下正確資訊，我才能回應給你喔。</p>
+                <div class="contact_form">
+                     <form id="contact" name="contact" method="post" action="http://war3nobu.wltw.org/send_form_email.php">
+                          <input type="text" name="nick_name" placeholder="請輸入暱稱">
+                          <input type="text" name="email" placeholder="請輸入電子信箱">
+                          <textarea name="comments" cols="25" rows="6" placeholder="請輸入內容"></textarea>
+                          <input type="submit" value="Submit">
+                          <input type="reset" value="Clear"></br></br>
+                     </form>
+                            
+                </div>
+            </div>
+		</div>
+    </div>
+
+    <div id="footer">
+    	<div id="footer_box">
+        	<ul>
+        		<li><a href="about.html">About</a></li>
+            	<li><a href="sitemap.html">SiteMap</a></li>
+            	<li><a href="contact.html">Contact</a></li>
+            </ul>
+            <div class="declaration">本站由WL所設計，資訊內容歡迎轉載，但請勿盜連、盜用本站素材。本站所用之其他圖片，皆屬原作者/原公司所有，無商業使用之途，如有疑慮，歡迎與我聯繫。</div>
+            <div class="explorer">建議使用IE10以上版本或Firefox、Chrome、Opera瀏覽本站</div>
+            <div class="copyright">Copyright © 2014 WL 保留一切權利</div>
+        </div>
+	</div>
+</body>
+
+<!-- Mirrored from war3nobu.wltw.org/contact by HTTrack Website Copier/3.x [XR&CO'2014], Fri, 09 Oct 2015 21:46:06 GMT -->
+</html>
