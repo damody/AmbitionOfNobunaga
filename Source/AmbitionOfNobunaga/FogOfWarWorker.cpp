@@ -63,7 +63,7 @@ void AFogOfWarWorker::UpdateFowTexture() {
 		//We divide by 100.0 because 1 texel equals 1 meter of visibility-data.
 		int posX = (int)(position.X / dividend) + halfTextureSize;
 		int posY = (int)(position.Y / dividend) + halfTextureSize;
-		float integerX, integerY;
+		double integerX, integerY;
 
 		FVector2D fractions = FVector2D(modf(position.X / 50.0f, &integerX), modf(position.Y / 50.0f, &integerY));
 		FVector2D textureSpacePos = FVector2D(posX, posY);
