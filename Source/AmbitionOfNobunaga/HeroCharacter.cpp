@@ -367,6 +367,10 @@ void AHeroCharacter::OnMouseClicked(UPrimitiveComponent* TouchComp)
                 {
                     return;
                 }
+				if (hud->CurrentSelection[0]->CurrentSkillHint)
+				{
+					return;
+				}
             }
             hud->ClickedSelected = true;
             hud->ClearAllSelection();
