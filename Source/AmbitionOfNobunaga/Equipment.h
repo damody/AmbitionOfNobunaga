@@ -31,15 +31,15 @@ public:
 	UPROPERTY(Category = "Equipment", VisibleAnywhere, BlueprintReadOnly)
 	class UStaticMeshComponent* StaticMesh;
 	
-	// ¤jÀY¶K
+	// å¤§é ­è²¼
 	UPROPERTY(Category = "Equipment", EditAnywhere, BlueprintReadWrite)
 	UTexture2D * Head;
 
-	// ª««~¦W
+	// ç‰©å“å
 	UPROPERTY(Category = "Equipment", EditAnywhere, BlueprintReadOnly)
 	FString Name;
 
-	// ª««~´y­z
+	// ç‰©å“æè¿°
 	UPROPERTY(Category = "Equipment", EditAnywhere, BlueprintReadOnly)
 	FString Description;
 

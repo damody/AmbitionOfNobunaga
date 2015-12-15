@@ -19,27 +19,27 @@ public:
 	UFUNCTION(Server, WithValidation, Reliable, BlueprintCallable, Category = "AONGameState")
 	void SetObjectLocation(AActor* actor, FVector pos);
 	
-	// ¨C1ÂI¤O¶q¼W¥[¦å¶q
+	// æ¯1é»åŠ›é‡å¢åŠ è¡€é‡
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AONGameState")
 	float StrengthToHP;
-	// ¨C1ÂI¤O¶q¼W¥[¦^¦å/sec
+	// æ¯1é»åŠ›é‡å¢åŠ å›è¡€/sec
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AONGameState")
 	float StrengthToHealingHP;
 
-	// ¨C1ÂI´¼¤O¼W¥[Å]¤O
+	// æ¯1é»æ™ºåŠ›å¢åŠ é­”åŠ›
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AONGameState")
 	float IntelligenceToMP;
-	// ¨C1ÂI´¼¤O¼W¥[¦^Å]/sec
+	// æ¯1é»æ™ºåŠ›å¢åŠ å›é­”/sec
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AONGameState")
 	float IntelligenceToHealingMP;
 
-	// ¨C1ÂI±Ó±¶¼W¥[¨¾¿m
+	// æ¯1é»æ•æ·å¢åŠ é˜²ç¦¦
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AONGameState")
 	float AgilityToDefense;
-	// ¨C1ÂI±Ó±¶¼W¥[§ğ³t
+	// æ¯1é»æ•æ·å¢åŠ æ”»é€Ÿ
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AONGameState")
 	float AgilityToAttackSpeed;
-	// ¨C1ÂI±Ó±¶¼W¥[¶]³t
+	// æ¯1é»æ•æ·å¢åŠ è·‘é€Ÿ
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AONGameState")
 	float AgilityToWalkSpeed;
 

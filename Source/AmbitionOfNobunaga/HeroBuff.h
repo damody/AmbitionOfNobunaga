@@ -13,51 +13,51 @@ class AMBITIONOFNOBUNAGA_API UHeroBuff : public UObject
 {
 	GENERATED_BODY()
 public:
-	// Buff Àu¥ıÅv
+	// Buff å„ªå…ˆæ¬Š
 	UPROPERTY(Category = "HeroBuff", EditAnywhere, BlueprintReadOnly)
 	int32 Priority;
-	// ¬O§_¸T¤î²¾°Ê
+	// æ˜¯å¦ç¦æ­¢ç§»å‹•
 	UPROPERTY(Category = "HeroBuff", EditAnywhere, BlueprintReadOnly)
 	bool BanMove;
-	// ¬O§_¸T¤î§ğÀ»
+	// æ˜¯å¦ç¦æ­¢æ”»æ“Š
 	UPROPERTY(Category = "HeroBuff", EditAnywhere, BlueprintReadOnly)
 	bool BanAttack;
-	// ¬O§_¸T¤î¨Ï¥Î§Ş¯à
+	// æ˜¯å¦ç¦æ­¢ä½¿ç”¨æŠ€èƒ½
 	UPROPERTY(Category = "HeroBuff", EditAnywhere, BlueprintReadOnly)
 	bool BanSkill;
-	// ¬O§_¸T¤î¨Ï¥Î¹D¨ã
+	// æ˜¯å¦ç¦æ­¢ä½¿ç”¨é“å…·
 	UPROPERTY(Category = "HeroBuff", EditAnywhere, BlueprintReadOnly)
 	bool BanEquipment;
-	// Å@¬Ş­È
+	// è­·ç›¾å€¼
 	UPROPERTY(Category = "HeroBuff", EditAnywhere, BlueprintReadOnly)
 	bool ShieldValue;
-	// ¬O§_Ä²µo¶Ë®`­«·s­pºâ¨Æ¥ó
+	// æ˜¯å¦è§¸ç™¼å‚·å®³é‡æ–°è¨ˆç®—äº‹ä»¶
 	UPROPERTY(Category = "HeroBuff", EditAnywhere, BlueprintReadOnly)
 	bool InjuredEvent;
-	// ª«²z¿é¥X¶Ë®`¥[¦¨
+	// ç‰©ç†è¼¸å‡ºå‚·å®³åŠ æˆ
 	UPROPERTY(Category = "HeroBuff", EditAnywhere, BlueprintReadOnly)
 	float PhysicalDamageOutputRatio;
-	// Å]ªk¿é¥X¶Ë®`¥[¦¨
+	// é­”æ³•è¼¸å‡ºå‚·å®³åŠ æˆ
 	UPROPERTY(Category = "HeroBuff", EditAnywhere, BlueprintReadOnly)
 	float MagicDamageOutputRatio;
-	// ¯à¤£¯à³Qªk³N«ü©w
+	// èƒ½ä¸èƒ½è¢«æ³•è¡“æŒ‡å®š
 	UPROPERTY(Category = "HeroBuff", EditAnywhere, BlueprintReadOnly)
 	bool CanBeSkillSight;
-	// ¯à¤£¯à³Q´¶§ğ«ü©w
+	// èƒ½ä¸èƒ½è¢«æ™®æ”»æŒ‡å®š
 	UPROPERTY(Category = "HeroBuff", EditAnywhere, BlueprintReadOnly)
 	bool CanBeAttackSight;
 
-	// ¬O§_¯àÅ|¥[
+	// æ˜¯å¦èƒ½ç–ŠåŠ 
 	UPROPERTY(Category = "HeroBuff", EditAnywhere, BlueprintReadOnly)
 	bool CanSuperposition;
-	// Å|¥[¼h¼Æ
+	// ç–ŠåŠ å±¤æ•¸
 	UPROPERTY(Category = "HeroBuff", EditAnywhere, BlueprintReadOnly)
 	int32 Superposition;
-	// ¨C¤@¼h«ùÄò®É¶¡
+	// æ¯ä¸€å±¤æŒçºŒæ™‚é–“
 	UPROPERTY(Category = "HeroBuff", EditAnywhere, BlueprintReadOnly)
 	float Duration;
 
-	// ²¾°Ê³t«×
+	// ç§»å‹•é€Ÿåº¦
 	UPROPERTY(Category = "HeroBuff", EditAnywhere, BlueprintReadOnly)
 	float MoveRatio;
 	

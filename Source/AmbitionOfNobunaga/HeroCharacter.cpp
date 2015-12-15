@@ -35,19 +35,19 @@ AHeroCharacter::AHeroCharacter(const FObjectInitializer& ObjectInitializer)
     HeroStatus = EHeroStatusEnum::Stand;
     GetMesh()->SetWorldRotation(FQuat(FRotator(0, -90, 0)));
 
-    // §ğÀ»°Êµe¼½¨ì´X¬í®Éµo¥X§ğÀ»
+    // æ”»æ“Šå‹•ç•«æ’­åˆ°å¹¾ç§’æ™‚ç™¼å‡ºæ”»æ“Š
     AnimationInstantAttack = 0.2;
-    // ¥Ø«e§ğÀ»°Êµe®É¶¡ªø«×
+    // ç›®å‰æ”»æ“Šå‹•ç•«æ™‚é–“é•·åº¦
     CurrentAttackTime = 0.5;
-    // °òÂ¦¦å¶q
+    // åŸºç¤è¡€é‡
     BaseHP = 450;
-    // °òÂ¦Å]¤O
+    // åŸºç¤é­”åŠ›
     BaseMP = 100;
-    // °òÂ¦¾ßª««~¶ZÂ÷
+    // åŸºç¤æ’¿ç‰©å“è·é›¢
     PickupObjectDistance = 500;
-    // °òÂ¦µ¥¯Å
+    // åŸºç¤ç­‰ç´š
     CurrentLevel = 1;
-    // °òÂ¦§ğ³t
+    // åŸºç¤æ”»é€Ÿ
     BaseAttackSpeedSecond = 1.8;
     IsAttacked = false;	
 }
@@ -87,9 +87,9 @@ void AHeroCharacter::BeginPlay()
     WantAttack = NULL;
 	CurrentSkillHint = NULL;
 	CurrentSkillIndex = -1;
-    // ¨Ìµ¥¯Å§ó·s¤O±Ó´¼
+    // ä¾ç­‰ç´šæ›´æ–°åŠ›æ•æ™º
     UpdateSAI();
-    // ¨Ìµ¥¯Å§ó·s¦åÅ]§ğ³t
+    // ä¾ç­‰ç´šæ›´æ–°è¡€é­”æ”»é€Ÿ
     UpdateHPMPAS();
     CurrentHP = CurrentMaxHP;
     CurrentMP = CurrentMaxMP;
@@ -116,7 +116,7 @@ void AHeroCharacter::Tick(float DeltaTime)
         CurrentHP = 0;
     }
     CurrentAttackSpeedCount += DeltaTime;
-    // ºâCD
+    // ç®—CD
     for(int32 i = 0; i < Skill_CDing.Num(); ++i)
     {
         if(Skill_CDing[i])
@@ -129,10 +129,10 @@ void AHeroCharacter::Tick(float DeltaTime)
             }
         }
     }
-    // ¾ßª««~
+    // æ’¿ç‰©å“
     if(WantPickup)
     {
-        // §PÂ_¶ZÂ÷
+        // åˆ¤æ–·è·é›¢
         if(FVector::Dist(GetActorLocation(), WantPickup->GetActorLocation()) < PickupObjectDistance)
         {
             if(Pickup(WantPickup))
@@ -140,7 +140,7 @@ void AHeroCharacter::Tick(float DeltaTime)
                 WantPickup->ServerSetLocation(FVector(FMath::Rand(), 99999, 99999));
             }
             WantPickup = NULL;
-            // °±¤î²¾°Ê
+            // åœæ­¢ç§»å‹•
             ARTS_HUD* hud = Cast<ARTS_HUD>(UGameplayStatics::GetPlayerController(this, 0)->GetHUD());
             if(hud)
             {
@@ -149,7 +149,7 @@ void AHeroCharacter::Tick(float DeltaTime)
             HeroStatus = EHeroStatusEnum::Stand;
         }
     }
-    // ¥áª««~
+    // ä¸Ÿç‰©å“
     else if(WantThrow)
     {
         if(FVector::Dist(GetActorLocation(), ThrowDestination) < PickupObjectDistance)
@@ -170,7 +170,7 @@ void AHeroCharacter::Tick(float DeltaTime)
             }
             WantThrow->ServerSetLocation(ThrowDestination);
             WantThrow = NULL;
-            // °±¤î²¾°Ê
+            // åœæ­¢ç§»å‹•
             ARTS_HUD* hud = Cast<ARTS_HUD>(UGameplayStatics::GetPlayerController(this, 0)->GetHUD());
             if(hud)
             {
@@ -179,7 +179,7 @@ void AHeroCharacter::Tick(float DeltaTime)
             HeroStatus = EHeroStatusEnum::Stand;
         }
     }
-    // ¥´¤H°Õ~
+    // æ‰“äººå•¦~
     else if(WantAttack)
     {
         FVector dir = WantAttack->GetActorLocation() - GetActorLocation();
@@ -209,7 +209,7 @@ void AHeroCharacter::Tick(float DeltaTime)
         {
             if(FVector::Dist(GetActorLocation(), WantAttack->GetActorLocation()) < CurrentAttackRadius)
             {
-                GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, HeroName + TEXT(" ¥´¤H°Õ"));
+                GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, HeroName + TEXT(" æ‰“äººå•¦"));
                 ARTS_HUD* hud = Cast<ARTS_HUD>(UGameplayStatics::GetPlayerController(this, 0)->GetHUD());
                 if(hud)
                 {
@@ -224,7 +224,7 @@ void AHeroCharacter::Tick(float DeltaTime)
         break;
         case EHeroStatusEnum::AttackBegin:
         {
-            // ®É¶¡¨ì´N§ğÀ»
+            // æ™‚é–“åˆ°å°±æ”»æ“Š
             if(!IsAttacked && CurrentAttackSpeedCount > AnimationInstantAttack)
             {
                 IsAttacked = true;
@@ -253,7 +253,7 @@ void AHeroCharacter::Tick(float DeltaTime)
                 CurrentAttackSpeedCount = 0;
                 HeroStatus = EHeroStatusEnum::Attacking;
             }
-            // ¼½©ñ§ğÀ»°Êµe
+            // æ’­æ”¾æ”»æ“Šå‹•ç•«
             // ...
 
         }
@@ -268,7 +268,7 @@ void AHeroCharacter::Tick(float DeltaTime)
         break;
         case EHeroStatusEnum::AttackEnd:
         {
-            // ¦pªG¼½§¹¤F§ğÀ»
+            // å¦‚æœæ’­å®Œäº†æ”»æ“Š
             HeroStatus = EHeroStatusEnum::Stand;
         }
         break;
@@ -358,7 +358,7 @@ void AHeroCharacter::OnMouseClicked(UPrimitiveComponent* TouchComp)
     ARTS_HUD* hud = Cast<ARTS_HUD>(UGameplayStatics::GetPlayerController(this, 0)->GetHUD());
     if(hud)
     {
-        // «ö¤U¥ªÁä
+        // æŒ‰ä¸‹å·¦éµ
         if(hud->bMouseLButton)
         {
             if(hud->CurrentSelection.Num() == 1)

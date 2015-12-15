@@ -140,8 +140,8 @@ void AAmbitionOfNobunagaPlayerController::PlayerTick(float DeltaTime)
 		{
 			res = GetWorld()->LineTraceMultiByObjectType(Hits, WorldOrigin, WorldOrigin + WorldDirection * HitResultTraceDistance, CollisionQuery);
 		}
-		// ¥utrace ¦aªOªºactor
-		// ¦aªO¦W¥i¥H¦Û©w¸q
+		// åªtrace åœ°æ¿çš„actor
+		// åœ°æ¿åå¯ä»¥è‡ªå®šç¾©
 		FVector HitPoint(0, 0, 0);
 		if (Hits.Num() > 0)
 		{

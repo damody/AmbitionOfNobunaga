@@ -32,7 +32,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bullet")
 	float MoveSpeed;
 
-	// Â÷Actor¦hªñ´NÃz¬µ 
+	// é›¢Actorå¤šè¿‘å°±çˆ†ç‚¸ 
 	UPROPERTY(Category = "Bullet", EditAnywhere, BlueprintReadWrite)
 	float BreakDistance;
 

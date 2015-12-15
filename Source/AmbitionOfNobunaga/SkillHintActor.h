@@ -68,27 +68,27 @@ public:
 	UPROPERTY(Category = "SkillHint", EditAnywhere, BlueprintReadOnly)
 	UTexture2D* MouseIcon;
 	
-	// ¬O§_©T©wªø«×
+	// æ˜¯å¦å›ºå®šé•·åº¦
 	UPROPERTY(Category = "FlySkill", EditAnywhere, BlueprintReadOnly, meta = (EditCondition = "UseDirectionSkill"))
 	bool IsFixdLength;
 
-	// §Ş¯à³Ì»·¶ZÂ÷
+	// æŠ€èƒ½æœ€é è·é›¢
 	UPROPERTY(Category = "FlySkill", EditAnywhere, BlueprintReadOnly, meta = (EditCondition = "UseDirectionSkill"))
 	float SkillLength;
 
-	// §Ş¯à³Ìµu¶ZÂ÷
+	// æŠ€èƒ½æœ€çŸ­è·é›¢
 	UPROPERTY(Category = "FlySkill", EditAnywhere, BlueprintReadOnly, meta = (EditCondition = "UseDirectionSkill"))
 	float MinimalLength;
 
-	// ªk³Nª½®|
+	// æ³•è¡“ç›´å¾‘
 	UPROPERTY(Category = "FlySkill", EditAnywhere, BlueprintReadOnly, meta = (EditCondition = "UseRangeSkill"))
 	float SkillDiameter;
 
-	// ¬Iªk¶ZÂ÷
+	// æ–½æ³•è·é›¢
 	UPROPERTY(Category = "FlySkill", EditAnywhere, BlueprintReadOnly, meta = (EditCondition = "UseRangeSkill"))
 	float SkillCastRadius;
 
-	// §Ş¯à³Ì¤p¬Iªk¶ZÂ÷
+	// æŠ€èƒ½æœ€å°æ–½æ³•è·é›¢
 	UPROPERTY(Category = "FlySkill", EditAnywhere, BlueprintReadOnly, meta = (EditCondition = "UseRangeSkill"))
 	float MinimalCastRadius;
 };

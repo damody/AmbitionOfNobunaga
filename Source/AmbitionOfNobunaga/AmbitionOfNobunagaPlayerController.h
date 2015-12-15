@@ -127,11 +127,11 @@ protected:
 	void ServerStopMovement(const TArray<AHeroCharacter*>& heros);
 public:
 		
-	// ·í«e·Æ¹«§¤¼Ğ
+	// ç•¶å‰æ»‘é¼ åæ¨™
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RTS")
 	FVector2D CurrentMouseXY;
 
-	// ¦aªOActor¦W ·Æ¹«LineTrace¥Î
+	// åœ°æ¿Actorå æ»‘é¼ LineTraceç”¨
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RTS")
 	FString FloorActorName;
 

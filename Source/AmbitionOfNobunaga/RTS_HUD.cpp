@@ -368,7 +368,7 @@ void ARTS_HUD::OnMouseMove(FVector2D pos, FVector pos3d)
 
 void ARTS_HUD::OnRMouseDown(FVector2D pos)
 {
-    // hitbox¥Î
+    // hitboxç”¨
     for(FRTSHitBox& HitBox : RTS_HitBoxMap)
     {
         if(HitBox.Contains(pos, ViewportScale))
@@ -377,7 +377,7 @@ void ARTS_HUD::OnRMouseDown(FVector2D pos)
             break;
         }
     }
-    // ¥kÁä¨Æ¥ó
+    // å³éµäº‹ä»¶
     if(!bClickHero)
     {
         localController->AddHeroToClearWantQueue(CurrentSelection);
@@ -411,7 +411,7 @@ void ARTS_HUD::OnRMouseDown(FVector2D pos)
             break;
         case ERTSStatusEnum::SkillHint:
         {
-            // ¨ú®ø§Þ¯à
+            // å–æ¶ˆæŠ€èƒ½
             if(IsGameRegion(CurrentMouseXY))
             {
 				if (CurrentSelection.Num() > 0)
@@ -448,7 +448,7 @@ void ARTS_HUD::OnRMousePressed2(FVector2D pos)
         return;
     }
     bMouseRButton = true;
-    // ¸Ë³Æ¨Æ¥ó
+    // è£å‚™äº‹ä»¶
     for(FRTSHitBox& HitBox : RTS_HitBoxMap)
     {
         if(HitBox.Contains(pos, ViewportScale))
@@ -465,7 +465,7 @@ void ARTS_HUD::OnRMousePressed2(FVector2D pos)
 
 void ARTS_HUD::OnRMouseReleased(FVector2D pos)
 {
-    // hitbox¥Î
+    // hitboxç”¨
     for(FRTSHitBox& HitBox : RTS_HitBoxMap)
     {
         if(HitBox.Contains(pos, ViewportScale))
@@ -475,7 +475,7 @@ void ARTS_HUD::OnRMouseReleased(FVector2D pos)
         }
     }
     bMouseRButton = false;
-    // ¸Ë³Æ¨Æ¥ó
+    // è£å‚™äº‹ä»¶
     for(FRTSHitBox& HitBox : RTS_HitBoxMap)
     {
         if(HitBox.Contains(pos, ViewportScale))
@@ -487,7 +487,7 @@ void ARTS_HUD::OnRMouseReleased(FVector2D pos)
             }
         }
     }
-    // ¦pªG¦³ÂI¨ìª««~
+    // å¦‚æžœæœ‰é»žåˆ°ç‰©å“
     if(CurrentSelection.Num() > 0)
     {
         AHeroCharacter* Selection = CurrentSelection[0];
@@ -507,7 +507,7 @@ void ARTS_HUD::OnRMouseReleased(FVector2D pos)
 
 void ARTS_HUD::OnLMouseDown(FVector2D pos)
 {
-    // hitbox¥Î
+    // hitboxç”¨
     for(FRTSHitBox& HitBox : RTS_HitBoxMap)
     {
         if(HitBox.Contains(pos, ViewportScale))
@@ -537,10 +537,10 @@ void ARTS_HUD::OnLMousePressed2(FVector2D pos)
     {
         bNeedMouseLDown = false;
         OnLMouseDown(pos);
-        // ³]©wSelectionBoxªì©l¦ì¸m
+        // è¨­å®šSelectionBoxåˆå§‹ä½ç½®
         if(RTSStatus == ERTSStatusEnum::Normal)
         {
-            if(IsGameRegion(CurrentMouseXY)) // ¨ú®ø¿ï­^¶¯
+            if(IsGameRegion(CurrentMouseXY)) // å–æ¶ˆé¸è‹±é›„
             {
                 InitialMouseXY = pos;
                 if(!ClickedSelected)
@@ -551,7 +551,7 @@ void ARTS_HUD::OnLMousePressed2(FVector2D pos)
                 UnSelectHero();
             }
         }
-        else if(RTSStatus == ERTSStatusEnum::SkillHint) // ©ñ§Þ¯à
+        else if(RTSStatus == ERTSStatusEnum::SkillHint) // æ”¾æŠ€èƒ½
         {
             CurrentSelection[0]->HideSkillHint();
 			localController->AddHeroToSkillQueue(CurrentSelection[0], CurrentSelection[0]->GetCurrentSkillIndex(),
@@ -560,7 +560,7 @@ void ARTS_HUD::OnLMousePressed2(FVector2D pos)
         }
         return;
     }
-    // Åã¥Ü§Þ¯à´£¥Ü
+    // é¡¯ç¤ºæŠ€èƒ½æç¤º
     if(CurrentSelection.Num() > 0)
     {
         for(FRTSHitBox& HitBox : RTS_HitBoxMap)
@@ -579,7 +579,7 @@ void ARTS_HUD::OnLMousePressed2(FVector2D pos)
             }
         }
     }
-    // µo¨Æ¥óµ¹BP
+    // ç™¼äº‹ä»¶çµ¦BP
     for(FRTSHitBox& HitBox : RTS_HitBoxMap)
     {
         if(HitBox.Contains(pos, ViewportScale))
@@ -595,7 +595,7 @@ void ARTS_HUD::OnLMousePressed2(FVector2D pos)
 
 void ARTS_HUD::OnLMouseReleased(FVector2D pos)
 {
-    // hitbox¥Î
+    // hitboxç”¨
     for(FRTSHitBox& HitBox : RTS_HitBoxMap)
     {
         if(HitBox.Contains(pos, ViewportScale))
@@ -605,7 +605,7 @@ void ARTS_HUD::OnLMouseReleased(FVector2D pos)
         }
     }
     bMouseLButton = false;
-    // ¿ï­^¶¯
+    // é¸è‹±é›„
     if(RTSStatus == ERTSStatusEnum::Normal)
     {
         if(IsGameRegion(CurrentMouseXY))
@@ -616,7 +616,7 @@ void ARTS_HUD::OnLMouseReleased(FVector2D pos)
             }
         }
     }
-    // ¥áª««~
+    // ä¸Ÿç‰©å“
     if(RTSStatus == ERTSStatusEnum::ThrowEquipment)
     {
         GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Cyan, FString::Printf(TEXT("CurrentSelection.Num %d"), CurrentSelection.Num()));
@@ -628,7 +628,7 @@ void ARTS_HUD::OnLMouseReleased(FVector2D pos)
             ThrowTexture = NULL;
         }
     }
-    // µo¨Æ¥óµ¹BP
+    // ç™¼äº‹ä»¶çµ¦BP
     for(FRTSHitBox& HitBox : RTS_HitBoxMap)
     {
         if(HitBox.Contains(pos, ViewportScale))
