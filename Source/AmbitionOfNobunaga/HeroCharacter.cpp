@@ -209,7 +209,7 @@ void AHeroCharacter::Tick(float DeltaTime)
         {
             if(FVector::Dist(GetActorLocation(), WantAttack->GetActorLocation()) < CurrentAttackRadius)
             {
-                GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, HeroName + TEXT(" 打人啦"));
+                GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, HeroName + TEXT(" Hit!"));
                 ARTS_HUD* hud = Cast<ARTS_HUD>(UGameplayStatics::GetPlayerController(this, 0)->GetHUD());
                 if(hud)
                 {
@@ -376,6 +376,7 @@ void AHeroCharacter::OnMouseClicked(UPrimitiveComponent* TouchComp)
             hud->ClearAllSelection();
             SelectionOn();
         }
+		// 按下右鍵
         else if(hud->bMouseRButton)
         {
             if(hud->CurrentSelection.Num() > 0)

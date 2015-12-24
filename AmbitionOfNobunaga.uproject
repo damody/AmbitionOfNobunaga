@@ -13,11 +13,5 @@
 				"CoreUObject"
 			]
 		}
-	],
-	"Plugins": [
-		{
-			"Name": "Substance",
-			"Enabled": true
-		}
 	]
 }
