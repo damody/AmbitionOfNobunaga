@@ -4,7 +4,9 @@
 
 #include "SkillHintActor.h"
 #include "GameFramework/Character.h"
+#include "Components/ArrowComponent.h"
 #include "HeroCharacter.generated.h"
+
 
 USTRUCT(BlueprintType)
 struct FLevelCDs

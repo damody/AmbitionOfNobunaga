@@ -2,6 +2,7 @@
 
 #include "AmbitionOfNobunaga.h"
 #include "SkillHintActor.h"
+#include "PaperSprite.h"
 
 
 ASkillHintActor::ASkillHintActor(const FObjectInitializer& ObjectInitializer)
@@ -82,7 +83,7 @@ ASkillHintActor::ASkillHintActor(const FObjectInitializer& ObjectInitializer)
     UseDirectionSkill = false;
 	UseRangeSkill = false;
 }
-
+#if WITH_EDITOR
 void ASkillHintActor::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
     if(SkillLength < MinimalLength)
@@ -114,13 +115,14 @@ void ASkillHintActor::PostInitProperties()
     Super::PostInitProperties();
     UpdateLength();
 }
-
+#endif
 void ASkillHintActor::SetLength(float len)
 {
     SkillLength = len;
     UpdateLength();
 }
 
+#if WITH_EDITOR
 void ASkillHintActor::UpdateLength()
 {
     switch(SkillType)
@@ -165,8 +167,12 @@ void ASkillHintActor::UpdateLength()
     }
     break;
     }
-
 }
+#else
+void ASkillHintActor::UpdateLength()
+{
+}
+#endif
 
 void ASkillHintActor::UpdatePos(FVector PlayerPos, FVector MousePos)
 {

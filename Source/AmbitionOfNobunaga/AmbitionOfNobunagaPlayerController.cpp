@@ -151,6 +151,16 @@ void AAmbitionOfNobunagaPlayerController::PlayerTick(float DeltaTime)
 				{	
 					HitPoint = Hit.ImpactPoint;
 				}
+				// all landscape can click
+				if (Hit.Actor.IsValid())
+				{
+					FString ResStr;
+					Hit.Actor->GetClass()->GetName(ResStr);
+					if (ResStr == "Landscape")
+					{
+						HitPoint = Hit.ImpactPoint;
+					}
+				}
 			}
 		}
 		Hud->OnMouseMove(CurrentMouseXY, HitPoint);
@@ -310,6 +320,10 @@ void AAmbitionOfNobunagaPlayerController::ServerMoveHeros_Implementation(const F
             NavSys->SimpleMoveToLocation(EachHero->GetController(), DestLocation);
 			EachHero->HeroStatus = EHeroStatusEnum::Walk;
         }
+
+		GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Magenta, 
+			FString::Printf(L"x:%.1f y:%.1f z:%.1f", DestLocation.X,
+				DestLocation.Y, DestLocation.Z));
     }
 }
 

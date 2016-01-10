@@ -39,14 +39,14 @@ ARangeSkillActor::ARangeSkillActor(const FObjectInitializer& ObjectInitializer)
     HasDamaged = false;
     DamageTime = 1;
 }
-
+#if WITH_EDITOR
 void ARangeSkillActor::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
     FName PropertyName = (PropertyChangedEvent.Property != nullptr) ? PropertyChangedEvent.Property->GetFName() : NAME_None;
 
     Super::PostEditChangeProperty(PropertyChangedEvent);
 }
-
+#endif
 void ARangeSkillActor::OnBeginAttackOverlap(AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
     AHeroCharacter* hero = Cast<AHeroCharacter>(OtherActor);

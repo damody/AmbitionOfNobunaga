@@ -36,7 +36,7 @@ AFlySkillActor::AFlySkillActor(const FObjectInitializer& ObjectInitializer)
 	DestroyDelay = 2;
 	UseTargetLocation = true;
 }
-
+#if WITH_EDITOR
 void AFlySkillActor::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	FName PropertyName = (PropertyChangedEvent.Property != nullptr) ? PropertyChangedEvent.Property->GetFName() : NAME_None;
@@ -65,7 +65,7 @@ void AFlySkillActor::PostEditChangeProperty(FPropertyChangedEvent& PropertyChang
 	}
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 }
-
+#endif
 void AFlySkillActor::OnBeginAttackOverlap(AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));

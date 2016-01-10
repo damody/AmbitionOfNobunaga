@@ -41,11 +41,11 @@ public:
 
 	UPROPERTY(Category = "FlySkill", VisibleAnywhere, BlueprintReadOnly)
 	UPaperSpriteComponent* FootSprite;
-
+#if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 
 	virtual void PostInitProperties() override;
-
+#endif
 	UFUNCTION(Category = "FlySkill", BlueprintCallable)
 	void SetLength(float len);
 
