@@ -7,5 +7,8 @@ Recreating the game of AmbitionOfNobunaga in Warcraft 3 custom map with Unreal E
 ## 筆記
 [https://hackpad.com/ue4-AmbitionOfNobunaga-vcmVWNIyTXG](https://hackpad.com/ue4-AmbitionOfNobunaga-vcmVWNIyTXG)
 
+## 新版筆記
+[UE4打信長](https://hackmd.io/EwMwpgbALAHArCAtARjCAzIqBjd3ECGEyAnIgCbkBGA7FVeiVQAzMRAA#)
+
 ## Phabricator 站
 [http://phabricator.athenaeum.idv.tw/tag/%E4%BF%A1%E9%95%B7%E4%B9%8B%E9%87%8E%E6%9C%9B/](http://phabricator.athenaeum.idv.tw/tag/%E4%BF%A1%E9%95%B7%E4%B9%8B%E9%87%8E%E6%9C%9B/)
