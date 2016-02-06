@@ -318,7 +318,7 @@ void AAmbitionOfNobunagaPlayerController::ServerMoveHeros_Implementation(const F
         if(NavSys && (Distance > 120.0f))
         {
             NavSys->SimpleMoveToLocation(EachHero->GetController(), DestLocation);
-			EachHero->HeroStatus = EHeroStatusEnum::Walk;
+			EachHero->HeroStatus = EHeroBodyStatus::Moving;
         }
 
 		GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Magenta, 
@@ -337,7 +337,7 @@ void AAmbitionOfNobunagaPlayerController::ServerStopMovement_Implementation(cons
     for(AHeroCharacter* EachHero : heros)
     {
         EachHero->GetController()->StopMovement();
-		EachHero->HeroStatus = EHeroStatusEnum::Stand;
+		EachHero->HeroStatus = EHeroBodyStatus::Standing;
     }
 }
 

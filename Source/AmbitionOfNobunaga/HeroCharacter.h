@@ -40,13 +40,31 @@ struct FSkillDescription
 };
 
 UENUM(BlueprintType)
-enum class EHeroStatusEnum : uint8
+enum class EHeroActionStatus : uint8
 {
-	Stand,
-	Walk,
-	AttackBegin,
+	MoveToPosition,
+	MoveToActor,
+	FollowActor,
+	AttackActor,
+	MovingAttack, // 移動中攻擊
+	MoveAndAttack, // A點地板
+	SpellToPosition,
+	SpellToActor,
+	SpellToDirection,
+	SpellToSelf
+};
+
+UENUM(BlueprintType)
+enum class EHeroBodyStatus : uint8
+{
+	Standing,
+	Moving,
+	Stunning,
+	AttackBegining, // 攻擊前搖
+	AttackEnding, //攻擊後搖
+	SpellBegining, // 施法前搖
+	SpellEnding, // 施法後搖
 	Attacking,
-	AttackEnd,
 };
 
 class AEquipment;
@@ -132,7 +150,7 @@ public:
 	TSubclassOf<ABulletActor> HeroBullet;
 
 	UPROPERTY(Category = Character, EditAnywhere, BlueprintReadWrite, Replicated)
-	EHeroStatusEnum HeroStatus;
+	EHeroBodyStatus HeroStatus;
 
 	// 英雄名
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")

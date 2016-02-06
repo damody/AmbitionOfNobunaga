@@ -32,7 +32,7 @@ AHeroCharacter::AHeroCharacter(const FObjectInitializer& ObjectInitializer)
     SelectionDecal->AttachParent = GetCapsuleComponent();
 
     AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
-    HeroStatus = EHeroStatusEnum::Stand;
+    HeroStatus = EHeroBodyStatus::Standing;
     GetMesh()->SetWorldRotation(FQuat(FRotator(0, -90, 0)));
 
     // 攻擊動畫播到幾秒時發出攻擊
@@ -146,7 +146,7 @@ void AHeroCharacter::Tick(float DeltaTime)
             {
                 hud->StopMovementHero(this);
             }
-            HeroStatus = EHeroStatusEnum::Stand;
+            HeroStatus = EHeroBodyStatus::Standing;
         }
     }
     // 丟物品
@@ -176,7 +176,7 @@ void AHeroCharacter::Tick(float DeltaTime)
             {
                 hud->StopMovementHero(this);
             }
-            HeroStatus = EHeroStatusEnum::Stand;
+            HeroStatus = EHeroBodyStatus::Standing;
         }
     }
     // 打人啦~
@@ -186,7 +186,7 @@ void AHeroCharacter::Tick(float DeltaTime)
         SetActorRotation(dir.Rotation());
         switch(HeroStatus)
         {
-        case EHeroStatusEnum::Stand:
+        case EHeroBodyStatus::Standing:
         {
             if(FVector::Dist(GetActorLocation(), WantAttack->GetActorLocation()) > CurrentAttackRadius)
             {
@@ -198,14 +198,14 @@ void AHeroCharacter::Tick(float DeltaTime)
             }
             else
             {
-                HeroStatus = EHeroStatusEnum::AttackBegin;
+                HeroStatus = EHeroBodyStatus::AttackBegining;
                 CurrentAttackSpeedCount = 0;
                 IsAttacked = false;
                 PlayAttack = true;
             }
         }
         break;
-        case EHeroStatusEnum::Walk:
+        case EHeroBodyStatus::Moving:
         {
             if(FVector::Dist(GetActorLocation(), WantAttack->GetActorLocation()) < CurrentAttackRadius)
             {
@@ -215,14 +215,14 @@ void AHeroCharacter::Tick(float DeltaTime)
                 {
                     hud->StopMovementHero(this);
                 }
-                HeroStatus = EHeroStatusEnum::AttackBegin;
+                HeroStatus = EHeroBodyStatus::AttackBegining;
                 CurrentAttackSpeedCount = 0;
                 IsAttacked = false;
                 PlayAttack = true;
             }
         }
         break;
-        case EHeroStatusEnum::AttackBegin:
+        case EHeroBodyStatus::AttackBegining:
         {
             // 時間到就攻擊
             if(!IsAttacked && CurrentAttackSpeedCount > AnimationInstantAttack)
@@ -251,25 +251,25 @@ void AHeroCharacter::Tick(float DeltaTime)
             if(CurrentAttackSpeedCount > CurrentAttackSpeedSecond)
             {
                 CurrentAttackSpeedCount = 0;
-                HeroStatus = EHeroStatusEnum::Attacking;
+                HeroStatus = EHeroBodyStatus::Attacking;
             }
             // 播放攻擊動畫
             // ...
 
         }
         break;
-        case EHeroStatusEnum::Attacking:
+        case EHeroBodyStatus::Attacking:
         {
             if(CurrentAttackSpeedCount > CurrentAttackTime)
             {
-                HeroStatus = EHeroStatusEnum::AttackEnd;
+                HeroStatus = EHeroBodyStatus::AttackEnding;
             }
         }
         break;
-        case EHeroStatusEnum::AttackEnd:
+        case EHeroBodyStatus::AttackEnding:
         {
             // 如果播完了攻擊
-            HeroStatus = EHeroStatusEnum::Stand;
+            HeroStatus = EHeroBodyStatus::Standing;
         }
         break;
         }
