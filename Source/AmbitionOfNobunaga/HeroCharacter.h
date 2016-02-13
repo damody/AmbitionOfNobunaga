@@ -39,20 +39,6 @@ struct FSkillDescription
 	}
 };
 
-UENUM(BlueprintType)
-enum class EHeroActionStatus : uint8
-{
-	MoveToPosition,
-	MoveToActor,
-	FollowActor,
-	AttackActor,
-	MovingAttack, // 移動中攻擊
-	MoveAndAttack, // A點地板
-	SpellToPosition,
-	SpellToActor,
-	SpellToDirection,
-	SpellToSelf
-};
 
 UENUM(BlueprintType)
 enum class EHeroBodyStatus : uint8

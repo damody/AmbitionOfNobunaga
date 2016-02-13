@@ -15,7 +15,7 @@ int main(int argc, char **argv)
 	if (argc == 3)
 	{
 		cv::Mat pic;
-		pic.create(161, 161, CV_8UC3);
+		pic.create(161, 161, CV_32F);
 		std::ifstream w3efile(argv[1], std::ifstream::binary);
 		w3efile.seekg(0, w3efile.end);
 		int FileSize = w3efile.tellg();
@@ -46,7 +46,7 @@ int main(int argc, char **argv)
 					{
 						Buffer[i] -= 64;
 					}
-					pic.at<cv::Vec3b>(PointCounter/161, PointCounter%161) = cv::Vec3b(Buffer[i], Buffer[i], Buffer[i]);
+					pic.at<float>(PointCounter/161, PointCounter%161) = Buffer[i];
 					Counter++;
 					break;
 				}
@@ -92,11 +92,11 @@ int main(int argc, char **argv)
 		}
 		cv::imwrite("war3.png", pic);
 		return 0;
-	} else if (argc < 6)
+	} else if (argc < 7)
 	{
 		printf("輸入格式為\n"
 			"convert_csv_to_heightmap.exe \"CSV路徑\" \"顏色對應表路徑\" \"輸出檔名.png\" 長 寬 模糊係數(1~100) \n"
-			"convert_csv_to_heightmap.exe map_1.csv colormap.txt map_1.png 512 512 5\n");
+			"convert_csv_to_heightmap.exe map_1.csv colormap.txt map_1.png 512 512 5 5\n");
 		return 0;
 	}
 	
@@ -135,7 +135,7 @@ int main(int argc, char **argv)
 		TextMapping.insert({{name,value}});
 	}
 	cv::Mat pic;
-	pic.create(csv_h, csv_w, CV_8UC3);
+	pic.create(csv_h, csv_w, CV_32F);
 	std::ifstream csvfile2(argv[1]);
 	// 上色
 	int now_x = 0, now_y = 0;
@@ -154,7 +154,7 @@ int main(int argc, char **argv)
 				if (namepos <= 1)
 				{
 					int v = TextMapping["BG"];
-					pic.at<cv::Vec3b>(now_y, now_x) = cv::Vec3b(v, v, v);
+					pic.at<float>(now_y, now_x) = v;
 				}
 				else
 				{
@@ -162,12 +162,12 @@ int main(int argc, char **argv)
 					if (TextMapping.find(name) != TextMapping.end())
 					{
 						int v = TextMapping[name];
-						pic.at<cv::Vec3b>(now_y, now_x) = cv::Vec3b(v, v, v);
+						pic.at<float>(now_y, now_x) = v;
 					}
 					else
 					{
 						printf("%s  沒有在色彩對應表\n", name);
-						pic.at<cv::Vec3b>(now_y, now_x) = cv::Vec3b(0, 0, 255);
+						pic.at<float>(now_y, now_x) = 0;
 					}
 				}
 				if (line[pos] == 0)
@@ -191,10 +191,12 @@ int main(int argc, char **argv)
 	int pic_h = atoi(argv[5]);
 	cv::resize(pic.clone(), pic, cv::Size(pic_w, pic_h), 0, 0, cv::INTER_CUBIC);
 	int blur = atoi(argv[6]);
-	for (int i = 1; i <= blur; i = i + 2)
+	int blur2 = atoi(argv[7]);
+	for (int i = 1; i <= blur; i++)
 	{
-		GaussianBlur(pic.clone(), pic, cv::Size(i, i), 0, 0);
+		bilateralFilter(pic.clone(), pic, 5, blur2, 0);
 	}
+	
 	cv::imwrite(argv[3], pic);
 	system("pause");
     return 0;
