@@ -141,7 +141,7 @@ public:
 	// 英雄名
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
     FString HeroName;
-	// 移動速度
+	// 隊伍id
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero|Current")
 	int32 TeamId;
 	// 歷史說明

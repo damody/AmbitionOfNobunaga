@@ -283,8 +283,8 @@ void ARTS_HUD::AssignSelectionHeroPickup(AEquipment* equ)
 void ARTS_HUD::StopMovementHero(AHeroCharacter* hero)
 {
     if(localController)
-    {
-        localController->AddHeroToStopMoveQueue(hero);
+	{
+		//localController->AddHeroToStopMoveQueue(hero);
     }
 }
 
@@ -303,7 +303,7 @@ void ARTS_HUD::HeroAttack(AHeroCharacter* hero)
         }
         if(HeroGoAttack.Num() > 0)
         {
-            localController->AddHeroToAttackQueue(HeroGoAttack, hero);
+            //localController->AddHeroToAttackQueue(HeroGoAttack, hero);
         }
     }
 }
@@ -314,7 +314,7 @@ void ARTS_HUD::HeroMove(AHeroCharacter* hero, FVector dst)
     {
         TArray<AHeroCharacter*> oneHero;
         oneHero.Add(hero);
-        localController->AddHeroToMoveQueue(dst, oneHero);
+        //localController->AddHeroToMoveQueue(dst, oneHero);
     }
 }
 
@@ -324,7 +324,7 @@ void ARTS_HUD::ClearHeroWant(AHeroCharacter* hero)
     {
         TArray<AHeroCharacter*> oneHero;
         oneHero.Add(hero);
-        localController->AddHeroToClearWantQueue(oneHero);
+        //localController->AddHeroToClearWantQueue(oneHero);
     }
 }
 
@@ -380,7 +380,7 @@ void ARTS_HUD::OnRMouseDown(FVector2D pos)
     // 右鍵事件
     if(!bClickHero)
     {
-        localController->AddHeroToClearWantQueue(CurrentSelection);
+        //localController->AddHeroToClearWantQueue(CurrentSelection);
     }
     if(IsGameRegion(pos) && localController && !bClickHero)
     {
@@ -393,12 +393,12 @@ void ARTS_HUD::OnRMouseDown(FVector2D pos)
                 GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("localController->AddHeroToMoveQueue"));
                 if(WantPickup)
                 {
-                    localController->AddHeroToPickupQueue(WantPickup->GetActorLocation(), CurrentSelection[0], WantPickup);
+                    //localController->AddHeroToPickupQueue(WantPickup->GetActorLocation(), CurrentSelection[0], WantPickup);
                     WantPickup = NULL;
                 }
                 else
                 {
-                    localController->AddHeroToMoveQueue(CurrentMouseHit, CurrentSelection);
+                    //localController->AddHeroToMoveQueue(CurrentMouseHit, CurrentSelection);
                 }
             }
         }
@@ -418,7 +418,7 @@ void ARTS_HUD::OnRMouseDown(FVector2D pos)
 				{
 					CurrentSelection[0]->HideSkillHint();
 					RTSStatus = ERTSStatusEnum::Normal;
-					localController->AddHeroToMoveQueue(CurrentMouseHit, CurrentSelection);
+					//localController->AddHeroToMoveQueue(CurrentMouseHit, CurrentSelection);
 				}
             }
         }
@@ -516,8 +516,6 @@ void ARTS_HUD::OnLMouseDown(FVector2D pos)
             break;
         }
     }
-
-
 }
 
 void ARTS_HUD::OnLMousePressed1(FVector2D pos)
@@ -554,8 +552,8 @@ void ARTS_HUD::OnLMousePressed2(FVector2D pos)
         else if(RTSStatus == ERTSStatusEnum::SkillHint) // 放技能
         {
             CurrentSelection[0]->HideSkillHint();
-			localController->AddHeroToSkillQueue(CurrentSelection[0], CurrentSelection[0]->GetCurrentSkillIndex(),
-				GetCurrentRotator(), GetCurrentDirection(), CurrentMouseHit);
+// 			localController->AddHeroToSkillQueue(CurrentSelection[0], CurrentSelection[0]->GetCurrentSkillIndex(),
+// 				GetCurrentRotator(), GetCurrentDirection(), CurrentMouseHit);
             RTSStatus = ERTSStatusEnum::ToNormal;
         }
         return;
@@ -623,7 +621,7 @@ void ARTS_HUD::OnLMouseReleased(FVector2D pos)
         if(CurrentSelection.Num() > 0)
         {
             GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("localController->SetNewMoveDestination"));
-            localController->AddHeroToThrowQueue(CurrentMouseHit, CurrentSelection[0], EquipmentIndex);
+            //localController->AddHeroToThrowQueue(CurrentMouseHit, CurrentSelection[0], EquipmentIndex);
             RTSStatus = ERTSStatusEnum::Normal;
             ThrowTexture = NULL;
         }

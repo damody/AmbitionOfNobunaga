@@ -92,11 +92,11 @@ int main(int argc, char **argv)
 		}
 		cv::imwrite("war3.png", pic);
 		return 0;
-	} else if (argc < 7)
+	} else if (argc < 8)
 	{
 		printf("輸入格式為\n"
-			"convert_csv_to_heightmap.exe \"CSV路徑\" \"顏色對應表路徑\" \"輸出檔名.png\" 長 寬 模糊係數(1~100) \n"
-			"convert_csv_to_heightmap.exe map_1.csv colormap.txt map_1.png 512 512 5 5\n");
+			"convert_csv_to_heightmap.exe \"CSV路徑\" \"顏色對應表路徑\" \"輸出檔名.png\" 長 寬 模糊大小 模糊次數 模糊係數(1~100) \n"
+			"convert_csv_to_heightmap.exe map_1.csv colormap.txt map_1.png 1271 1271 5 10 30\n");
 		return 0;
 	}
 	
@@ -135,7 +135,7 @@ int main(int argc, char **argv)
 		TextMapping.insert({{name,value}});
 	}
 	cv::Mat pic;
-	pic.create(csv_h, csv_w, CV_32F);
+	pic.create(csv_h, csv_w, CV_32FC1);
 	std::ifstream csvfile2(argv[1]);
 	// 上色
 	int now_x = 0, now_y = 0;
@@ -189,16 +189,20 @@ int main(int argc, char **argv)
 	}
 	int pic_w = atoi(argv[4]);
 	int pic_h = atoi(argv[5]);
-	cv::resize(pic.clone(), pic, cv::Size(pic_w, pic_h), 0, 0, cv::INTER_CUBIC);
-	int blur = atoi(argv[6]);
+	cv::resize(pic.clone(), pic, cv::Size(pic_w, pic_h), 0, 0, cv::INTER_LINEAR);
+	int blur1 = atoi(argv[6]);
 	int blur2 = atoi(argv[7]);
-	for (int i = 1; i <= blur; i++)
+	int blur3 = atoi(argv[8]);
+	blur1 = blur1 % 2 == 0 ? blur1 + 1 : blur1;
+	for (int i = 1; i <= blur2; i++)
 	{
-		bilateralFilter(pic.clone(), pic, 5, blur2, 0);
+		//blur(pic.clone(), pic, cv::Size(blur1, blur1));
+		bilateralFilter(pic.clone(), pic, blur1, blur3, 0);
 	}
-	
+	pic.clone().convertTo(pic, CV_16U, 255);
+	cv::imshow("pic", pic);
+	cv::waitKey();
 	cv::imwrite(argv[3], pic);
-	system("pause");
     return 0;
 }
 
