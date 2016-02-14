@@ -3,12 +3,12 @@
 #pragma once
 
 #include "GameFramework/GameState.h"
+#include "HeroActionx.h"
 #include "AONGameState.generated.h"
 
-
-class AActor;
 /**
- * 
+ * 有需要全地圖大招可以改這裡的參數
+ * if any hero need big spell, you can modify this parameter
  */
 UCLASS()
 class AMBITIONOFNOBUNAGA_API AAONGameState : public AGameState
@@ -17,7 +17,19 @@ class AMBITIONOFNOBUNAGA_API AAONGameState : public AGameState
 public:
 
 	UFUNCTION(Server, WithValidation, Reliable, BlueprintCallable, Category = "AONGameState")
-	void SetObjectLocation(AActor* actor, FVector pos);
+	void SetObjectLocation(AActor* actor, const FVector& pos);
+
+	UFUNCTION(Server, WithValidation, Reliable, BlueprintCallable, Category = "AONGameState")
+	void SetHeroMove(AHeroCharacter* hero, const FVector& action);
+
+	UFUNCTION(Server, WithValidation, Reliable, BlueprintCallable, Category = "AONGameState")
+	void SetHeroAction(AHeroCharacter* hero, const FHeroAction& action);
+
+	UFUNCTION(Server, WithValidation, Reliable, BlueprintCallable, Category = "AONGameState")
+	void AppendHeroAction(AHeroCharacter* hero, const FHeroAction& action);
+
+	UFUNCTION(Server, WithValidation, Reliable, BlueprintCallable, Category = "AONGameState")
+	void ClearHeroAction(AHeroCharacter* hero, const FHeroAction& action);
 	
 	// 每1點力量增加血量
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AONGameState")

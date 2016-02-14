@@ -32,7 +32,7 @@ AHeroCharacter::AHeroCharacter(const FObjectInitializer& ObjectInitializer)
     SelectionDecal->AttachParent = GetCapsuleComponent();
 
     AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
-    HeroStatus = EHeroBodyStatus::Standing;
+    BodyStatus = EHeroBodyStatus::Standing;
     GetMesh()->SetWorldRotation(FQuat(FRotator(0, -90, 0)));
 
     // 攻擊動畫播到幾秒時發出攻擊
@@ -50,6 +50,7 @@ AHeroCharacter::AHeroCharacter(const FObjectInitializer& ObjectInitializer)
     // 基礎攻速
     BaseAttackSpeedSecond = 1.8;
     IsAttacked = false;	
+	LastMoveTarget = FVector::ZeroVector;
 }
 
 // Called when the game starts or when spawned
@@ -82,9 +83,6 @@ void AHeroCharacter::BeginPlay()
     {
         Equipments[idx] = NULL;
     }
-    WantThrow = NULL;
-    WantPickup = NULL;
-    WantAttack = NULL;
 	CurrentSkillHint = NULL;
 	CurrentSkillIndex = -1;
     // 依等級更新力敏智
@@ -129,6 +127,49 @@ void AHeroCharacter::Tick(float DeltaTime)
             }
         }
     }
+	// 是否有動作？
+	if (ActionQueue.Num() > 0)
+	{
+		// 動作駐列最上層動作是否為當前動作
+		if (ActionQueue[0] != CurrentAction)
+		{
+			// 拿出動作
+			CurrentAction = ActionQueue[0];
+			// 進入此狀態的有限狀態機來做事
+			DoAction(CurrentAction);
+		}
+		// 查看當前動作是否做完？
+		else if (!CheckCurrentActionFinish())
+		{
+			// 進入此狀態的有限狀態機來做事
+			DoAction(CurrentAction);
+		}
+		else
+		{
+			ActionQueue.RemoveAt(0);
+			// 檢查動作駐列是否為空？
+			if (ActionQueue.Num() == 0)
+			{
+				// 站立不動
+				DoNothing();
+			}
+			else
+			{
+				// 拿下一個動作出來
+				CurrentAction = ActionQueue[0];
+				// 進入此狀態的有限狀態機來做事
+				DoAction(CurrentAction);
+			}
+		}
+	}
+	else
+	{
+		// 站立不動
+		DoNothing();
+	}
+
+
+	/*
     // 撿物品
     if(WantPickup)
     {
@@ -198,7 +239,7 @@ void AHeroCharacter::Tick(float DeltaTime)
             }
             else
             {
-                HeroStatus = EHeroBodyStatus::AttackBegining;
+                HeroStatus = EHeroBodyStatus::AttackWating;
                 CurrentAttackSpeedCount = 0;
                 IsAttacked = false;
                 PlayAttack = true;
@@ -215,14 +256,14 @@ void AHeroCharacter::Tick(float DeltaTime)
                 {
                     hud->StopMovementHero(this);
                 }
-                HeroStatus = EHeroBodyStatus::AttackBegining;
+                HeroStatus = EHeroBodyStatus::AttackWating;
                 CurrentAttackSpeedCount = 0;
                 IsAttacked = false;
                 PlayAttack = true;
             }
         }
         break;
-        case EHeroBodyStatus::AttackBegining:
+        case EHeroBodyStatus::AttackWating:
         {
             // 時間到就攻擊
             if(!IsAttacked && CurrentAttackSpeedCount > AnimationInstantAttack)
@@ -251,14 +292,14 @@ void AHeroCharacter::Tick(float DeltaTime)
             if(CurrentAttackSpeedCount > CurrentAttackSpeedSecond)
             {
                 CurrentAttackSpeedCount = 0;
-                HeroStatus = EHeroBodyStatus::Attacking;
+                HeroStatus = EHeroBodyStatus::AttackBegining;
             }
             // 播放攻擊動畫
             // ...
 
         }
         break;
-        case EHeroBodyStatus::Attacking:
+        case EHeroBodyStatus::AttackBegining:
         {
             if(CurrentAttackSpeedCount > CurrentAttackTime)
             {
@@ -274,6 +315,7 @@ void AHeroCharacter::Tick(float DeltaTime)
         break;
         }
     }
+	*/
 }
 
 // Called to bind functionality to input
@@ -533,14 +575,110 @@ int32 AHeroCharacter::GetCurrentSkillIndex()
 	return CurrentSkillIndex;
 }
 
+bool AHeroCharacter::CheckCurrentActionFinish()
+{
+	return false;
+}
+
+void AHeroCharacter::DoAction(const FHeroAction& CurrentAction)
+{
+	switch (CurrentAction.ActionStatus)
+	{
+	case EHeroActionStatus::Default:
+		break;
+	case EHeroActionStatus::MoveToPosition:
+		DoAction_MoveToPosition(CurrentAction);
+		break;
+	case EHeroActionStatus::MoveToActor:
+		break;
+	case EHeroActionStatus::FollowActor:
+		break;
+	case EHeroActionStatus::AttackActor:
+		break;
+	case EHeroActionStatus::MovingAttackActor:
+		break;
+	case EHeroActionStatus::MoveAndAttack:
+		break;
+	case EHeroActionStatus::SpellToPosition:
+		break;
+	case EHeroActionStatus::SpellToActor:
+		break;
+	case EHeroActionStatus::SpellToDirection:
+		break;
+	case EHeroActionStatus::SpellToSelf:
+		break;
+	case EHeroActionStatus::MoveToPickup:
+		break;
+	case EHeroActionStatus::MoveToThrowEqu:
+		break;
+	case EHeroActionStatus::ThrowEquToActor:
+		break;
+	default:
+		break;
+	}
+}
+
+void AHeroCharacter::DoNothing()
+{
+	switch (BodyStatus)
+	{
+	case EHeroBodyStatus::Standing:
+		break;
+	case EHeroBodyStatus::Moving:
+		break;
+	case EHeroBodyStatus::Stunning:
+		break;
+	case EHeroBodyStatus::AttackWating:
+		break;
+	case EHeroBodyStatus::AttackBegining:
+		break;
+	case EHeroBodyStatus::AttackEnding:
+		break;
+	case EHeroBodyStatus::SpellBegining:
+		break;
+	case EHeroBodyStatus::SpellEnding:
+		break;
+	default:
+		break;
+	}
+}
+
+void AHeroCharacter::DoAction_MoveToPosition(const FHeroAction& CurrentAction)
+{
+	AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
+	switch (BodyStatus)
+	{
+	case EHeroBodyStatus::Standing:
+		ags->SetHeroMove(this, CurrentAction.TargetValue);
+		break;
+	case EHeroBodyStatus::Moving:
+		if (LastMoveTarget != CurrentAction.TargetValue)
+		{
+			ags->SetHeroMove(this, CurrentAction.TargetValue);
+		}
+		break;
+	case EHeroBodyStatus::Stunning:
+		break;
+	case EHeroBodyStatus::AttackWating:
+		break;
+	case EHeroBodyStatus::AttackBegining:
+		break;
+	case EHeroBodyStatus::AttackEnding:
+		break;
+	case EHeroBodyStatus::SpellBegining:
+		break;
+	case EHeroBodyStatus::SpellEnding:
+		break;
+	default:
+		break;
+	}
+}
+
 void AHeroCharacter::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
 {
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-    DOREPLIFETIME(AHeroCharacter, WantPickup);
-    DOREPLIFETIME(AHeroCharacter, WantThrow);
     DOREPLIFETIME(AHeroCharacter, Equipments);
-    DOREPLIFETIME(AHeroCharacter, ThrowDestination);
-    DOREPLIFETIME(AHeroCharacter, WantAttack);
     DOREPLIFETIME(AHeroCharacter, CurrentHP);
-    DOREPLIFETIME(AHeroCharacter, HeroStatus);
+    DOREPLIFETIME(AHeroCharacter, BodyStatus);
+	DOREPLIFETIME(AHeroCharacter, ActionQueue);
 }

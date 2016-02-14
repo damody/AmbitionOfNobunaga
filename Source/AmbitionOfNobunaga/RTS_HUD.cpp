@@ -13,6 +13,8 @@
 #include "HeroCharacter.h"
 #include "AmbitionOfNobunagaPlayerController.h"
 #include "Equipment.h"
+#include "AONGameState.h"
+#include "HeroActionx.h"
 
 
 ARTS_HUD::ARTS_HUD()
@@ -368,6 +370,7 @@ void ARTS_HUD::OnMouseMove(FVector2D pos, FVector pos3d)
 
 void ARTS_HUD::OnRMouseDown(FVector2D pos)
 {
+	AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
     // hitbox用
     for(FRTSHitBox& HitBox : RTS_HitBoxMap)
     {
@@ -398,6 +401,10 @@ void ARTS_HUD::OnRMouseDown(FVector2D pos)
                 }
                 else
                 {
+					FHeroAction act;
+					act.ActionStatus = EHeroActionStatus::MoveToPosition;
+					act.TargetValue = CurrentMouseHit;
+					ags->SetHeroAction(CurrentSelection[0], act);
                     //localController->AddHeroToMoveQueue(CurrentMouseHit, CurrentSelection);
                 }
             }

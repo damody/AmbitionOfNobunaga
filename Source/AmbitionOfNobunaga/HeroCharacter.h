@@ -5,8 +5,8 @@
 #include "SkillHintActor.h"
 #include "GameFramework/Character.h"
 #include "Components/ArrowComponent.h"
+#include "HeroActionx.h"
 #include "HeroCharacter.generated.h"
-
 
 USTRUCT(BlueprintType)
 struct FLevelCDs
@@ -39,18 +39,17 @@ struct FSkillDescription
 	}
 };
 
-
 UENUM(BlueprintType)
 enum class EHeroBodyStatus : uint8
 {
 	Standing,
 	Moving,
 	Stunning,
+	AttackWating, // 攻擊等待
 	AttackBegining, // 攻擊前搖
 	AttackEnding, //攻擊後搖
 	SpellBegining, // 施法前搖
 	SpellEnding, // 施法後搖
-	Attacking,
 };
 
 class AEquipment;
@@ -123,27 +122,32 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Hero")
 	int32 GetCurrentSkillIndex();
 
-	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly)
+	bool CheckCurrentActionFinish();
+
+	void DoAction(const FHeroAction& CurrentAction);
+
+	void DoNothing();
+
+
+	FVector LastMoveTarget;
+	void DoAction_MoveToPosition(const FHeroAction& CurrentAction);
+
+	UPROPERTY(Category = Character, EditAnywhere, BlueprintReadOnly)
 	UDecalComponent* SelectionDecal;
 
-	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(Category = Character, EditAnywhere, BlueprintReadOnly)
 	UArrowComponent* PositionOnHead;
 
-	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(Category = Character, EditAnywhere, BlueprintReadOnly)
 	UArrowComponent* PositionUnderFoot;
 
 	UPROPERTY(Category = Character, EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<ABulletActor> HeroBullet;
 
-	UPROPERTY(Category = Character, EditAnywhere, BlueprintReadWrite, Replicated)
-	EHeroBodyStatus HeroStatus;
-
 	// 英雄名
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
     FString HeroName;
-	// 隊伍id
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero|Current")
-	int32 TeamId;
+		
 	// 歷史說明
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
     FString HeroHistoryDescription;
@@ -152,80 +156,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
 	float AnimationInstantAttack;
 
-	// 目前是否攻擊
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero|Current")
-	bool PlayAttack;
-	// 當前普攻是否打出來了
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero|Current")
-	bool IsAttacked;
-	// 目前攻擊動畫時間長度
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero|Current")
-	float CurrentAttackTime;
-	// 目前攻擊計時器
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero|Current")
-	float CurrentAttackSpeedCount;
-	// 目前等級
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero|Current")
-	int32 CurrentLevel;
-	// 移動速度
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero|Current")
-	float CurrentMoveSpeed;
-	// 血量
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero|Current")
-	float CurrentMaxHP;
-	// 魔力
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero|Current")
-	float CurrentMaxMP;
-	// 血量
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero|Current", Replicated)
-	float CurrentHP;
-	// 魔力
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero|Current")
-	float CurrentMP;
-	// 回血
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero|Current")
-	float CurrentHealingHP;
-	// 回魔
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero|Current")
-	float CurrentHealingMP;
-	// 攻速
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero|Current")
-	float CurrentAttackSpeed;
-	// 攻速秒數
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero|Current")
-	float CurrentAttackSpeedSecond;
-	// 攻擊力
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero|Current")
-	float CurrentAttack;
-	// 防禦力
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero|Current")
-	float CurrentArmor;
-	// 當前魔法減傷
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero|Current")
-	float CurrentMagicInjured;
-	// 外加力量
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero|Current")
-	float AdditionStrength;
-	// 外加敏捷
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero|Current")
-	float AdditionAgility;
-	// 外加智力
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero|Current")
-	float AdditionIntelligence;
-	// 目前攻擊距離
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero|Current")
-	float CurrentAttackRadius;
-	// 準備要用的技能索引
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero|Current")
-	int32 CurrentSkillIndex;
-
 	// 血條長度
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
 	float HPBarLength;
-
-	// 裝備
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero", Replicated)
-	TArray<AEquipment*> Equipments;
 
 	// 大頭貼
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
@@ -337,45 +270,117 @@ public:
     TArray<FLevelCDs> Skill_LevelCDs;
 
 	// 是否在CD中
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
     TArray<bool> Skill_CDing;
 	
 	// 當前CD秒數，CD秒數等於Skill_MaxCD時就是CD結束
     // Skill_CurrentCD will accumulation every frame
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
     TArray<float> Skill_CurrentCD;
 
 	// 當前技能CD時間
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
     TArray<float> Skill_MaxCD;
 
 	// 當前所有技能原始CD時間
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
     TArray<float> Skill_BaseCD;
 
 	// 當前所有的技能等級
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
     TArray<int32> Skill_Level;
 
 	// 可以使用的技能點數
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
     int32 Skill_Points;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hero")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
 	bool isSelection;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
 	float PickupObjectDistance;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero", Replicated)
-	AEquipment* WantPickup;
+	
+	// 隊伍id
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Current")
+	int32 TeamId;
+	// 目前是否攻擊
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Current")
+	bool PlayAttack;
+	// 當前普攻是否打出來了
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Current")
+	bool IsAttacked;
+	// 目前攻擊動畫時間長度
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Current")
+	float CurrentAttackTime;
+	// 目前攻擊計時器
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Current")
+	float CurrentAttackSpeedCount;
+	// 目前等級
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Current")
+	int32 CurrentLevel;
+	// 移動速度
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Current")
+	float CurrentMoveSpeed;
+	// 血量
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Current")
+	float CurrentMaxHP;
+	// 魔力
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Current")
+	float CurrentMaxMP;
+	// 血量
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Current", Replicated)
+	float CurrentHP;
+	// 魔力
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Current")
+	float CurrentMP;
+	// 回血
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Current")
+	float CurrentHealingHP;
+	// 回魔
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Current")
+	float CurrentHealingMP;
+	// 攻速
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Current")
+	float CurrentAttackSpeed;
+	// 攻速秒數
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Current")
+	float CurrentAttackSpeedSecond;
+	// 攻擊力
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Current")
+	float CurrentAttack;
+	// 防禦力
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Current")
+	float CurrentArmor;
+	// 當前魔法減傷
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Current")
+	float CurrentMagicInjured;
+	// 外加力量
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Current")
+	float AdditionStrength;
+	// 外加敏捷
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Current")
+	float AdditionAgility;
+	// 外加智力
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Current")
+	float AdditionIntelligence;
+	// 目前攻擊距離
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Current")
+	float CurrentAttackRadius;
+	// 準備要用的技能索引
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Current")
+	int32 CurrentSkillIndex;
+	// 裝備
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Current", Replicated)
+	TArray<AEquipment*> Equipments;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero", Replicated)
-	AEquipment* WantThrow;
+	// 依序做完裡面的動作
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Current", Replicated)
+	TArray<FHeroAction> ActionQueue;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero", Replicated)
-	FVector ThrowDestination;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Current", Replicated)
+	FHeroAction CurrentAction;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero", Replicated)
-	AHeroCharacter* WantAttack;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Current", Replicated)
+	EHeroBodyStatus BodyStatus;
 };
