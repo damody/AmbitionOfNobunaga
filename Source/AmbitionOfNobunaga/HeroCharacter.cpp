@@ -565,7 +565,7 @@ void AHeroCharacter::HideSkillHint()
 	CurrentSkillHint = NULL;
 }
 
-bool AHeroCharacter::UseSkill(int32 index, FRotator RFaceTo, FVector VFaceTo, FVector Pos)
+bool AHeroCharacter::UseSkill(int32 index, FVector VFaceTo, FVector Pos)
 {
 	if (index < 0)
 	{
@@ -579,7 +579,7 @@ bool AHeroCharacter::UseSkill(int32 index, FRotator RFaceTo, FVector VFaceTo, FV
 			SetActorRotation(dir.Rotation());
 		}
 	}
-	BP_ImplementSkill(index, RFaceTo, VFaceTo, Pos);
+	BP_ImplementSkill(index, VFaceTo, Pos);
 	return true;
 }
 
@@ -596,7 +596,7 @@ bool AHeroCharacter::CheckCurrentActionFinish()
 		break;
 	case EHeroBodyStatus::Moving:
 	{ // 移動到夠接近就 Pop 掉
-		float Distance = FVector::Dist(CurrentAction.TargetValue1, this->GetActorLocation());
+		float Distance = FVector::Dist(CurrentAction.TargetVec1, this->GetActorLocation());
 		if (Distance < MinimumDontMoveDistance)
 		{
 			return true;
@@ -667,6 +667,7 @@ void AHeroCharacter::DoAction(const FHeroAction& CurrentAction)
 	case EHeroActionStatus::SpellToActor:
 		break;
 	case EHeroActionStatus::SpellToDirection:
+		DoAction_SpellToDirection(CurrentAction);
 		break;
 	case EHeroActionStatus::SpellToSelf:
 		break;
@@ -712,10 +713,10 @@ void AHeroCharacter::DoNothing()
 
 void AHeroCharacter::DoAction_MoveToPosition(const FHeroAction& CurrentAction)
 {
-	if (LastMoveTarget != CurrentAction.TargetValue1)
+	if (LastMoveTarget != CurrentAction.TargetVec1)
 	{
 		DoAction_MoveToPositionImpl(CurrentAction);
-		LastMoveTarget = CurrentAction.TargetValue1;
+		LastMoveTarget = CurrentAction.TargetVec1;
 	}
 }
 
@@ -729,10 +730,10 @@ void AHeroCharacter::DoAction_MoveToPositionImpl(const FHeroAction& CurrentActio
 	case EHeroBodyStatus::AttackEnding:
 	case EHeroBodyStatus::Standing:
 	{
-		float Distance = FVector::Dist(CurrentAction.TargetValue1, this->GetActorLocation());
+		float Distance = FVector::Dist(CurrentAction.TargetVec1, this->GetActorLocation());
 		if (Distance > MinimumDontMoveDistance)
 		{
-			ags->CharacterMove(this, CurrentAction.TargetValue1);
+			ags->CharacterMove(this, CurrentAction.TargetVec1);
 			BodyStatus = EHeroBodyStatus::Moving;
 			GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Magenta,
 			                                 FString::Printf(L"Distance:%.1f %.1f", Distance, MinimumDontMoveDistance));
@@ -740,9 +741,9 @@ void AHeroCharacter::DoAction_MoveToPositionImpl(const FHeroAction& CurrentActio
 	}
 	break;
 	case EHeroBodyStatus::Moving:
-		if (LastMoveTarget != CurrentAction.TargetValue1)
+		if (LastMoveTarget != CurrentAction.TargetVec1)
 		{
-			ags->CharacterMove(this, CurrentAction.TargetValue1);
+			ags->CharacterMove(this, CurrentAction.TargetVec1);
 		}
 		break;
 	case EHeroBodyStatus::Stunning:
@@ -863,6 +864,41 @@ void AHeroCharacter::DoAction_AttackActor(const FHeroAction& CurrentAction)
 			BodyStatus = EHeroBodyStatus::Standing;
 		}
 	}
+		break;
+	case EHeroBodyStatus::SpellBegining:
+		break;
+	case EHeroBodyStatus::SpellEnding:
+		break;
+	default:
+		break;
+	}
+}
+
+void AHeroCharacter::DoAction_SpellToDirection(const FHeroAction& CurrentAction)
+{
+	FVector dir = CurrentAction.TargetVec1;
+	SetActorRotation(dir.Rotation());
+	switch (BodyStatus)
+	{
+	case EHeroBodyStatus::Moving:
+		this->GetController()->StopMovement();
+	case EHeroBodyStatus::Standing:
+	{
+		if (LastUseSkill != CurrentAction)
+		{
+			AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
+			ags->HeroUseSkill(this, CurrentAction.TargetIndex1, CurrentAction.TargetVec1, CurrentAction.TargetVec2);
+		}
+		LastUseSkill = CurrentAction;
+	}
+		break;
+	case EHeroBodyStatus::Stunning:
+		break;
+	case EHeroBodyStatus::AttackWating:
+		break;
+	case EHeroBodyStatus::AttackBegining:
+		break;
+	case EHeroBodyStatus::AttackEnding:
 		break;
 	case EHeroBodyStatus::SpellBegining:
 		break;

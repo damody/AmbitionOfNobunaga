@@ -114,10 +114,10 @@ public:
 	void HideSkillHint();
 
 	UFUNCTION(BlueprintImplementableEvent)
-	void BP_ImplementSkill(int32 index, FRotator RFaceTo, FVector VFaceTo, FVector Pos);
+	void BP_ImplementSkill(int32 index, FVector VFaceTo, FVector Pos);
 
 	UFUNCTION(BlueprintCallable, Category = "Hero")
-	virtual bool UseSkill(int32 index, FRotator RFaceTo, FVector VFaceTo, FVector Pos);
+	bool UseSkill(int32 index, FVector VFaceTo, FVector Pos);
 
 	UFUNCTION(BlueprintCallable, Category = "Hero")
 	int32 GetCurrentSkillIndex();
@@ -128,13 +128,12 @@ public:
 
 	void DoNothing();
 
-
-	FVector LastMoveTarget;
+		
 	void DoAction_MoveToPosition(const FHeroAction& CurrentAction);
 	void DoAction_MoveToPositionImpl(const FHeroAction& CurrentAction);
-
 	void PopAction();
 	void DoAction_AttackActor(const FHeroAction& CurrentAction);
+	void DoAction_SpellToDirection(const FHeroAction& CurrentAction);
 	UPROPERTY(Category = Character, EditAnywhere, BlueprintReadOnly)
 	UDecalComponent * SelectionDecal;
 
@@ -426,4 +425,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Current", Replicated)
 	EHeroBodyStatus BodyStatus;
+
+	FVector LastMoveTarget;
+	FHeroAction LastUseSkill;
 };

@@ -37,7 +37,7 @@ struct FHeroAction
 	GENERATED_USTRUCT_BODY()
 
 	FHeroAction() :ActionStatus(EHeroActionStatus::Default), TargetActor(NULL), TargetEquipment(NULL),
-		TargetValue1(FVector::ZeroVector), SequenceNumber(0){}
+		TargetVec1(FVector::ZeroVector), TargetVec2(FVector::ZeroVector), TargetIndex1(0), SequenceNumber(0){}
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EHeroActionStatus ActionStatus;
@@ -52,10 +52,15 @@ struct FHeroAction
 
 	// for MoveToPosition, MoveAndAttack, SpellToPosition, SpellToDirection, MoveToThrowEqu
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector		TargetValue1;
+	FVector		TargetVec1;
 
+	// for SpellToPosition, SpellToDirection
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector		TargetValue2;
+	FVector		TargetVec2;
+
+	// for SpellToPosition, SpellToDirection
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32		TargetIndex1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32	SequenceNumber;

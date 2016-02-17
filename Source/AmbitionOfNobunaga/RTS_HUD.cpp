@@ -313,7 +313,7 @@ void ARTS_HUD::HeroAttack(AHeroCharacter* hero)
 			act.ActionStatus = EHeroActionStatus::AttackActor;
 			act.TargetActor = hero;
 			act.SequenceNumber = SequenceNumber++;
-			
+
 			for (AHeroCharacter* EachHero : HeroGoAttack)
 			{
 				if (bLeftShiftDown)
@@ -324,7 +324,7 @@ void ARTS_HUD::HeroAttack(AHeroCharacter* hero)
 				{
 					ags->SetHeroAction(EachHero, act);
 				}
-				
+
 			}
 			//localController->AddHeroToAttackQueue(HeroGoAttack, hero);
 		}
@@ -425,7 +425,7 @@ void ARTS_HUD::OnRMouseDown(FVector2D pos)
 					// 確認 shift 鍵來插旗
 					FHeroAction act;
 					act.ActionStatus = EHeroActionStatus::MoveToPosition;
-					act.TargetValue1 = CurrentMouseHit;
+					act.TargetVec1 = CurrentMouseHit;
 					act.SequenceNumber = SequenceNumber++;
 					if (CurrentMouseHit != FVector::ZeroVector)
 					{
@@ -449,9 +449,9 @@ void ARTS_HUD::OnRMouseDown(FVector2D pos)
 			break;
 		case ERTSStatusEnum::Attack:
 		{
-			
+
 		}
-			break;
+		break;
 		case ERTSStatusEnum::ThrowEquipment:
 			break;
 		case ERTSStatusEnum::SkillHint:
@@ -597,9 +597,21 @@ void ARTS_HUD::OnLMousePressed2(FVector2D pos)
 		else if(RTSStatus == ERTSStatusEnum::SkillHint) // 放技能
 		{
 			CurrentSelection[0]->HideSkillHint();
-
-// 			localController->AddHeroToSkillQueue(CurrentSelection[0], CurrentSelection[0]->GetCurrentSkillIndex(),
-// 				GetCurrentRotator(), GetCurrentDirection(), CurrentMouseHit);
+			FHeroAction act;
+			act.ActionStatus = EHeroActionStatus::SpellToDirection;
+			act.TargetIndex1 = CurrentSelection[0]->GetCurrentSkillIndex();
+			act.TargetVec1 = GetCurrentDirection();
+			act.TargetVec2 = CurrentMouseHit;
+			act.SequenceNumber = SequenceNumber++;
+			AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
+			if (bLeftShiftDown)
+			{
+				ags->AppendHeroAction(CurrentSelection[0], act);
+			}
+			else
+			{
+				ags->SetHeroAction(CurrentSelection[0], act);
+			}
 			RTSStatus = ERTSStatusEnum::ToNormal;
 		}
 		return;

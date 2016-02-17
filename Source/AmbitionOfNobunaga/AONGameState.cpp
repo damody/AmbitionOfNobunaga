@@ -29,9 +29,19 @@ void AAONGameState::CharacterStopMove_Implementation(ACharacter* actor)
 	actor->GetController()->StopMovement();
 }
 
+bool AAONGameState::HeroUseSkill_Validate(AHeroCharacter* hero, int32 index, const FVector& VFaceTo, const FVector& Pos)
+{
+	return true;
+}
+
+void AAONGameState::HeroUseSkill_Implementation(AHeroCharacter* hero, int32 index, const FVector& VFaceTo, const FVector& Pos)
+{
+	hero->UseSkill(index, VFaceTo, Pos);
+}
+
 bool AAONGameState::SetObjectLocation_Validate(AActor* actor, const FVector& pos)
 {
-    return true;
+	return true;
 }
 
 void AAONGameState::SetObjectLocation_Implementation(AActor* actor, const FVector& pos)
@@ -41,7 +51,7 @@ void AAONGameState::SetObjectLocation_Implementation(AActor* actor, const FVecto
 
 float AAONGameState::ArmorConvertToInjuryPersent(float armor)
 {
-    return 1.f / (1.f + 0.06f * armor);
+	return 1.f / (1.f + 0.06f * armor);
 }
 
 bool AAONGameState::SetHeroAction_Validate(AHeroCharacter* hero, const FHeroAction& action)
