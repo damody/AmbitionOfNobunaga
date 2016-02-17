@@ -11,15 +11,15 @@
 USTRUCT(BlueprintType)
 struct FLevelCDs
 {
-    GENERATED_USTRUCT_BODY()
+	GENERATED_USTRUCT_BODY()
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    TArray<float> CDs;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<float> CDs;
 
-    float operator[](int32 n)
-    {
-        return CDs[n];
-    }
+	float operator[](int32 n)
+	{
+		return CDs[n];
+	}
 };
 
 USTRUCT(BlueprintType)
@@ -29,7 +29,7 @@ struct FSkillDescription
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString Description;
-	
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<FString> DescriptionLevel;
 
@@ -62,62 +62,62 @@ class AMBITIONOFNOBUNAGA_API AHeroCharacter : public ACharacter
 
 public:
 
-    // Called when the game starts or when spawned
-    virtual void BeginPlay() override;
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
 
-    // Called every frame
-    virtual void Tick(float DeltaSeconds) override;
+	// Called every frame
+	virtual void Tick(float DeltaSeconds) override;
 
-    // Called to bind functionality to input
-    virtual void SetupPlayerInputComponent(class UInputComponent* InputComponent) override;
+	// Called to bind functionality to input
+	virtual void SetupPlayerInputComponent(class UInputComponent* InputComponent) override;
 #if WITH_EDITOR
-    virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 
 	virtual void PostEditChangeChainProperty(FPropertyChangedChainEvent& PropertyChangedEvent) override;
 #endif // WITH_EDITOR
 	bool Pickup(AEquipment* equ);
-	
+
 	// for UI
 	UFUNCTION()
 	void OnMouseClicked(UPrimitiveComponent* TouchComp);
 
 	UFUNCTION(BlueprintCallable, Category = "Hero")
-    void SelectionOn();
+	void SelectionOn();
 
 	UFUNCTION(BlueprintCallable, Category = "Hero")
-    void SelectionOff();
+	void SelectionOff();
 
 	void CheckSelf(bool res, FString msg);
 
 	// for Game Logic
-    UFUNCTION(BlueprintCallable, Category = "Hero")
-    float GetSkillCDPercent(int32 n);
+	UFUNCTION(BlueprintCallable, Category = "Hero")
+	float GetSkillCDPercent(int32 n);
 
 	UFUNCTION(BlueprintCallable, Category = "Hero")
-    float GetHPPercent();
+	float GetHPPercent();
 
 	UFUNCTION(BlueprintCallable, Category = "Hero")
-    float GetMPPercent();
+	float GetMPPercent();
 
 	// 依等級更新血魔攻速
 	UFUNCTION(BlueprintCallable, Category = "Hero")
-    void UpdateHPMPAS();
+	void UpdateHPMPAS();
 
 	// 依等級更新力敏智
 	UFUNCTION(BlueprintCallable, Category = "Hero")
-    void UpdateSAI();
+	void UpdateSAI();
 
 	UFUNCTION(BlueprintCallable, Category = "Hero")
-    bool ShowSkillHint(int32 index);
-	
+	bool ShowSkillHint(int32 index);
+
 	UFUNCTION(BlueprintCallable, Category = "Hero")
-    void HideSkillHint();
+	void HideSkillHint();
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void BP_ImplementSkill(int32 index, FRotator RFaceTo, FVector VFaceTo, FVector Pos);
-	
+
 	UFUNCTION(BlueprintCallable, Category = "Hero")
-    virtual bool UseSkill(int32 index, FRotator RFaceTo, FVector VFaceTo, FVector Pos);
+	virtual bool UseSkill(int32 index, FRotator RFaceTo, FVector VFaceTo, FVector Pos);
 
 	UFUNCTION(BlueprintCallable, Category = "Hero")
 	int32 GetCurrentSkillIndex();
@@ -131,46 +131,45 @@ public:
 
 	FVector LastMoveTarget;
 	void DoAction_MoveToPosition(const FHeroAction& CurrentAction);
+	void DoAction_MoveToPositionImpl(const FHeroAction& CurrentAction);
+
+	void PopAction();
+	void DoAction_AttackActor(const FHeroAction& CurrentAction);
+	UPROPERTY(Category = Character, EditAnywhere, BlueprintReadOnly)
+	UDecalComponent * SelectionDecal;
 
 	UPROPERTY(Category = Character, EditAnywhere, BlueprintReadOnly)
-	UDecalComponent* SelectionDecal;
+	UArrowComponent * PositionOnHead;
 
 	UPROPERTY(Category = Character, EditAnywhere, BlueprintReadOnly)
-	UArrowComponent* PositionOnHead;
-
-	UPROPERTY(Category = Character, EditAnywhere, BlueprintReadOnly)
-	UArrowComponent* PositionUnderFoot;
+	UArrowComponent * PositionUnderFoot;
 
 	UPROPERTY(Category = Character, EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<ABulletActor> HeroBullet;
 
 	// 英雄名
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
-    FString HeroName;
-		
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
+	FString HeroName;
+
 	// 歷史說明
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
-    FString HeroHistoryDescription;
-
-	// 攻擊動畫播到幾秒時發出攻擊
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
-	float AnimationInstantAttack;
-
+	FString HeroHistoryDescription;
+	
 	// 血條長度
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
 	float HPBarLength;
 
 	// 大頭貼
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
-    UTexture2D * Head;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
+	UTexture2D * Head;
 
 	// set by HUD
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
 	FVector2D	ScreenPosition;
 
 	// 該英雄的技能數量
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
-    int32 Skill_Amount;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
+	int32 Skill_Amount;
 
 	// 目前攻擊距離
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
@@ -181,6 +180,24 @@ public:
 	// 基礎攻速
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
 	float BaseAttackSpeedSecond;
+
+	// 基礎攻擊動畫時間長度
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
+	float BaseAttackingAnimationTimeLength;
+	// 基礎攻擊前搖時間長度
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
+	float BaseAttackingBeginingTimeLength;
+	// 基礎攻擊後搖時間長度
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
+	float BaseAttackingEndingTimeLength;
+
+	// 追踨目標計時器
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
+	float FollowActorUpdateCounting;
+	// 追踨目標更新時間
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
+	float FollowActorUpdateTimeGap;
+
 	// 基礎魔法受傷倍率
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
 	float BaseMagicInjuredRatio;
@@ -228,7 +245,7 @@ public:
 	// 智力
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
 	float Intelligence;
-	
+
 	// 每個等級提升的XXX不累加
 	// 每個等級提升的攻擊力
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Hero")
@@ -245,54 +262,54 @@ public:
 
 	// 技能名字
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Hero")
-    TArray<FString> Skill_Name;
+	TArray<FString> Skill_Name;
 	// 使用了技能後是否面對技能
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
-    TArray<bool> Skill_FaceSkill;
+	TArray<bool> Skill_FaceSkill;
 	// 技能描述
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Hero")
-    TArray<FSkillDescription> Skill_Description;
-    
+	TArray<FSkillDescription> Skill_Description;
+
 	// 技能圖片
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Hero")
-    TArray<UTexture2D*> Skill_Texture;
+	TArray<UTexture2D*> Skill_Texture;
 
 	// 所有技能提示
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Hero")
-    TArray<TSubclassOf<ASkillHintActor>> Skill_HintActor;
+	TArray<TSubclassOf<ASkillHintActor>> Skill_HintActor;
 
 	// 當前技能提示
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Hero")
-	ASkillHintActor* CurrentSkillHint;
+	ASkillHintActor * CurrentSkillHint;
 
 	// 儲存所有技能每個等級的CD時間
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Hero")
-    TArray<FLevelCDs> Skill_LevelCDs;
+	TArray<FLevelCDs> Skill_LevelCDs;
 
 	// 是否在CD中
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
-    TArray<bool> Skill_CDing;
-	
+	TArray<bool> Skill_CDing;
+
 	// 當前CD秒數，CD秒數等於Skill_MaxCD時就是CD結束
-    // Skill_CurrentCD will accumulation every frame
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
-    TArray<float> Skill_CurrentCD;
+	// Skill_CurrentCD will accumulation every frame
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
+	TArray<float> Skill_CurrentCD;
 
 	// 當前技能CD時間
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
-    TArray<float> Skill_MaxCD;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
+	TArray<float> Skill_MaxCD;
 
 	// 當前所有技能原始CD時間
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
-    TArray<float> Skill_BaseCD;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
+	TArray<float> Skill_BaseCD;
 
 	// 當前所有的技能等級
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
-    TArray<int32> Skill_Level;
+	TArray<int32> Skill_Level;
 
 	// 可以使用的技能點數
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
-    int32 Skill_Points;
+	int32 Skill_Points;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
 	bool isSelection;
@@ -300,7 +317,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
 	float PickupObjectDistance;
 
-	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
+	float MinimumDontMoveDistance;
+
+
 	// 隊伍id
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Current")
 	int32 TeamId;
@@ -310,12 +330,35 @@ public:
 	// 當前普攻是否打出來了
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Current")
 	bool IsAttacked;
+
+	/*
+
+	                             Each Attacking Time gap
+	|---------------------------------------------------------------------------------------|
+	                                                                 waiting for next attack
+	                                                                |-----------------------|
+	CurrentAttackingAnimationTimeLength
+	|---------------------------------------------------------------|
+	CurrentAttackingBeginingTimeLength
+	|--------------------------------|
+	  								 CurrentAttackingEndingTimeLength
+									 |------------------------------|
+									 ^
+							    Cause Damage
+	*/
+
 	// 目前攻擊動畫時間長度
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Current")
-	float CurrentAttackTime;
+	float CurrentAttackingAnimationTimeLength;
+	// 目前攻擊前搖時間長度
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Current")
+	float CurrentAttackingBeginingTimeLength;
+	// 目前攻擊後搖時間長度
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Current")
+	float CurrentAttackingEndingTimeLength;
 	// 目前攻擊計時器
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Current")
-	float CurrentAttackSpeedCount;
+	float CurrentAttackingCounting;
 	// 目前等級
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Current")
 	int32 CurrentLevel;

@@ -20,7 +20,10 @@ public:
 	void SetObjectLocation(AActor* actor, const FVector& pos);
 
 	UFUNCTION(Server, WithValidation, Reliable, BlueprintCallable, Category = "AONGameState")
-	void SetHeroMove(AHeroCharacter* hero, const FVector& action);
+	void CharacterMove(ACharacter* hero, const FVector& action);
+
+	UFUNCTION(Server, WithValidation, Reliable, BlueprintCallable, Category = "AONGameState")
+	void CharacterStopMove(ACharacter* hero);
 
 	UFUNCTION(Server, WithValidation, Reliable, BlueprintCallable, Category = "AONGameState")
 	void SetHeroAction(AHeroCharacter* hero, const FHeroAction& action);

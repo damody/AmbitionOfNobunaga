@@ -14,46 +14,74 @@
 
 AAmbitionOfNobunagaPlayerController::AAmbitionOfNobunagaPlayerController()
 {
-    bShowMouseCursor = true;
-    DefaultMouseCursor = EMouseCursor::Crosshairs;
+	bShowMouseCursor = true;
+	DefaultMouseCursor = EMouseCursor::Crosshairs;
 	FloorActorName = TEXT("Floor");
 }
 
 void AAmbitionOfNobunagaPlayerController::BeginPlay()
 {
-    Hud = Cast<ARTS_HUD>(UGameplayStatics::GetPlayerController(this, 0)->GetHUD());
-    Hud->localController = this;
-    bMouseRButton = false;
-    bMouseLButton = false;
-    for(TActorIterator<AActor> ActorItr(GetWorld()); ActorItr; ++ActorItr)
-    {
-        if(*ActorItr != this)
-        {
-            ActorItr->SetOwner(this);
-        }
-    }
+	Hud = Cast<ARTS_HUD>(UGameplayStatics::GetPlayerController(this, 0)->GetHUD());
+	Hud->localController = this;
+	bMouseRButton = false;
+	bMouseLButton = false;
+	for(TActorIterator<AActor> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		if(*ActorItr != this)
+		{
+			ActorItr->SetOwner(this);
+		}
+	}
 }
 
-bool AAmbitionOfNobunagaPlayerController::InputKey(FKey Key, EInputEvent EventType, float AmountDepressed, bool bGamepad)
+bool AAmbitionOfNobunagaPlayerController::InputKey(FKey Key, EInputEvent EventType, float AmountDepressed,
+        bool bGamepad)
 {
-    bool bResult = false;
+	bool bResult = false;
 
-    if(GEngine->HMDDevice.IsValid())
-    {
-        bResult = GEngine->HMDDevice->HandleInputKey(PlayerInput, Key, EventType, AmountDepressed, bGamepad);
-        if(bResult)
-        {
-            return bResult;
-        }
-    }
+	if(GEngine->HMDDevice.IsValid())
+	{
+		bResult = GEngine->HMDDevice->HandleInputKey(PlayerInput, Key, EventType, AmountDepressed, bGamepad);
+		if(bResult)
+		{
+			return bResult;
+		}
+	}
+	if (Key == EKeys::LeftShift)
+	{
+		if (Hud)
+		{
+			if (EventType == IE_Pressed)
+			{
+				Hud->bLeftShiftDown = true;
+			}
+			else if (EventType == IE_Released)
+			{
+				Hud->bLeftShiftDown = false;
+			}
+		}
+	}
+	else if (Key == EKeys::RightShift)
+	{
+		if (Hud)
+		{
+			if (EventType == IE_Pressed)
+			{
+				Hud->bRightShiftDown = true;
+			}
+			else if (EventType == IE_Released)
+			{
+				Hud->bRightShiftDown = false;
+			}
+		}
+	}
+	if(PlayerInput)
+	{
+		bResult = PlayerInput->InputKey(Key, EventType, AmountDepressed, bGamepad);
 
-    if(PlayerInput)
-    {
-        bResult = PlayerInput->InputKey(Key, EventType, AmountDepressed, bGamepad);
-
-        // TODO: Allow click key(s?) to be defined
-        if(bEnableClickEvents && (Key == EKeys::LeftMouseButton || Key == EKeys::RightMouseButton))
-        {
+		// TODO: Allow click key(s?) to be defined
+		if(bEnableClickEvents && (Key == EKeys::LeftMouseButton || Key == EKeys::RightMouseButton))
+		{
 			if (Key == EKeys::LeftMouseButton)
 			{
 				AAmbitionOfNobunagaPlayerController::OnMouseLButtonPressed1();
@@ -62,53 +90,52 @@ bool AAmbitionOfNobunagaPlayerController::InputKey(FKey Key, EInputEvent EventTy
 			{
 				AAmbitionOfNobunagaPlayerController::OnMouseRButtonPressed1();
 			}
+			FVector2D MousePosition;
+			if(CastChecked<ULocalPlayer>(Player)->ViewportClient->GetMousePosition(MousePosition))
+			{
+				ClickedPrimitive = NULL;
+				if(bEnableMouseOverEvents)
+				{
+					ClickedPrimitive = CurrentClickablePrimitive.Get();
+				}
+				else
+				{
+					FHitResult HitResult;
+					const bool bHit = GetHitResultAtScreenPosition(MousePosition, CurrentClickTraceChannel, true, HitResult);
+					if(bHit)
+					{
+						ClickedPrimitive = HitResult.Component.Get();
+					}
+				}
+				if(GetHUD())
+				{
+					if(GetHUD()->UpdateAndDispatchHitBoxClickEvents(MousePosition, EventType))
+					{
+						ClickedPrimitive = NULL;
+					}
+				}
 
-            FVector2D MousePosition;
-            if(CastChecked<ULocalPlayer>(Player)->ViewportClient->GetMousePosition(MousePosition))
-            {
-                ClickedPrimitive = NULL;
-                if(bEnableMouseOverEvents)
-                {
-                    ClickedPrimitive = CurrentClickablePrimitive.Get();
-                }
-                else
-                {
-                    FHitResult HitResult;
-                    const bool bHit = GetHitResultAtScreenPosition(MousePosition, CurrentClickTraceChannel, true, HitResult);
-                    if(bHit)
-                    {
-                        ClickedPrimitive = HitResult.Component.Get();
-                    }
-                }
-                if(GetHUD())
-                {
-                    if(GetHUD()->UpdateAndDispatchHitBoxClickEvents(MousePosition, EventType))
-                    {
-                        ClickedPrimitive = NULL;
-                    }
-                }
+				if(ClickedPrimitive)
+				{
+					switch(EventType)
+					{
+					case IE_Pressed:
+					case IE_DoubleClick:
+						ClickedPrimitive->DispatchOnClicked();
+						break;
 
-                if(ClickedPrimitive)
-                {
-                    switch(EventType)
-                    {
-                    case IE_Pressed:
-                    case IE_DoubleClick:
-                        ClickedPrimitive->DispatchOnClicked();
-                        break;
+					case IE_Released:
+						ClickedPrimitive->DispatchOnReleased();
+						break;
 
-                    case IE_Released:
-                        ClickedPrimitive->DispatchOnReleased();
-                        break;
+					case IE_Axis:
+					case IE_Repeat:
+						break;
+					}
+				}
 
-                    case IE_Axis:
-                    case IE_Repeat:
-                        break;
-                    }
-                }
-
-                bResult = true;
-            }
+				bResult = true;
+			}
 			if (Key == EKeys::LeftMouseButton)
 			{
 				AAmbitionOfNobunagaPlayerController::OnMouseLButtonPressed2();
@@ -117,20 +144,20 @@ bool AAmbitionOfNobunagaPlayerController::InputKey(FKey Key, EInputEvent EventTy
 			{
 				AAmbitionOfNobunagaPlayerController::OnMouseRButtonPressed2();
 			}
-        }
-    }
+		}
+	}
 
-    return bResult;
+	return bResult;
 }
 
 void AAmbitionOfNobunagaPlayerController::PlayerTick(float DeltaTime)
 {
-    Super::PlayerTick(DeltaTime);
+	Super::PlayerTick(DeltaTime);
 
-    if(Hud)
-    {
-        CurrentMouseXY = GetMouseScreenPosition();
-        TArray<FHitResult> Hits;
+	if(Hud)
+	{
+		CurrentMouseXY = GetMouseScreenPosition();
+		TArray<FHitResult> Hits;
 		bool res;
 		FVector WorldOrigin;
 		FVector WorldDirection;
@@ -138,7 +165,8 @@ void AAmbitionOfNobunagaPlayerController::PlayerTick(float DeltaTime)
 		CollisionQuery.AddObjectTypesToQuery(ECC_WorldStatic);
 		if (UGameplayStatics::DeprojectScreenToWorld(this, CurrentMouseXY, WorldOrigin, WorldDirection) == true)
 		{
-			res = GetWorld()->LineTraceMultiByObjectType(Hits, WorldOrigin, WorldOrigin + WorldDirection * HitResultTraceDistance, CollisionQuery);
+			res = GetWorld()->LineTraceMultiByObjectType(Hits, WorldOrigin, WorldOrigin + WorldDirection * HitResultTraceDistance,
+			        CollisionQuery);
 		}
 		// 只trace 地板的actor
 		// 地板名可以自定義
@@ -148,7 +176,7 @@ void AAmbitionOfNobunagaPlayerController::PlayerTick(float DeltaTime)
 			for (FHitResult Hit : Hits)
 			{
 				if (Hit.Actor.IsValid() && Hit.Actor->GetFName().GetPlainNameString() == FloorActorName)
-				{	
+				{
 					HitPoint = Hit.ImpactPoint;
 				}
 				// all landscape can click
@@ -164,31 +192,33 @@ void AAmbitionOfNobunagaPlayerController::PlayerTick(float DeltaTime)
 			}
 		}
 		Hud->OnMouseMove(CurrentMouseXY, HitPoint);
-    }
+	}
 }
 
 void AAmbitionOfNobunagaPlayerController::SetupInputComponent()
 {
-    // set up gameplay key bindings
-    Super::SetupInputComponent();
+	// set up gameplay key bindings
+	Super::SetupInputComponent();
 
-    //InputComponent->BindAction("MouseRButton", IE_Pressed, this, &AAmbitionOfNobunagaPlayerController::OnMouseRButtonPressed);
-    InputComponent->BindAction("MouseRButton", IE_Released, this, &AAmbitionOfNobunagaPlayerController::OnMouseRButtonReleased);
-    //InputComponent->BindAction("MouseLButton", IE_Pressed, this, &AAmbitionOfNobunagaPlayerController::OnMouseLButtonPressed);
-    InputComponent->BindAction("MouseLButton", IE_Released, this, &AAmbitionOfNobunagaPlayerController::OnMouseLButtonReleased);
+	//InputComponent->BindAction("MouseRButton", IE_Pressed, this, &AAmbitionOfNobunagaPlayerController::OnMouseRButtonPressed);
+	InputComponent->BindAction("MouseRButton", IE_Released, this,
+	                           &AAmbitionOfNobunagaPlayerController::OnMouseRButtonReleased);
+	//InputComponent->BindAction("MouseLButton", IE_Pressed, this, &AAmbitionOfNobunagaPlayerController::OnMouseLButtonPressed);
+	InputComponent->BindAction("MouseLButton", IE_Released, this,
+	                           &AAmbitionOfNobunagaPlayerController::OnMouseLButtonReleased);
 
-    // support touch devices
+	// support touch devices
 //     InputComponent->BindTouch(EInputEvent::IE_Pressed, this, &AAmbitionOfNobunagaPlayerController::MoveToTouchLocation);
 //     InputComponent->BindTouch(EInputEvent::IE_Repeat, this, &AAmbitionOfNobunagaPlayerController::MoveToTouchLocation);
 }
 FVector2D AAmbitionOfNobunagaPlayerController::GetMouseScreenPosition()
 {
-    ULocalPlayer* LocalPlayer = Cast<ULocalPlayer>(Player);
-    if(LocalPlayer && LocalPlayer->ViewportClient)
-    {
-        return LocalPlayer->ViewportClient->GetMousePosition();
-    }
-    return FVector2D(-1, -1);
+	ULocalPlayer* LocalPlayer = Cast<ULocalPlayer>(Player);
+	if(LocalPlayer && LocalPlayer->ViewportClient)
+	{
+		return LocalPlayer->ViewportClient->GetMousePosition();
+	}
+	return FVector2D(-1, -1);
 }
 
 void AAmbitionOfNobunagaPlayerController::OnMouseRButtonPressed1()
@@ -202,20 +232,20 @@ void AAmbitionOfNobunagaPlayerController::OnMouseRButtonPressed1()
 
 void AAmbitionOfNobunagaPlayerController::OnMouseRButtonPressed2()
 {
-    bMouseRButton = true;
-    if(Hud)
-    {
-        Hud->OnRMousePressed2(GetMouseScreenPosition());
-    }
+	bMouseRButton = true;
+	if(Hud)
+	{
+		Hud->OnRMousePressed2(GetMouseScreenPosition());
+	}
 }
 
 void AAmbitionOfNobunagaPlayerController::OnMouseRButtonReleased()
 {
-    bMouseRButton = false;
-    if(Hud)
-    {
-        Hud->OnRMouseReleased(GetMouseScreenPosition());
-    }
+	bMouseRButton = false;
+	if(Hud)
+	{
+		Hud->OnRMouseReleased(GetMouseScreenPosition());
+	}
 }
 
 void AAmbitionOfNobunagaPlayerController::OnMouseLButtonPressed1()
@@ -228,18 +258,18 @@ void AAmbitionOfNobunagaPlayerController::OnMouseLButtonPressed1()
 
 void AAmbitionOfNobunagaPlayerController::OnMouseLButtonPressed2()
 {
-    bMouseLButton = true;
-    if(Hud)
-    {
-        Hud->OnLMousePressed2(GetMouseScreenPosition());
-    }
+	bMouseLButton = true;
+	if(Hud)
+	{
+		Hud->OnLMousePressed2(GetMouseScreenPosition());
+	}
 }
 
 void AAmbitionOfNobunagaPlayerController::OnMouseLButtonReleased()
 {
-    bMouseLButton = false;
-    if(Hud)
-    {
-        Hud->OnLMouseReleased(GetMouseScreenPosition());
-    }
+	bMouseLButton = false;
+	if(Hud)
+	{
+		Hud->OnLMouseReleased(GetMouseScreenPosition());
+	}
 }

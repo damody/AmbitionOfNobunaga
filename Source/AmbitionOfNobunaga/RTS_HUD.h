@@ -4,6 +4,7 @@
 
 #include "GameFramework/HUD.h"
 #include "RTSHitBox.h"
+#include "MouseEffect.h"
 #include "RTS_HUD.generated.h"
 
 UENUM(BlueprintType)
@@ -125,6 +126,9 @@ public:
 	void GetSkillPosition(int32 n, FVector2D& pos, FVector2D& size);
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RTS")
+	TSubclassOf<AMouseEffect> MouseEffect;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RTS")
 	TArray<AHeroCharacter*> HeroCanSelection;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RTS")
@@ -174,6 +178,9 @@ public:
 	bool bNeedMouseRDown;
 	bool bNeedMouseLDown;
 
+	bool bLeftShiftDown;
+	bool bRightShiftDown;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "RTS")
 	UTexture2D* NothingTexture;
 
@@ -213,4 +220,6 @@ public:
 	UTexture2D* ThrowTexture;
 
 	float ViewportScale;
+
+	int32 SequenceNumber;
 };

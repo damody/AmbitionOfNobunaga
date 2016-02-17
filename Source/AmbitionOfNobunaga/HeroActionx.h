@@ -36,15 +36,15 @@ struct FHeroAction
 {
 	GENERATED_USTRUCT_BODY()
 
-	FHeroAction() :ActionStatus(EHeroActionStatus::Default), TargetHero(NULL), TargetEquipment(NULL),
-		TargetValue(FVector::ZeroVector) {}
+	FHeroAction() :ActionStatus(EHeroActionStatus::Default), TargetActor(NULL), TargetEquipment(NULL),
+		TargetValue1(FVector::ZeroVector), SequenceNumber(0){}
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EHeroActionStatus ActionStatus;
 
 	// for MoveToActor, FollowActor, AttackActor, MovingAttackActor, SpellToActor, ThrowEquToActor
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	AHeroCharacter* TargetHero;
+	AHeroCharacter* TargetActor;
 
 	// for MoveToPickup
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -52,14 +52,18 @@ struct FHeroAction
 
 	// for MoveToPosition, MoveAndAttack, SpellToPosition, SpellToDirection, MoveToThrowEqu
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector		TargetValue;
+	FVector		TargetValue1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector		TargetValue2;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32	SequenceNumber;
 
 	bool operator==(const FHeroAction& rhs)
 	{
 		return rhs.ActionStatus == ActionStatus &&
-			rhs.TargetHero == TargetHero &&
-			rhs.TargetEquipment == TargetEquipment &&
-			rhs.TargetValue == TargetValue;
+			rhs.SequenceNumber == SequenceNumber;
 	}
 	bool operator!=(const FHeroAction& rhs)
 	{

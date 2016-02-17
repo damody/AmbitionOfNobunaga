@@ -8,24 +8,25 @@
 // for GEngine
 #include "Engine.h"
 
-bool AAONGameState::SetHeroMove_Validate(AHeroCharacter* actor, const FVector& pos)
+bool AAONGameState::CharacterMove_Validate(ACharacter* actor, const FVector& pos)
 {
 	return true;
 }
 
-void AAONGameState::SetHeroMove_Implementation(AHeroCharacter* actor, const FVector& pos)
+void AAONGameState::CharacterMove_Implementation(ACharacter* actor, const FVector& pos)
 {
 	UNavigationSystem* const NavSys = GetWorld()->GetNavigationSystem();
-	float const Distance = FVector::Dist(pos, actor->GetActorLocation());
-	// We need to issue move command only if far enough in order for walk animation to play correctly
-	if (NavSys && (Distance > 120.0f))
-	{
-		NavSys->SimpleMoveToLocation(actor->GetController(), pos);
-	}
+	NavSys->SimpleMoveToLocation(actor->GetController(), pos);
+}
 
-	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Magenta,
-		FString::Printf(L"x:%.1f y:%.1f z:%.1f", pos.X,
-			pos.Y, pos.Z)); 
+bool AAONGameState::CharacterStopMove_Validate(ACharacter* actor)
+{
+	return true;
+}
+
+void AAONGameState::CharacterStopMove_Implementation(ACharacter* actor)
+{
+	actor->GetController()->StopMovement();
 }
 
 bool AAONGameState::SetObjectLocation_Validate(AActor* actor, const FVector& pos)
