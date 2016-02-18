@@ -2,13 +2,12 @@
 #pragma once
 #include "GameFramework/PlayerController.h"
 #include "Engine/EngineBaseTypes.h"
+#include "HeroActionx.h"
 #include "AmbitionOfNobunagaPlayerController.generated.h"
 
 class ARTS_HUD;
 class AHeroCharacter;
 class AEquipment;
-
-
 
 UCLASS()
 class AAmbitionOfNobunagaPlayerController : public APlayerController
@@ -49,9 +48,23 @@ public:
 
 	/** Navigate player to the given world location. */
 	
-// 	UFUNCTION(Server, WithValidation, Reliable, BlueprintCallable, Category = "RTS")
-// 	void AddHeroToMoveQueue(const FVector DestLocation, const TArray<AHeroCharacter*>& heros);
+	UFUNCTION(Server, WithValidation, Reliable, BlueprintCallable, Category = "AONGameState")
+	void CharacterMove(AHeroCharacter* hero, const FVector& action);
 
+	UFUNCTION(Server, WithValidation, Reliable, BlueprintCallable, Category = "AONGameState")
+	void CharacterStopMove(AHeroCharacter* hero);
+
+	UFUNCTION(Server, WithValidation, Reliable, BlueprintCallable, Category = "AONGameState")
+	void HeroUseSkill(AHeroCharacter* hero, int32 index, const FVector& VFaceTo, const FVector& Pos);
+
+	UFUNCTION(Server, WithValidation, Reliable, BlueprintCallable, Category = "AONGameState")
+	void SetHeroAction(AHeroCharacter* hero, const FHeroAction& action);
+
+	UFUNCTION(Server, WithValidation, Reliable, BlueprintCallable, Category = "AONGameState")
+	void AppendHeroAction(AHeroCharacter* hero, const FHeroAction& action);
+
+	UFUNCTION(Server, WithValidation, Reliable, BlueprintCallable, Category = "AONGameState")
+	void ClearHeroAction(AHeroCharacter* hero, const FHeroAction& action);
 
 	FVector2D GetMouseScreenPosition();
 

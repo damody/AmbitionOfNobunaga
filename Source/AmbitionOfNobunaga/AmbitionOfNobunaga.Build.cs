@@ -7,7 +7,7 @@ public class AmbitionOfNobunaga : ModuleRules
 	public AmbitionOfNobunaga(TargetInfo Target)
 	{
         PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore",
-            "Paper2D",
+            "Paper2D", "AIModule",
             "UMG", "RHI",
             "RenderCore", "SlateCore", "HeadMountedDisplay" });
 	}

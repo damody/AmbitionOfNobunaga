@@ -7,37 +7,8 @@
 #include "HeroCharacter.h"
 // for GEngine
 #include "Engine.h"
+#include "AIController.h"
 
-bool AAONGameState::CharacterMove_Validate(ACharacter* actor, const FVector& pos)
-{
-	return true;
-}
-
-void AAONGameState::CharacterMove_Implementation(ACharacter* actor, const FVector& pos)
-{
-	UNavigationSystem* const NavSys = GetWorld()->GetNavigationSystem();
-	NavSys->SimpleMoveToLocation(actor->GetController(), pos);
-}
-
-bool AAONGameState::CharacterStopMove_Validate(ACharacter* actor)
-{
-	return true;
-}
-
-void AAONGameState::CharacterStopMove_Implementation(ACharacter* actor)
-{
-	actor->GetController()->StopMovement();
-}
-
-bool AAONGameState::HeroUseSkill_Validate(AHeroCharacter* hero, int32 index, const FVector& VFaceTo, const FVector& Pos)
-{
-	return true;
-}
-
-void AAONGameState::HeroUseSkill_Implementation(AHeroCharacter* hero, int32 index, const FVector& VFaceTo, const FVector& Pos)
-{
-	hero->UseSkill(index, VFaceTo, Pos);
-}
 
 bool AAONGameState::SetObjectLocation_Validate(AActor* actor, const FVector& pos)
 {
@@ -84,4 +55,42 @@ bool AAONGameState::ClearHeroAction_Validate(AHeroCharacter* hero, const FHeroAc
 void AAONGameState::ClearHeroAction_Implementation(AHeroCharacter* hero, const FHeroAction& action)
 {
 	hero->ActionQueue.Empty();
+}
+
+
+
+bool AAONGameState::CharacterMove_Validate(AHeroCharacter* actor, const FVector& pos)
+{
+	return true;
+}
+
+void AAONGameState::CharacterMove_Implementation(AHeroCharacter* actor, const FVector& pos)
+{
+	//UNavigationSystem* const NavSys = GetWorld()->GetNavigationSystem();
+	//NavSys->SimpleMoveToLocation(actor->GetController(), pos);
+	if (actor->WalkAI)
+	{
+		actor->WalkAI->MoveToLocation(pos);
+	}
+}
+
+bool AAONGameState::CharacterStopMove_Validate(AHeroCharacter* actor)
+{
+	return true;
+}
+
+void AAONGameState::CharacterStopMove_Implementation(AHeroCharacter* actor)
+{
+	actor->GetController()->StopMovement();
+}
+
+bool AAONGameState::HeroUseSkill_Validate(AHeroCharacter* hero, int32 index, const FVector& VFaceTo, const FVector& Pos)
+{
+	return true;
+}
+
+void AAONGameState::HeroUseSkill_Implementation(AHeroCharacter* hero, int32 index, const FVector& VFaceTo,
+	const FVector& Pos)
+{
+	hero->UseSkill(index, VFaceTo, Pos);
 }

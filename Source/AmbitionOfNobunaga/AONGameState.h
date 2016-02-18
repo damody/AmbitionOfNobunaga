@@ -16,14 +16,14 @@ class AMBITIONOFNOBUNAGA_API AAONGameState : public AGameState
 	GENERATED_BODY()
 public:
 
-	UFUNCTION(Server, WithValidation, Reliable, BlueprintCallable, Category = "AONGameState")
+	UFUNCTION(NetMulticast, WithValidation, Reliable, BlueprintCallable, Category = "AONGameState")
 	void SetObjectLocation(AActor* actor, const FVector& pos);
 
 	UFUNCTION(Server, WithValidation, Reliable, BlueprintCallable, Category = "AONGameState")
-	void CharacterMove(ACharacter* hero, const FVector& action);
+	void CharacterMove(AHeroCharacter* hero, const FVector& action);
 
 	UFUNCTION(Server, WithValidation, Reliable, BlueprintCallable, Category = "AONGameState")
-	void CharacterStopMove(ACharacter* hero);
+	void CharacterStopMove(AHeroCharacter* hero);
 
 	UFUNCTION(Server, WithValidation, Reliable, BlueprintCallable, Category = "AONGameState")
 	void HeroUseSkill(AHeroCharacter* hero, int32 index, const FVector& VFaceTo, const FVector& Pos);

@@ -21,13 +21,16 @@ AAmbitionOfNobunagaPlayerController::AAmbitionOfNobunagaPlayerController()
 
 void AAmbitionOfNobunagaPlayerController::BeginPlay()
 {
-	Hud = Cast<ARTS_HUD>(UGameplayStatics::GetPlayerController(this, 0)->GetHUD());
-	Hud->localController = this;
+	Hud = Cast<ARTS_HUD>(this->GetHUD());
+	if (Hud)
+	{
+		Hud->localController = this;
+	}
 	bMouseRButton = false;
 	bMouseLButton = false;
-	for(TActorIterator<AActor> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	for (TActorIterator<AActor> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 	{
-		if(*ActorItr != this)
+		if (*ActorItr != this)
 		{
 			ActorItr->SetOwner(this);
 		}
@@ -273,3 +276,77 @@ void AAmbitionOfNobunagaPlayerController::OnMouseLButtonReleased()
 		Hud->OnLMouseReleased(GetMouseScreenPosition());
 	}
 }
+
+// network function
+
+
+bool AAmbitionOfNobunagaPlayerController::SetHeroAction_Validate(AHeroCharacter* hero, const FHeroAction& action)
+{
+	return true;
+}
+
+void AAmbitionOfNobunagaPlayerController::SetHeroAction_Implementation(AHeroCharacter* hero, const FHeroAction& action)
+{
+	hero->ActionQueue.Empty();
+	hero->ActionQueue.Add(action);
+}
+
+bool AAmbitionOfNobunagaPlayerController::AppendHeroAction_Validate(AHeroCharacter* hero, const FHeroAction& action)
+{
+	return true;
+}
+
+void AAmbitionOfNobunagaPlayerController::AppendHeroAction_Implementation(AHeroCharacter* hero, const FHeroAction& action)
+{
+	hero->ActionQueue.Add(action);
+}
+
+
+bool AAmbitionOfNobunagaPlayerController::ClearHeroAction_Validate(AHeroCharacter* hero, const FHeroAction& action)
+{
+	return true;
+}
+
+void AAmbitionOfNobunagaPlayerController::ClearHeroAction_Implementation(AHeroCharacter* hero, const FHeroAction& action)
+{
+	hero->ActionQueue.Empty();
+}
+
+
+
+bool AAmbitionOfNobunagaPlayerController::CharacterMove_Validate(AHeroCharacter* actor, const FVector& pos)
+{
+	return true;
+}
+
+void AAmbitionOfNobunagaPlayerController::CharacterMove_Implementation(AHeroCharacter* actor, const FVector& pos)
+{
+	//UNavigationSystem* const NavSys = GetWorld()->GetNavigationSystem();
+	//NavSys->SimpleMoveToLocation(actor->GetController(), pos);
+	if (actor->WalkAI)
+	{
+		actor->WalkAI->MoveToLocation(pos);
+	}
+}
+
+bool AAmbitionOfNobunagaPlayerController::CharacterStopMove_Validate(AHeroCharacter* actor)
+{
+	return true;
+}
+
+void AAmbitionOfNobunagaPlayerController::CharacterStopMove_Implementation(AHeroCharacter* actor)
+{
+	actor->GetController()->StopMovement();
+}
+
+bool AAmbitionOfNobunagaPlayerController::HeroUseSkill_Validate(AHeroCharacter* hero, int32 index, const FVector& VFaceTo, const FVector& Pos)
+{
+	return true;
+}
+
+void AAmbitionOfNobunagaPlayerController::HeroUseSkill_Implementation(AHeroCharacter* hero, int32 index, const FVector& VFaceTo,
+	const FVector& Pos)
+{
+	hero->UseSkill(index, VFaceTo, Pos);
+}
+

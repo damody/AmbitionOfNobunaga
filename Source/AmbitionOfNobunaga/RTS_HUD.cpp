@@ -318,11 +318,11 @@ void ARTS_HUD::HeroAttack(AHeroCharacter* hero)
 			{
 				if (bLeftShiftDown)
 				{
-					ags->AppendHeroAction(EachHero, act);
+					localController->AppendHeroAction(EachHero, act);
 				}
 				else
 				{
-					ags->SetHeroAction(EachHero, act);
+					localController->SetHeroAction(EachHero, act);
 				}
 
 			}
@@ -431,11 +431,11 @@ void ARTS_HUD::OnRMouseDown(FVector2D pos)
 					{
 						if (bLeftShiftDown)
 						{
-							ags->AppendHeroAction(CurrentSelection[0], act);
+							localController->AppendHeroAction(CurrentSelection[0], act);
 						}
 						else
 						{
-							ags->SetHeroAction(CurrentSelection[0], act);
+							localController->SetHeroAction(CurrentSelection[0], act);
 						}
 						UWorld* const World = GetWorld();
 						AMouseEffect* actor = World->SpawnActor<AMouseEffect>(MouseEffect);
@@ -606,11 +606,11 @@ void ARTS_HUD::OnLMousePressed2(FVector2D pos)
 			AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
 			if (bLeftShiftDown)
 			{
-				ags->AppendHeroAction(CurrentSelection[0], act);
+				localController->AppendHeroAction(CurrentSelection[0], act);
 			}
 			else
 			{
-				ags->SetHeroAction(CurrentSelection[0], act);
+				localController->SetHeroAction(CurrentSelection[0], act);
 			}
 			RTSStatus = ERTSStatusEnum::ToNormal;
 		}
@@ -669,6 +669,7 @@ void ARTS_HUD::OnLMouseReleased(FVector2D pos)
 			if(CurrentSelection.Num() > 0)
 			{
 				SelectedHero(CurrentSelection[0]);
+				CurrentSelection[0]->SetOwner(localController);
 			}
 		}
 	}

@@ -12,6 +12,7 @@
 #include "UnrealNetwork.h"
 #include "BulletActor.h"
 #include "MouseEffect.h"
+#include "AmbitionOfNobunagaPlayerController.h"
 
 AHeroCharacter::AHeroCharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(FObjectInitializer::Get())
@@ -67,7 +68,22 @@ AHeroCharacter::AHeroCharacter(const FObjectInitializer& ObjectInitializer)
 void AHeroCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	WalkAI = nullptr;
+	if (Role == ROLE_Authority)
+	{
+		// Get current location of the Player Proxy
+		FVector Location = GetActorLocation();
+		FRotator Rotation = GetActorRotation();
+
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.Owner = this;
+		SpawnParams.Instigator = Instigator;
+		SpawnParams.bNoCollisionFail = true;
+				
+		WalkAI = GetWorld()->SpawnActor<AAIController>(GetActorLocation(), GetActorRotation());
+		WalkAI->Possess(this);
+	}
+
 	SelectionDecal->SetVisibility(false);
 	isSelection = false;
 	CheckSelf(Skill_MaxCD.Num() == Skill_Amount, TEXT("Skill_MaxCD is invalid"));
@@ -647,6 +663,7 @@ void AHeroCharacter::DoAction(const FHeroAction& CurrentAction)
 	switch (CurrentAction.ActionStatus)
 	{
 	case EHeroActionStatus::Default:
+		PopAction();
 		break;
 	case EHeroActionStatus::MoveToPosition:
 		DoAction_MoveToPosition(CurrentAction);
@@ -690,8 +707,11 @@ void AHeroCharacter::DoNothing()
 		break;
 	case EHeroBodyStatus::Moving:
 	{
-		AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
-		ags->CharacterStopMove(this);
+		AAmbitionOfNobunagaPlayerController* acontrol = 
+			Cast<AAmbitionOfNobunagaPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
+ 		//AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
+ 		acontrol->CharacterStopMove(this);
+		BodyStatus = EHeroBodyStatus::Standing;
 	}
 		break;
 	case EHeroBodyStatus::Stunning:
@@ -722,7 +742,9 @@ void AHeroCharacter::DoAction_MoveToPosition(const FHeroAction& CurrentAction)
 
 void AHeroCharacter::DoAction_MoveToPositionImpl(const FHeroAction& CurrentAction)
 {
-	AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
+	AAmbitionOfNobunagaPlayerController* acontrol =
+		Cast<AAmbitionOfNobunagaPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
+	//AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
 	switch (BodyStatus)
 	{
 	case EHeroBodyStatus::AttackWating:
@@ -730,10 +752,11 @@ void AHeroCharacter::DoAction_MoveToPositionImpl(const FHeroAction& CurrentActio
 	case EHeroBodyStatus::AttackEnding:
 	case EHeroBodyStatus::Standing:
 	{
+		
 		float Distance = FVector::Dist(CurrentAction.TargetVec1, this->GetActorLocation());
 		if (Distance > MinimumDontMoveDistance)
 		{
-			ags->CharacterMove(this, CurrentAction.TargetVec1);
+			acontrol->CharacterMove(this, CurrentAction.TargetVec1);
 			BodyStatus = EHeroBodyStatus::Moving;
 			GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Magenta,
 			                                 FString::Printf(L"Distance:%.1f %.1f", Distance, MinimumDontMoveDistance));
@@ -743,7 +766,7 @@ void AHeroCharacter::DoAction_MoveToPositionImpl(const FHeroAction& CurrentActio
 	case EHeroBodyStatus::Moving:
 		if (LastMoveTarget != CurrentAction.TargetVec1)
 		{
-			ags->CharacterMove(this, CurrentAction.TargetVec1);
+			acontrol->CharacterMove(this, CurrentAction.TargetVec1);
 		}
 		break;
 	case EHeroBodyStatus::Stunning:
@@ -791,8 +814,10 @@ void AHeroCharacter::DoAction_AttackActor(const FHeroAction& CurrentAction)
 		}
 		else
 		{
-			AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
-			ags->CharacterMove(this, CurrentAction.TargetActor->GetActorLocation());
+			AAmbitionOfNobunagaPlayerController* acontrol =
+				Cast<AAmbitionOfNobunagaPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
+			//AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
+			acontrol->CharacterMove(this, CurrentAction.TargetActor->GetActorLocation());
 			BodyStatus = EHeroBodyStatus::Moving;
 		}
 	}
@@ -802,16 +827,20 @@ void AHeroCharacter::DoAction_AttackActor(const FHeroAction& CurrentAction)
 		float DistanceToTargetActor = FVector::Dist(CurrentAction.TargetActor->GetActorLocation(), this->GetActorLocation());
 		if (CurrentAttackRadius > DistanceToTargetActor)
 		{
-			AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
-			ags->CharacterStopMove(this);
+			AAmbitionOfNobunagaPlayerController* acontrol =
+				Cast<AAmbitionOfNobunagaPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
+			//AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
+			acontrol->CharacterStopMove(this);
 			BodyStatus = EHeroBodyStatus::AttackWating;
 			IsAttacked = false;
 		}
 		else if (FollowActorUpdateCounting > FollowActorUpdateTimeGap)
 		{
 			FollowActorUpdateCounting = 0;
-			AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
-			ags->CharacterMove(this, CurrentAction.TargetActor->GetActorLocation());
+			AAmbitionOfNobunagaPlayerController* acontrol =
+				Cast<AAmbitionOfNobunagaPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
+			//AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
+			acontrol->CharacterMove(this, CurrentAction.TargetActor->GetActorLocation());
 		}
 	}
 		break;
@@ -886,8 +915,10 @@ void AHeroCharacter::DoAction_SpellToDirection(const FHeroAction& CurrentAction)
 	{
 		if (LastUseSkill != CurrentAction)
 		{
-			AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
-			ags->HeroUseSkill(this, CurrentAction.TargetIndex1, CurrentAction.TargetVec1, CurrentAction.TargetVec2);
+			AAmbitionOfNobunagaPlayerController* acontrol =
+				Cast<AAmbitionOfNobunagaPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
+			//AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
+			acontrol->HeroUseSkill(this, CurrentAction.TargetIndex1, CurrentAction.TargetVec1, CurrentAction.TargetVec2);
 		}
 		LastUseSkill = CurrentAction;
 	}

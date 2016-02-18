@@ -4,6 +4,7 @@
 
 #include "SkillHintActor.h"
 #include "GameFramework/Character.h"
+#include "AIController.h"
 #include "Components/ArrowComponent.h"
 #include "HeroActionx.h"
 #include "HeroCharacter.generated.h"
@@ -61,6 +62,8 @@ class AMBITIONOFNOBUNAGA_API AHeroCharacter : public ACharacter
 	GENERATED_UCLASS_BODY()
 
 public:
+
+	AAIController* WalkAI;
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
