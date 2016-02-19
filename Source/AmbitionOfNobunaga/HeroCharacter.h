@@ -307,6 +307,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Hero")
 	ASkillHintActor * CurrentSkillHint;
 
+	// 當前技能指向
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Hero")
+	FVector CurrentSkillDirection;
+
 	// 儲存所有技能每個等級的CD時間
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Hero")
 	TArray<FLevelCDs> Skill_LevelCDs;
@@ -474,7 +478,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Current")
 	float CurrentAttackRadius;
 	// 準備要用的技能索引
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Current")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Current", Replicated)
 	int32 CurrentSkillIndex;
 	// 裝備
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Current", Replicated)

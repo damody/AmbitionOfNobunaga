@@ -154,7 +154,32 @@ void AHeroCharacter::Tick(float DeltaTime)
 		ARTS_HUD* hud = Cast<ARTS_HUD>(UGameplayStatics::GetPlayerController(this, 0)->GetHUD());
 		if (hud)
 		{
-			CurrentSkillHint->UpdatePos(GetActorLocation(), hud->CurrentMouseHit);
+			// 如果有按左shift的話顯示插旗後的技能位置
+			if (hud->bLeftShiftDown)
+			{
+				// 如果有插旗移動，以最後一根移動旗為準來顯示技能提示
+				int32 lastMoveIndex = -1;
+				for (int32 i = 0; i < ActionQueue.Num(); ++i)
+				{
+					if (ActionQueue[i].ActionStatus == EHeroActionStatus::MoveToPosition)
+					{
+						lastMoveIndex = i;
+					}
+				}
+				if (lastMoveIndex >= 0)
+				{
+					FVector pos = ActionQueue[lastMoveIndex].TargetVec1;
+					pos.Z += 50;
+					CurrentSkillHint->UpdatePos(pos, hud->CurrentMouseHit);
+					CurrentSkillDirection = hud->CurrentMouseHit - pos;
+					CurrentSkillDirection.Z = 0;
+				}
+			}
+			else
+			{
+				CurrentSkillDirection = hud->CurrentMouseHit - GetActorLocation();
+				CurrentSkillHint->UpdatePos(GetActorLocation(), hud->CurrentMouseHit);
+			}
 		}
 	}
 	if(CurrentHP <= 0)
@@ -183,7 +208,7 @@ void AHeroCharacter::Tick(float DeltaTime)
 		}
 	}
 	// 是否有動作？
-	if (ActionQueue.Num() > 0)
+	if (ActionQueue.Num() > 0 && !IsDead)
 	{
 		// 動作駐列最上層動作是否為當前動作
 		if (ActionQueue[0] != CurrentAction)
@@ -586,12 +611,7 @@ bool AHeroCharacter::ShowSkillHint(int32 index)
 	if(index < Skill_HintActor.Num())
 	{
 		CurrentSkillHint = GetWorld()->SpawnActor<ASkillHintActor>(Skill_HintActor[index]);
-		FVector pos = GetActorLocation();
-		if (CurrentSkillHint)
-		{
-			CurrentSkillIndex = index;
-			CurrentSkillHint->SetActorLocation(pos);
-		}
+		CurrentSkillIndex = index;
 		return true;
 	}
 	return false;
@@ -1044,3 +1064,4 @@ void AHeroCharacter::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& Out
 	DOREPLIFETIME(AHeroCharacter, BodyStatus);
 	DOREPLIFETIME(AHeroCharacter, ActionQueue);
 }
+

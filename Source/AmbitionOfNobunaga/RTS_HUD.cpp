@@ -361,19 +361,18 @@ void ARTS_HUD::ShowHeroSkillHint(int32 index)
 
 FVector ARTS_HUD::GetCurrentDirection()
 {
-	FVector dir = CurrentMouseHit - CurrentSelection[0]->GetActorLocation();
-	dir.Z = 0;
-	dir.Normalize();
-	return dir;
+	if (CurrentSelection.Num() > 0)
+	{
+		return CurrentSelection[0]->CurrentSkillDirection;
+	}
+	return FVector();
 }
 
 FRotator ARTS_HUD::GetCurrentRotator()
 {
 	if(CurrentSelection.Num() > 0)
 	{
-		FVector dir = CurrentMouseHit - CurrentSelection[0]->GetActorLocation();
-		dir.Z = 0;
-		return dir.Rotation();
+		return CurrentSelection[0]->CurrentSkillDirection.Rotation();
 	}
 	return FRotator();
 }
