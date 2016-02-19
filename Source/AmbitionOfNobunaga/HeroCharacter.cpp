@@ -50,14 +50,28 @@ AHeroCharacter::AHeroCharacter(const FObjectInitializer& ObjectInitializer)
 	// 基礎攻速
 	BaseAttackSpeedSecond = 1.8;
 	IsAttacked = false;
+	IsDead = false;
 	LastMoveTarget = FVector::ZeroVector;
-	
+	AttackingCounting = 0;
+	FollowActorUpdateCounting = 0;
+	SpellingCounting = 0;
+
 	// 基礎攻擊前搖時間長度
 	BaseAttackingBeginingTimeLength = 0.5;
 	// 基礎攻擊後搖時間長度
 	BaseAttackingEndingTimeLength = 0.3;
 	// 基礎攻擊動畫時間長度
 	BaseAttackingAnimationTimeLength = 0.5;
+
+	// 基礎施法前等待時間長度
+	BaseSpellingWatingTimeLength = 0;
+	// 基礎施法動畫時間長度
+	BaseSpellingAnimationTimeLength = 1;
+	// 基礎施法前搖時間長度
+	BaseSpellingBeginingTimeLength = 0.5;
+	// 基礎施法後搖時間長度
+	BaseSpellingEndingTimeLength = 0.5;
+
 
 	// 每隔一段時間更新移動
 	FollowActorUpdateTimeGap = 0.3;
@@ -79,7 +93,7 @@ void AHeroCharacter::BeginPlay()
 		SpawnParams.Owner = this;
 		SpawnParams.Instigator = Instigator;
 		SpawnParams.bNoCollisionFail = true;
-				
+
 		WalkAI = GetWorld()->SpawnActor<AAIController>(GetActorLocation(), GetActorRotation());
 		WalkAI->Possess(this);
 	}
@@ -123,6 +137,11 @@ void AHeroCharacter::BeginPlay()
 	CurrentAttackingBeginingTimeLength = BaseAttackingBeginingTimeLength;
 	CurrentAttackingEndingTimeLength = BaseAttackingEndingTimeLength;
 	CurrentAttackingAnimationTimeLength = BaseAttackingAnimationTimeLength;
+	CurrentSpellingWatingTimeLength = BaseSpellingWatingTimeLength;
+	CurrentSpellingAnimationTimeLength = BaseSpellingAnimationTimeLength;
+	CurrentSpellingBeginingTimeLength = BaseSpellingBeginingTimeLength;
+	CurrentSpellingEndingTimeLength = BaseSpellingEndingTimeLength;
+
 	MinimumDontMoveDistance = GetCapsuleComponent()->GetScaledCapsuleHalfHeight() + 30;
 }
 
@@ -138,12 +157,18 @@ void AHeroCharacter::Tick(float DeltaTime)
 			CurrentSkillHint->UpdatePos(GetActorLocation(), hud->CurrentMouseHit);
 		}
 	}
-	if(CurrentHP < 0)
+	if(CurrentHP <= 0)
 	{
+		IsDead = true;
 		CurrentHP = 0;
 	}
-	CurrentAttackingCounting += DeltaTime;
+	else
+	{
+		IsDead = false;
+	}
+	AttackingCounting += DeltaTime;
 	FollowActorUpdateCounting += DeltaTime;
+	SpellingCounting += DeltaTime;
 	// 算CD
 	for(int32 i = 0; i < Skill_CDing.Num(); ++i)
 	{
@@ -609,45 +634,82 @@ bool AHeroCharacter::CheckCurrentActionFinish()
 	switch (BodyStatus)
 	{
 	case EHeroBodyStatus::Standing:
-		break;
+	{
+		switch (CurrentAction.ActionStatus)
+		{
+		case EHeroActionStatus::Default:
+			break;
+		case EHeroActionStatus::MoveToPosition:
+			break;
+		case EHeroActionStatus::MoveToActor:
+			break;
+		case EHeroActionStatus::FollowActor:
+			break;
+		case EHeroActionStatus::AttackActor:
+			break;
+		case EHeroActionStatus::MovingAttackActor:
+			break;
+		case EHeroActionStatus::MoveAndAttack:
+			break;
+		case EHeroActionStatus::SpellToPosition:
+			break;
+		case EHeroActionStatus::SpellToActor:
+			break;
+		case EHeroActionStatus::SpellToDirection:
+			return true;
+			break;
+		case EHeroActionStatus::SpellToSelf:
+			break;
+		case EHeroActionStatus::MoveToPickup:
+			break;
+		case EHeroActionStatus::MoveToThrowEqu:
+			break;
+		case EHeroActionStatus::ThrowEquToActor:
+			break;
+		default:
+			break;
+		}
+	}
+	break;
 	case EHeroBodyStatus::Moving:
-	{ // 移動到夠接近就 Pop 掉
+	{
+		// 移動到夠接近就 Pop 掉
 		float Distance = FVector::Dist(CurrentAction.TargetVec1, this->GetActorLocation());
-		if (Distance < MinimumDontMoveDistance)
+		if (Distance < MinimumDontMoveDistance && this->GetVelocity().Size() < 5)
 		{
 			return true;
 		}
 	}
-		break;
+	break;
 	case EHeroBodyStatus::Stunning:
 		break;
 	case EHeroBodyStatus::AttackWating:
 	{
-		if (CurrentAction.TargetActor && 
-			CurrentAction.TargetActor->CurrentHP <= 0)
+		if (CurrentAction.TargetActor &&
+		        CurrentAction.TargetActor->CurrentHP <= 0)
 		{
 			return true;
 		}
 	}
-		break;
+	break;
 	case EHeroBodyStatus::AttackBegining:
 	{
 		if (CurrentAction.TargetActor &&
-			CurrentAction.TargetActor->CurrentHP <= 0)
+		        CurrentAction.TargetActor->CurrentHP <= 0)
 		{
 			return true;
 		}
 	}
-		break;
+	break;
 	case EHeroBodyStatus::AttackEnding:
 	{
 		if (CurrentAction.TargetActor &&
-			CurrentAction.TargetActor->CurrentHP <= 0)
+		        CurrentAction.TargetActor->CurrentHP <= 0)
 		{
 			return true;
 		}
 	}
-		break;
+	break;
 	case EHeroBodyStatus::SpellBegining:
 		break;
 	case EHeroBodyStatus::SpellEnding:
@@ -707,13 +769,13 @@ void AHeroCharacter::DoNothing()
 		break;
 	case EHeroBodyStatus::Moving:
 	{
-		AAmbitionOfNobunagaPlayerController* acontrol = 
-			Cast<AAmbitionOfNobunagaPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
- 		//AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
- 		acontrol->CharacterStopMove(this);
+		AAmbitionOfNobunagaPlayerController* acontrol =
+		    Cast<AAmbitionOfNobunagaPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
+		//AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
+		acontrol->CharacterStopMove(this);
 		BodyStatus = EHeroBodyStatus::Standing;
 	}
-		break;
+	break;
 	case EHeroBodyStatus::Stunning:
 		break;
 	case EHeroBodyStatus::AttackWating:
@@ -743,7 +805,7 @@ void AHeroCharacter::DoAction_MoveToPosition(const FHeroAction& CurrentAction)
 void AHeroCharacter::DoAction_MoveToPositionImpl(const FHeroAction& CurrentAction)
 {
 	AAmbitionOfNobunagaPlayerController* acontrol =
-		Cast<AAmbitionOfNobunagaPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
+	    Cast<AAmbitionOfNobunagaPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
 	//AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
 	switch (BodyStatus)
 	{
@@ -752,7 +814,7 @@ void AHeroCharacter::DoAction_MoveToPositionImpl(const FHeroAction& CurrentActio
 	case EHeroBodyStatus::AttackEnding:
 	case EHeroBodyStatus::Standing:
 	{
-		
+
 		float Distance = FVector::Dist(CurrentAction.TargetVec1, this->GetActorLocation());
 		if (Distance > MinimumDontMoveDistance)
 		{
@@ -815,20 +877,20 @@ void AHeroCharacter::DoAction_AttackActor(const FHeroAction& CurrentAction)
 		else
 		{
 			AAmbitionOfNobunagaPlayerController* acontrol =
-				Cast<AAmbitionOfNobunagaPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
+			    Cast<AAmbitionOfNobunagaPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
 			//AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
 			acontrol->CharacterMove(this, CurrentAction.TargetActor->GetActorLocation());
 			BodyStatus = EHeroBodyStatus::Moving;
 		}
 	}
-		break;
+	break;
 	case EHeroBodyStatus::Moving:
 	{
 		float DistanceToTargetActor = FVector::Dist(CurrentAction.TargetActor->GetActorLocation(), this->GetActorLocation());
 		if (CurrentAttackRadius > DistanceToTargetActor)
 		{
 			AAmbitionOfNobunagaPlayerController* acontrol =
-				Cast<AAmbitionOfNobunagaPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
+			    Cast<AAmbitionOfNobunagaPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
 			//AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
 			acontrol->CharacterStopMove(this);
 			BodyStatus = EHeroBodyStatus::AttackWating;
@@ -838,29 +900,29 @@ void AHeroCharacter::DoAction_AttackActor(const FHeroAction& CurrentAction)
 		{
 			FollowActorUpdateCounting = 0;
 			AAmbitionOfNobunagaPlayerController* acontrol =
-				Cast<AAmbitionOfNobunagaPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
+			    Cast<AAmbitionOfNobunagaPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
 			//AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
 			acontrol->CharacterMove(this, CurrentAction.TargetActor->GetActorLocation());
 		}
 	}
-		break;
+	break;
 	case EHeroBodyStatus::Stunning:
 		break;
 	case EHeroBodyStatus::AttackWating:
 	{
-		if (CurrentAttackingCounting > CurrentAttackSpeedSecond)
+		if (AttackingCounting > CurrentAttackSpeedSecond)
 		{
-			CurrentAttackingCounting = 0;
+			AttackingCounting = 0;
 			BodyStatus = EHeroBodyStatus::AttackBegining;
 			PlayAttack = true;
 		}
 		// 播放攻擊動畫
 		// ...
 	}
-		break;
+	break;
 	case EHeroBodyStatus::AttackBegining:
 	{
-		if (!IsAttacked && CurrentAttackingCounting > CurrentAttackingBeginingTimeLength)
+		if (!IsAttacked && AttackingCounting > CurrentAttackingBeginingTimeLength)
 		{
 			IsAttacked = true;
 			AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
@@ -885,15 +947,15 @@ void AHeroCharacter::DoAction_AttackActor(const FHeroAction& CurrentAction)
 			BodyStatus = EHeroBodyStatus::AttackEnding;
 		}
 	}
-		break;
+	break;
 	case EHeroBodyStatus::AttackEnding:
 	{
-		if (CurrentAttackingCounting > CurrentAttackingBeginingTimeLength + CurrentAttackingEndingTimeLength)
+		if (AttackingCounting > CurrentAttackingBeginingTimeLength + CurrentAttackingEndingTimeLength)
 		{
 			BodyStatus = EHeroBodyStatus::Standing;
 		}
 	}
-		break;
+	break;
 	case EHeroBodyStatus::SpellBegining:
 		break;
 	case EHeroBodyStatus::SpellEnding:
@@ -910,19 +972,18 @@ void AHeroCharacter::DoAction_SpellToDirection(const FHeroAction& CurrentAction)
 	switch (BodyStatus)
 	{
 	case EHeroBodyStatus::Moving:
-		this->GetController()->StopMovement();
+	{
+		AAmbitionOfNobunagaPlayerController* acontrol =
+		    Cast<AAmbitionOfNobunagaPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
+		acontrol->CharacterStopMove(this);
+	}
+	// no break;
 	case EHeroBodyStatus::Standing:
 	{
-		if (LastUseSkill != CurrentAction)
-		{
-			AAmbitionOfNobunagaPlayerController* acontrol =
-				Cast<AAmbitionOfNobunagaPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
-			//AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
-			acontrol->HeroUseSkill(this, CurrentAction.TargetIndex1, CurrentAction.TargetVec1, CurrentAction.TargetVec2);
-		}
-		LastUseSkill = CurrentAction;
+		BodyStatus = EHeroBodyStatus::SpellWating;
+		SpellingCounting = 0;
 	}
-		break;
+	break;
 	case EHeroBodyStatus::Stunning:
 		break;
 	case EHeroBodyStatus::AttackWating:
@@ -931,10 +992,45 @@ void AHeroCharacter::DoAction_SpellToDirection(const FHeroAction& CurrentAction)
 		break;
 	case EHeroBodyStatus::AttackEnding:
 		break;
+	case EHeroBodyStatus::SpellWating:
+	{
+		if (SpellingCounting > CurrentSpellingWatingTimeLength)
+		{
+			BodyStatus = EHeroBodyStatus::SpellBegining;
+			SpellingCounting = 0;
+		}
+	}
+	break;
 	case EHeroBodyStatus::SpellBegining:
-		break;
+	{
+		if (Role == ROLE_Authority)
+		{
+			if (SpellingCounting > CurrentSpellingBeginingTimeLength)
+			{
+				if (LastUseSkill != CurrentAction)
+				{
+					GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Magenta,
+					                                 FString::Printf(L"GetVelocity: %.1f %d",
+					                                         SpellingCounting, CurrentAction.SequenceNumber));
+					BodyStatus = EHeroBodyStatus::SpellEnding;
+					SpellingCounting = 0;
+					AAmbitionOfNobunagaPlayerController* acontrol =
+					    Cast<AAmbitionOfNobunagaPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
+					acontrol->HeroUseSkill(this, CurrentAction.TargetIndex1, CurrentAction.TargetVec1, CurrentAction.TargetVec2);
+				}
+				LastUseSkill = CurrentAction;
+			}
+		}
+	}
+	break;
 	case EHeroBodyStatus::SpellEnding:
-		break;
+	{
+		if (SpellingCounting > CurrentSpellingBeginingTimeLength)
+		{
+			BodyStatus = EHeroBodyStatus::Standing;
+		}
+	}
+	break;
 	default:
 		break;
 	}

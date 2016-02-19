@@ -49,6 +49,7 @@ enum class EHeroBodyStatus : uint8
 	AttackWating, // 攻擊等待
 	AttackBegining, // 攻擊前搖
 	AttackEnding, //攻擊後搖
+	SpellWating, // 施法前等待
 	SpellBegining, // 施法前搖
 	SpellEnding, // 施法後搖
 };
@@ -125,18 +126,28 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Hero")
 	int32 GetCurrentSkillIndex();
 
+	// 確定當前動作做完了沒
 	bool CheckCurrentActionFinish();
 
+	// 做動作
 	void DoAction(const FHeroAction& CurrentAction);
 
+	// 停止目前所有動作
 	void DoNothing();
 
-		
+	// 做移動到指定位置
 	void DoAction_MoveToPosition(const FHeroAction& CurrentAction);
 	void DoAction_MoveToPositionImpl(const FHeroAction& CurrentAction);
+	
+	// 推出做完的動作
 	void PopAction();
+	// 做打人
 	void DoAction_AttackActor(const FHeroAction& CurrentAction);
+
+	// 做指向技
 	void DoAction_SpellToDirection(const FHeroAction& CurrentAction);
+	
+	// 選人的地版光環
 	UPROPERTY(Category = Character, EditAnywhere, BlueprintReadOnly)
 	UDecalComponent * SelectionDecal;
 
@@ -193,12 +204,24 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
 	float BaseAttackingEndingTimeLength;
 
-	// 追踨目標計時器
+	// 基礎施法前等待時間長度
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
-	float FollowActorUpdateCounting;
+	float BaseSpellingWatingTimeLength;
+	// 基礎施法動畫時間長度
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
+	float BaseSpellingAnimationTimeLength;
+	// 基礎施法前搖時間長度
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
+	float BaseSpellingBeginingTimeLength;
+	// 基礎施法後搖時間長度
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
+	float BaseSpellingEndingTimeLength;
+
+	
 	// 追踨目標更新時間
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
 	float FollowActorUpdateTimeGap;
+
 
 	// 基礎魔法受傷倍率
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
@@ -333,6 +356,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Current")
 	bool IsAttacked;
 
+	// 目前是否倒下
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Current")
+	bool IsDead;
+
 	/*
 
 	                             Each Attacking Time gap
@@ -348,7 +375,6 @@ public:
 									 ^
 							    Cause Damage
 	*/
-
 	// 目前攻擊動畫時間長度
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Current")
 	float CurrentAttackingAnimationTimeLength;
@@ -358,9 +384,44 @@ public:
 	// 目前攻擊後搖時間長度
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Current")
 	float CurrentAttackingEndingTimeLength;
+
+	/*
+
+    waiting for next attack
+    |---------------|
+	                CurrentSpellingAnimationTimeLength
+	                |---------------------------------------------------------------|
+	                CurrentSpellingBeginingTimeLength
+	                |--------------------------------|
+	  						                         CurrentSpellingEndingTimeLength
+							                         |------------------------------|
+							                         ^
+                                               Spell cold down
+	*/
+
+	// 目前施法前等待時間長度
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
+	float CurrentSpellingWatingTimeLength;
+	// 目前施法動畫時間長度
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
+	float CurrentSpellingAnimationTimeLength;
+	// 目前施法前搖時間長度
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
+	float CurrentSpellingBeginingTimeLength;
+	// 目前施法後搖時間長度
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
+	float CurrentSpellingEndingTimeLength;
+
 	// 目前攻擊計時器
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Current")
-	float CurrentAttackingCounting;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Counting")
+	float AttackingCounting;
+	// 追踨目標計時器
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Counting")
+	float FollowActorUpdateCounting;
+	// 施法計時器
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Counting")
+	float SpellingCounting;
+
 	// 目前等級
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Current")
 	int32 CurrentLevel;
