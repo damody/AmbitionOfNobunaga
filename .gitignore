@@ -58,3 +58,4 @@ Intermediate/*
 DerivedDataCache/*
 
 *.log
+/Content/AnimStarterPack/UE4_Mannequin/Materials/leaf_mask_texture_00002.uasset
