@@ -385,7 +385,11 @@ void ARTS_HUD::OnSize()
 void ARTS_HUD::OnMouseMove(FVector2D pos, FVector pos3d)
 {
 	CurrentMouseXY = pos;
-	CurrentMouseHit = pos3d;
+	// 如果沒有點到任何東西就不更新滑鼠點到的位置
+	if (pos3d != FVector::ZeroVector)
+	{
+		CurrentMouseHit = pos3d;
+	}
 }
 
 void ARTS_HUD::OnRMouseDown(FVector2D pos)
@@ -413,7 +417,6 @@ void ARTS_HUD::OnRMouseDown(FVector2D pos)
 		{
 			if(CurrentSelection.Num() > 0)
 			{
-				GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("localController->AddHeroToMoveQueue"));
 				if(WantPickup)
 				{
 					//localController->AddHeroToPickupQueue(WantPickup->GetActorLocation(), CurrentSelection[0], WantPickup);
@@ -668,7 +671,7 @@ void ARTS_HUD::OnLMouseReleased(FVector2D pos)
 			if(CurrentSelection.Num() > 0)
 			{
 				SelectedHero(CurrentSelection[0]);
-				CurrentSelection[0]->SetOwner(localController);
+				//CurrentSelection[0]->SetOwner(localController);
 			}
 		}
 	}
@@ -679,7 +682,6 @@ void ARTS_HUD::OnLMouseReleased(FVector2D pos)
 		                                 CurrentSelection.Num()));
 		if(CurrentSelection.Num() > 0)
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("localController->SetNewMoveDestination"));
 			//localController->AddHeroToThrowQueue(CurrentMouseHit, CurrentSelection[0], EquipmentIndex);
 			RTSStatus = ERTSStatusEnum::Normal;
 			ThrowTexture = NULL;

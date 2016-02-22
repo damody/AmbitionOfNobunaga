@@ -7,6 +7,7 @@
 #include "AIController.h"
 #include "Components/ArrowComponent.h"
 #include "HeroActionx.h"
+#include "HeroBuffx.h"
 #include "HeroCharacter.generated.h"
 
 USTRUCT(BlueprintType)
@@ -45,13 +46,13 @@ enum class EHeroBodyStatus : uint8
 {
 	Standing,
 	Moving,
-	Stunning,
-	AttackWating, // 攻擊等待
+	Dazzing,		// 暈炫中
+	AttackWating,	// 攻擊等待
 	AttackBegining, // 攻擊前搖
-	AttackEnding, //攻擊後搖
-	SpellWating, // 施法前等待
-	SpellBegining, // 施法前搖
-	SpellEnding, // 施法後搖
+	AttackEnding,	//攻擊後搖
+	SpellWating,	// 施法前等待
+	SpellBegining,	// 施法前搖
+	SpellEnding,	// 施法後搖
 };
 
 class AEquipment;
@@ -63,8 +64,6 @@ class AMBITIONOFNOBUNAGA_API AHeroCharacter : public ACharacter
 	GENERATED_UCLASS_BODY()
 
 public:
-
-	AAIController* WalkAI;
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -404,16 +403,16 @@ public:
 	*/
 
 	// 目前施法前等待時間長度
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Current")
 	float CurrentSpellingWatingTimeLength;
 	// 目前施法動畫時間長度
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Current")
 	float CurrentSpellingAnimationTimeLength;
 	// 目前施法前搖時間長度
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Current")
 	float CurrentSpellingBeginingTimeLength;
 	// 目前施法後搖時間長度
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Current")
 	float CurrentSpellingEndingTimeLength;
 
 	// 目前攻擊計時器
@@ -425,6 +424,9 @@ public:
 	// 施法計時器
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Counting")
 	float SpellingCounting;
+	// 暈炫倒數計時器
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Counting")
+	float DazzingLeftCounting;
 
 	// 目前等級
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Current")
@@ -493,6 +495,12 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Current", Replicated)
 	EHeroBodyStatus BodyStatus;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Current", Replicated)
+	TArray<FHeroBuff> BuffQueue;
+
+	
+	AAIController* WalkAI;
 
 	FVector LastMoveTarget;
 	FHeroAction LastUseSkill;

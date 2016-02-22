@@ -214,6 +214,7 @@ void AAmbitionOfNobunagaPlayerController::SetupInputComponent()
 //     InputComponent->BindTouch(EInputEvent::IE_Pressed, this, &AAmbitionOfNobunagaPlayerController::MoveToTouchLocation);
 //     InputComponent->BindTouch(EInputEvent::IE_Repeat, this, &AAmbitionOfNobunagaPlayerController::MoveToTouchLocation);
 }
+
 FVector2D AAmbitionOfNobunagaPlayerController::GetMouseScreenPosition()
 {
 	ULocalPlayer* LocalPlayer = Cast<ULocalPlayer>(Player);
@@ -279,7 +280,6 @@ void AAmbitionOfNobunagaPlayerController::OnMouseLButtonReleased()
 
 // network function
 
-
 bool AAmbitionOfNobunagaPlayerController::SetHeroAction_Validate(AHeroCharacter* hero, const FHeroAction& action)
 {
 	return true;
@@ -287,6 +287,8 @@ bool AAmbitionOfNobunagaPlayerController::SetHeroAction_Validate(AHeroCharacter*
 
 void AAmbitionOfNobunagaPlayerController::SetHeroAction_Implementation(AHeroCharacter* hero, const FHeroAction& action)
 {
+	UE_LOG(LogAmbitionOfNobunaga, Log, TEXT("%s SetHeroAction"), *GetFullName());
+	//GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Magenta, TEXT("SetHeroAction"));
 	hero->ActionQueue.Empty();
 	hero->ActionQueue.Add(action);
 }
@@ -296,8 +298,11 @@ bool AAmbitionOfNobunagaPlayerController::AppendHeroAction_Validate(AHeroCharact
 	return true;
 }
 
-void AAmbitionOfNobunagaPlayerController::AppendHeroAction_Implementation(AHeroCharacter* hero, const FHeroAction& action)
+void AAmbitionOfNobunagaPlayerController::AppendHeroAction_Implementation(AHeroCharacter* hero,
+        const FHeroAction& action)
 {
+	UE_LOG(LogAmbitionOfNobunaga, Log, TEXT("%s AppendHeroAction"), *GetFullName());
+	//GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Magenta, TEXT("AppendHeroAction"));
 	hero->ActionQueue.Add(action);
 }
 
@@ -307,12 +312,43 @@ bool AAmbitionOfNobunagaPlayerController::ClearHeroAction_Validate(AHeroCharacte
 	return true;
 }
 
-void AAmbitionOfNobunagaPlayerController::ClearHeroAction_Implementation(AHeroCharacter* hero, const FHeroAction& action)
+void AAmbitionOfNobunagaPlayerController::ClearHeroAction_Implementation(AHeroCharacter* hero,
+        const FHeroAction& action)
 {
+	UE_LOG(LogAmbitionOfNobunaga, Log, TEXT("%s ClearHeroAction"), *GetFullName());
+	//GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Magenta, TEXT("ClearHeroAction"));
 	hero->ActionQueue.Empty();
 }
 
+bool AAmbitionOfNobunagaPlayerController::CharacterMoveMulticast_Validate(AHeroCharacter* actor, const FVector& pos)
+{
+	return true;
+}
 
+void AAmbitionOfNobunagaPlayerController::CharacterMoveMulticast_Implementation(AHeroCharacter* actor,
+        const FVector& pos)
+{
+	//if (Role != ROLE_Authority)
+	{
+		UE_LOG(LogAmbitionOfNobunaga, Log, TEXT("%s CharacterMoveMulticast"), *GetFullName());
+		GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Magenta, TEXT("CharacterMoveMulticast"));
+		if (actor->WalkAI)
+		{
+			if (EPathFollowingRequestResult::Failed == actor->WalkAI->MoveToLocation(pos))
+			{
+				UE_LOG(LogAmbitionOfNobunaga, Log, TEXT("%s WalkAI->MoveToLocation FAIL"), *GetFullName());
+			}
+			else
+			{
+				UE_LOG(LogAmbitionOfNobunaga, Log, TEXT("%s WalkAI->MoveToLocation OK"), *GetFullName());
+			}
+		}
+		else
+		{
+			UE_LOG(LogAmbitionOfNobunaga, Log, TEXT("%s WalkAI->MoveToLocation FAIL"), *GetFullName());
+		}
+	}
+}
 
 bool AAmbitionOfNobunagaPlayerController::CharacterMove_Validate(AHeroCharacter* actor, const FVector& pos)
 {
@@ -321,11 +357,20 @@ bool AAmbitionOfNobunagaPlayerController::CharacterMove_Validate(AHeroCharacter*
 
 void AAmbitionOfNobunagaPlayerController::CharacterMove_Implementation(AHeroCharacter* actor, const FVector& pos)
 {
-	//UNavigationSystem* const NavSys = GetWorld()->GetNavigationSystem();
-	//NavSys->SimpleMoveToLocation(actor->GetController(), pos);
+	UE_LOG(LogAmbitionOfNobunaga, Log, TEXT("%s CharacterMove"), *GetFullName());
+	//GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Magenta, TEXT("CharacterMove"));
 	if (actor->WalkAI)
 	{
+		UE_LOG(LogAmbitionOfNobunaga, Log, TEXT("%s WalkAI->MoveToLocation OK"), *GetFullName());
 		actor->WalkAI->MoveToLocation(pos);
+	}
+	else
+	{
+		UE_LOG(LogAmbitionOfNobunaga, Log, TEXT("%s WalkAI->MoveToLocation FAIL"), *GetFullName());
+	}
+	if (Role == ROLE_Authority)
+	{
+		//CharacterMoveMulticast(actor, pos);
 	}
 }
 
@@ -336,17 +381,23 @@ bool AAmbitionOfNobunagaPlayerController::CharacterStopMove_Validate(AHeroCharac
 
 void AAmbitionOfNobunagaPlayerController::CharacterStopMove_Implementation(AHeroCharacter* actor)
 {
+	UE_LOG(LogAmbitionOfNobunaga, Log, TEXT("%s CharacterStopMove"), *GetFullName());
+	//GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Magenta, TEXT("CharacterStopMove"));
 	actor->GetController()->StopMovement();
 }
 
-bool AAmbitionOfNobunagaPlayerController::HeroUseSkill_Validate(AHeroCharacter* hero, int32 index, const FVector& VFaceTo, const FVector& Pos)
+bool AAmbitionOfNobunagaPlayerController::HeroUseSkill_Validate(AHeroCharacter* hero, int32 index,
+        const FVector& VFaceTo, const FVector& Pos)
 {
 	return true;
 }
 
-void AAmbitionOfNobunagaPlayerController::HeroUseSkill_Implementation(AHeroCharacter* hero, int32 index, const FVector& VFaceTo,
-	const FVector& Pos)
+void AAmbitionOfNobunagaPlayerController::HeroUseSkill_Implementation(AHeroCharacter* hero, int32 index,
+        const FVector& VFaceTo,
+        const FVector& Pos)
 {
+	UE_LOG(LogAmbitionOfNobunaga, Log, TEXT("%s HeroUseSkill"), *GetFullName());
+	//GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Magenta, TEXT("HeroUseSkill"));
 	hero->UseSkill(index, VFaceTo, Pos);
 }
 

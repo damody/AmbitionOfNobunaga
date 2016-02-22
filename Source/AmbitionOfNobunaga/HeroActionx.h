@@ -77,7 +77,7 @@ struct FHeroAction
 };
 
 UCLASS()
-class UHeroActionx : public UObject
+class AMBITIONOFNOBUNAGA_API UHeroActionx : public UObject
 {
 	GENERATED_BODY()
 

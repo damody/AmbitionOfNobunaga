@@ -85,9 +85,6 @@ void AEquipment::OnMouseClicked(UPrimitiveComponent* TouchComp)
     }
 }
 
-// if (GEngine->GetNetMode(GetWorld()) == ENetMode::NM_Client)
-// if (Role == ROLE_Authority)
-
 bool AEquipment::ServerSetLocation_Validate(FVector location)
 {
     return true;

@@ -75,17 +75,24 @@ void ARangeSkillActor::Injury_Implementation()
 	AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
 	for (AHeroCharacter* hero : AttackCollision)
 	{
-		if (hero && PhysicalDamage > 0)
+		// 如果不同隊才造成傷害
+		if (hero && hero->TeamId != TeamId)
 		{
-			float Injury = ags->ArmorConvertToInjuryPersent(hero->CurrentArmor);
-			float Damage = PhysicalDamage * Injury;
-			hero->CurrentHP -= Damage;
+			// 物傷
+			if (PhysicalDamage > 0)
+			{
+				float Injury = ags->ArmorConvertToInjuryPersent(hero->CurrentArmor);
+				float Damage = PhysicalDamage * Injury;
+				hero->CurrentHP -= Damage;
+			}
+			// 法傷
+			if (MagicDamage > 0)
+			{
+				float Damage = MagicDamage * (1 - hero->CurrentMagicInjured);
+				hero->CurrentHP -= Damage;
+			}
 		}
-		if (hero && MagicDamage > 0)
-		{
-			float Damage = MagicDamage * (1 - hero->CurrentMagicInjured);
-			hero->CurrentHP -= Damage;
-		}
+		hero->BuffQueue.Append(Buffs);
 	}
 }
 

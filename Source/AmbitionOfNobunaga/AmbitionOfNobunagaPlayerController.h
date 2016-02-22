@@ -51,6 +51,9 @@ public:
 	UFUNCTION(Server, WithValidation, Reliable, BlueprintCallable, Category = "AONGameState")
 	void CharacterMove(AHeroCharacter* hero, const FVector& action);
 
+	UFUNCTION(NetMulticast, WithValidation, Reliable, BlueprintCallable, Category = "AONGameState")
+	void CharacterMoveMulticast(AHeroCharacter* hero, const FVector& action);
+
 	UFUNCTION(Server, WithValidation, Reliable, BlueprintCallable, Category = "AONGameState")
 	void CharacterStopMove(AHeroCharacter* hero);
 

@@ -66,20 +66,28 @@ void AFlySkillActor::PostEditChangeProperty(FPropertyChangedEvent& PropertyChang
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 }
 #endif
-void AFlySkillActor::OnBeginAttackOverlap(AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void AFlySkillActor::OnBeginAttackOverlap(AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
+        bool bFromSweep, const FHitResult& SweepResult)
 {
 	AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
 	AHeroCharacter* hero = Cast<AHeroCharacter>(OtherActor);
-	if (hero && PhysicalDamage > 0)
+	// 如果不同隊才造成傷害
+	if (hero && hero->TeamId != TeamId)
 	{
-		float Injury = ags->ArmorConvertToInjuryPersent(hero->CurrentArmor);
-		float Damage = PhysicalDamage * Injury;
-		hero->CurrentHP -= Damage;
-	}
-	if (hero && MagicDamage > 0)
-	{
-		float Damage = MagicDamage * (1 - hero->CurrentMagicInjured);
-		hero->CurrentHP -= Damage;
+		// 物傷
+		if (PhysicalDamage > 0)
+		{
+			float Injury = ags->ArmorConvertToInjuryPersent(hero->CurrentArmor);
+			float Damage = PhysicalDamage * Injury;
+			hero->CurrentHP -= Damage;
+		}
+		// 法傷
+		if (MagicDamage > 0)
+		{
+			float Damage = MagicDamage * (1 - hero->CurrentMagicInjured);
+			hero->CurrentHP -= Damage;
+		}
+		hero->BuffQueue.Append(Buffs);
 	}
 }
 
@@ -95,7 +103,7 @@ void AFlySkillActor::BeginPlay()
 void AFlySkillActor::Tick( float DeltaTime )
 {
 	Super::Tick( DeltaTime );
-	
+
 	float move = DeltaTime * MoveSpeed;
 	FVector ourpos = GetActorLocation();
 	FVector dstpos;
