@@ -9,6 +9,12 @@ public class AmbitionOfNobunaga : ModuleRules
         PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore",
             "Paper2D", "AIModule",
             "UMG", "RHI",
-            "RenderCore", "SlateCore", "HeadMountedDisplay" });
-	}
+            "RenderCore", "SlateCore", "HeadMountedDisplay",
+            "DA_RTS"});
+        if (UEBuildConfiguration.bBuildEditor)
+        {
+            PublicDependencyModuleNames.AddRange(new string[] { "UnrealEd", "DA_RTS_Editor" });
+        }
+        Definitions.AddRange(new string[] { "_USE_MATH_DEFINES" });
+    }
 }

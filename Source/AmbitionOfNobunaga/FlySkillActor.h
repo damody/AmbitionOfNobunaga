@@ -3,7 +3,7 @@
 #pragma once
 
 #include "GameFramework/Actor.h"
-#include "HeroBuffx.h"
+#include "HeroBuff.h"
 #include "FlySkillActor.generated.h"
 
 UCLASS()
@@ -73,5 +73,5 @@ public:
 	TArray<AActor*> AlreadyDamageActor;
 
 	UPROPERTY(Category = "RangeSkill", EditAnywhere, BlueprintReadWrite)
-	TArray<FHeroBuff> Buffs;
+	TArray<UHeroBuff*> Buffs;
 };

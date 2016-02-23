@@ -13,6 +13,8 @@
 #include "BulletActor.h"
 #include "MouseEffect.h"
 #include "AmbitionOfNobunagaPlayerController.h"
+#include "cmath"
+#include "PaperFlipbook.h"
 
 AHeroCharacter::AHeroCharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(FObjectInitializer::Get())
@@ -23,9 +25,19 @@ AHeroCharacter::AHeroCharacter(const FObjectInitializer& ObjectInitializer)
 	SelectionDecal = ObjectInitializer.CreateDefaultSubobject<UDecalComponent>(this, TEXT("SelectionDecal0"));
 	PositionOnHead = ObjectInitializer.CreateDefaultSubobject<UArrowComponent>(this, TEXT("PositionOnHead0"));
 	PositionUnderFoot = ObjectInitializer.CreateDefaultSubobject<UArrowComponent>(this, TEXT("PositionUnderFoot0"));
+	HeadEffectSprite = ObjectInitializer.CreateDefaultSubobject<UPaperFlipbookComponent>(this, TEXT("HeadEffectSprite0"));
 
 	PositionOnHead->AttachParent = GetCapsuleComponent();
 	PositionUnderFoot->AttachParent = GetCapsuleComponent();
+
+	HeadEffectSprite->SetWorldLocation(FVector(0, 0, 90));
+	// FRotator = rotation Y Z X
+	HeadEffectSprite->SetWorldRotation(FQuat(FRotator(0, 0, 90)));
+	HeadEffectSprite->SetWorldScale3D(FVector(0.5, 0.5, 0.5));
+	ConstructorHelpers::FClassFinder<APawn> PlayerPawnBPClass(TEXT("/Game/AllLogic/Blueprints/TopDownCharacter"));
+	ConstructorHelpers::FObjectFinder<UPaperFlipbook> Flipbook(TEXT("/Game/AllLogic/Hero/Skill/Dazzing_Flipbook"));
+	HeadEffectSprite->SetFlipbook(Flipbook.Object);
+	HeadEffectSprite->AttachParent = GetCapsuleComponent();
 
 	SelectionDecal->SetWorldLocation(FVector(0, 0, -90));
 	// FRotator = rotation Y Z X
@@ -98,7 +110,8 @@ void AHeroCharacter::BeginPlay()
 		WalkAI = GetWorld()->SpawnActor<AAIController>(GetActorLocation(), GetActorRotation());
 		WalkAI->Possess(this);
 	}
-
+	HeadEffectSprite->DetachFromParent();
+	HeadEffectSprite->SetVisibility(false);
 	SelectionDecal->SetVisibility(false);
 	isSelection = false;
 	CheckSelf(Skill_MaxCD.Num() == Skill_Amount, TEXT("Skill_MaxCD is invalid"));
@@ -142,6 +155,8 @@ void AHeroCharacter::BeginPlay()
 	CurrentSpellingAnimationTimeLength = BaseSpellingAnimationTimeLength;
 	CurrentSpellingBeginingTimeLength = BaseSpellingBeginingTimeLength;
 	CurrentSpellingEndingTimeLength = BaseSpellingEndingTimeLength;
+	DazzingRotationCounting = 0;
+	DazzingRotationSpeed = 10;
 
 	MinimumDontMoveDistance = GetCapsuleComponent()->GetScaledCapsuleHalfHeight() + 30;
 }
@@ -150,6 +165,7 @@ void AHeroCharacter::BeginPlay()
 void AHeroCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	HeadEffectSprite->SetWorldLocation(PositionOnHead->GetComponentLocation());
 	if (CurrentSkillHint)
 	{
 		ARTS_HUD* hud = Cast<ARTS_HUD>(UGameplayStatics::GetPlayerController(this, 0)->GetHUD());
@@ -208,17 +224,31 @@ void AHeroCharacter::Tick(float DeltaTime)
 	DazzingLeftCounting = 0;
 	for (int32 i = 0; i < BuffQueue.Num(); ++i)
 	{
-		BuffQueue[i].Duration -= DeltaTime;
+		BuffQueue[i]->Duration -= DeltaTime;
 		// 如果暈了
-		if (BuffQueue[i].Dazzing && BuffQueue[i].Duration > DazzingLeftCounting)
+		if (BuffQueue[i]->Dazzing && BuffQueue[i]->Duration > DazzingLeftCounting)
 		{
-			DazzingLeftCounting = BuffQueue[i].Duration;
+			DazzingLeftCounting = BuffQueue[i]->Duration;
 			BodyStatus = EHeroBodyStatus::Dazzing;
 		}
+		// 移除時間到的Buff
+		if (BuffQueue[i]->Duration <= 0)
+		{
+			BuffQueue.RemoveAt(i);
+			i--;
+		}
+	}
+	if (EHeroBodyStatus::Dazzing == BodyStatus)
+	{
+		HeadEffectSprite->SetVisibility(true);
+		FVector RSpeed = FVector::ZeroVector;
+		RSpeed.Z = DazzingRotationSpeed * 180 / M_PI * DeltaTime;
+		HeadEffectSprite->AddRelativeRotation(FRotator::MakeFromEuler(RSpeed));
 	}
 	// 如果醒了
 	if (!isLastFrameDazzing && DazzingLeftCounting == 0)
 	{
+		HeadEffectSprite->SetVisibility(false);
 		LastMoveTarget = FVector::ZeroVector;
 		BodyStatus = EHeroBodyStatus::Standing;
 	}

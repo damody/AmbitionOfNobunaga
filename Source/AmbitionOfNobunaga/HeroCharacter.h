@@ -7,8 +7,10 @@
 #include "AIController.h"
 #include "Components/ArrowComponent.h"
 #include "HeroActionx.h"
-#include "HeroBuffx.h"
+#include "HeroBuff.h"
+#include "PaperFlipbookComponent.h"
 #include "HeroCharacter.generated.h"
+
 
 USTRUCT(BlueprintType)
 struct FLevelCDs
@@ -150,11 +152,16 @@ public:
 	UPROPERTY(Category = Character, EditAnywhere, BlueprintReadOnly)
 	UDecalComponent * SelectionDecal;
 
+	// 手動設定的頭頂位置
 	UPROPERTY(Category = Character, EditAnywhere, BlueprintReadOnly)
 	UArrowComponent * PositionOnHead;
 
+	// 手動設定的腳底位置
 	UPROPERTY(Category = Character, EditAnywhere, BlueprintReadOnly)
 	UArrowComponent * PositionUnderFoot;
+
+	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly)
+	UPaperFlipbookComponent* HeadEffectSprite;
 
 	UPROPERTY(Category = Character, EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<ABulletActor> HeroBullet;
@@ -192,6 +199,13 @@ public:
 	// 基礎攻速
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
 	float BaseAttackSpeedSecond;
+
+	// 基礎攻擊動畫時間長度
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
+	float DazzingRotationSpeed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
+	float DazzingRotationCounting;
 
 	// 基礎攻擊動畫時間長度
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
@@ -497,7 +511,7 @@ public:
 	EHeroBodyStatus BodyStatus;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Current", Replicated)
-	TArray<FHeroBuff> BuffQueue;
+	TArray<UHeroBuff*> BuffQueue;
 
 	
 	AAIController* WalkAI;
