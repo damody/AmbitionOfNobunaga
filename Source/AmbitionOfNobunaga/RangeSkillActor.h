@@ -84,4 +84,6 @@ public:
 	UPROPERTY(Category = "RangeSkill", EditAnywhere, BlueprintReadWrite)
 	TArray<UHeroBuff*> Buffs;
 
+	UPROPERTY(Category = "RangeSkill", EditAnywhere, BlueprintReadWrite)
+	bool IsReadyToStart;
 };

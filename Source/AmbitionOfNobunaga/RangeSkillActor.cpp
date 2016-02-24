@@ -37,6 +37,7 @@ ARangeSkillActor::ARangeSkillActor(const FObjectInitializer& ObjectInitializer)
     DestroyDelay = 2;
     LifeCount = 0;
     HasDamaged = false;
+	IsReadyToStart = false;
     DamageTime = 1;
 }
 #if WITH_EDITOR
@@ -91,8 +92,8 @@ void ARangeSkillActor::Injury_Implementation()
 				float Damage = MagicDamage * (1 - hero->CurrentMagicInjured);
 				hero->CurrentHP -= Damage;
 			}
+			hero->BuffQueue.Append(UHeroBuff::CloneArray(Buffs));
 		}
-		hero->BuffQueue.Append(Buffs);
 	}
 }
 
@@ -108,6 +109,10 @@ void ARangeSkillActor::BeginPlay()
 void ARangeSkillActor::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
+	if (!IsReadyToStart)
+	{
+		return;
+	}
     LifeCount += DeltaTime;
     if(!HasDamaged && LifeCount >= DamageTime)
     {

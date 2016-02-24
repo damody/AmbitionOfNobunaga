@@ -6,6 +6,8 @@
 #include "HeroBuff.h"
 #include "FlySkillActor.generated.h"
 
+class AHeroCharacter;
+
 UCLASS()
 class AMBITIONOFNOBUNAGA_API AFlySkillActor : public AActor
 {
@@ -17,6 +19,9 @@ public:
 #endif
 	UFUNCTION()
 	void OnBeginAttackOverlap(AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION(Server, WithValidation, Reliable)
+	void Injury();
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -69,9 +74,15 @@ public:
 	UPROPERTY(Category = "FlySkill", EditAnywhere, BlueprintReadWrite, Replicated, meta = (EditCondition = "UseTargetActor"))
 	AActor* TargetActor;
 
+	UPROPERTY(Category = "FlySkill", VisibleAnywhere, BlueprintReadOnly)
+	TArray<AHeroCharacter*> AttackCollision;
+
 	UPROPERTY(Category = "FlySkill", EditAnywhere, BlueprintReadWrite)
 	TArray<AActor*> AlreadyDamageActor;
 
 	UPROPERTY(Category = "RangeSkill", EditAnywhere, BlueprintReadWrite)
 	TArray<UHeroBuff*> Buffs;
+
+	UPROPERTY(Category = "FlySkill", EditAnywhere, BlueprintReadWrite)
+	bool IsReadyToStart;
 };

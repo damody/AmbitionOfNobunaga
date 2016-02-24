@@ -33,8 +33,14 @@ class DA_RTS_API UHeroBuff : public UObject
 {
 	GENERATED_BODY()
 public:
-	UFUNCTION(BlueprintCallable, Category = "HeroBuff")
+	UFUNCTION(BlueprintCallable, Category = "NewObject")
 	static UHeroBuff* NewHeroBuff();
+
+	UFUNCTION(BlueprintCallable, Category = "NewObject")
+	static TArray<UHeroBuff*> CloneArray(TArray<UHeroBuff*> input);
+
+	UFUNCTION(BlueprintCallable, Category = "NewObject")
+	UHeroBuff* Clone();
 
 	// Buff 優先權
 	UPROPERTY(Category = "HeroBuff", EditAnywhere, BlueprintReadOnly)

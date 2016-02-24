@@ -171,26 +171,23 @@ void AHeroCharacter::Tick(float DeltaTime)
 		ARTS_HUD* hud = Cast<ARTS_HUD>(UGameplayStatics::GetPlayerController(this, 0)->GetHUD());
 		if (hud)
 		{
-			// 如果有按左shift的話顯示插旗後的技能位置
-			if (hud->bLeftShiftDown)
+			// 如果有插旗移動，以最後一根移動旗為準來顯示技能提示
+			int32 lastMoveIndex = -1;
+			for (int32 i = 0; i < ActionQueue.Num(); ++i)
 			{
-				// 如果有插旗移動，以最後一根移動旗為準來顯示技能提示
-				int32 lastMoveIndex = -1;
-				for (int32 i = 0; i < ActionQueue.Num(); ++i)
+				if (ActionQueue[i].ActionStatus == EHeroActionStatus::MoveToPosition)
 				{
-					if (ActionQueue[i].ActionStatus == EHeroActionStatus::MoveToPosition)
-					{
-						lastMoveIndex = i;
-					}
+					lastMoveIndex = i;
 				}
-				if (lastMoveIndex >= 0)
-				{
-					FVector pos = ActionQueue[lastMoveIndex].TargetVec1;
-					pos.Z += 50;
-					CurrentSkillHint->UpdatePos(pos, hud->CurrentMouseHit);
-					CurrentSkillDirection = hud->CurrentMouseHit - pos;
-					CurrentSkillDirection.Z = 0;
-				}
+			}
+			// 如果有按左shift的話顯示插旗後的技能位置
+			if (hud->bLeftShiftDown && lastMoveIndex >= 0)
+			{
+				FVector pos = ActionQueue[lastMoveIndex].TargetVec1;
+				pos.Z += 50;
+				CurrentSkillHint->UpdatePos(pos, hud->CurrentMouseHit);
+				CurrentSkillDirection = hud->CurrentMouseHit - pos;
+				CurrentSkillDirection.Z = 0;
 			}
 			else
 			{
@@ -206,7 +203,7 @@ void AHeroCharacter::Tick(float DeltaTime)
 		if (GetVelocity().Size() > 5)
 		{
 			AAmbitionOfNobunagaPlayerController* acontrol =
-				Cast<AAmbitionOfNobunagaPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
+			    Cast<AAmbitionOfNobunagaPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
 			acontrol->CharacterStopMove(this);
 		}
 		IsDead = true;
@@ -234,6 +231,9 @@ void AHeroCharacter::Tick(float DeltaTime)
 		// 移除時間到的Buff
 		if (BuffQueue[i]->Duration <= 0)
 		{
+			// 釋放記憶體
+			BuffQueue[i]->ConditionalBeginDestroy();
+			BuffQueue[i] = NULL;
 			BuffQueue.RemoveAt(i);
 			i--;
 		}
@@ -265,7 +265,7 @@ void AHeroCharacter::Tick(float DeltaTime)
 			}
 		}
 	}
-	
+
 	// 是否有動作？
 	if (ActionQueue.Num() > 0 && !IsDead)
 	{
@@ -552,6 +552,8 @@ bool AHeroCharacter::UseSkill(int32 index, FVector VFaceTo, FVector Pos)
 			SetActorRotation(dir.Rotation());
 		}
 	}
+	VFaceTo.Z = 0;
+	VFaceTo.Normalize();
 	BP_ImplementSkill(index, VFaceTo, Pos);
 	return true;
 }
@@ -728,9 +730,9 @@ void AHeroCharacter::DoNothing()
 void AHeroCharacter::DoAction_MoveToPosition(const FHeroAction& CurrentAction)
 {
 	if (BodyStatus == EHeroBodyStatus::Dazzing && GetVelocity().Size() > 5)
-	{ 
+	{
 		AAmbitionOfNobunagaPlayerController* acontrol =
-			Cast<AAmbitionOfNobunagaPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
+		    Cast<AAmbitionOfNobunagaPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
 		acontrol->CharacterStopMove(this);
 	}
 	else if (LastMoveTarget != CurrentAction.TargetVec1)

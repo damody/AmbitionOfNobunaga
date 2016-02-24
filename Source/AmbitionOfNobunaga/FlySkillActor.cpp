@@ -35,7 +35,9 @@ AFlySkillActor::AFlySkillActor(const FObjectInitializer& ObjectInitializer)
 	CapsuleComponent->SetCollisionResponseToChannel(ECC_Destructible, ECR_Ignore);
 	DestroyDelay = 2;
 	UseTargetLocation = true;
+	IsReadyToStart = false;
 }
+
 #if WITH_EDITOR
 void AFlySkillActor::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
@@ -66,29 +68,47 @@ void AFlySkillActor::PostEditChangeProperty(FPropertyChangedEvent& PropertyChang
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 }
 #endif
+
 void AFlySkillActor::OnBeginAttackOverlap(AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
         bool bFromSweep, const FHitResult& SweepResult)
 {
-	AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
 	AHeroCharacter* hero = Cast<AHeroCharacter>(OtherActor);
-	// 如果不同隊才造成傷害
-	if (hero && hero->TeamId != TeamId)
+	if (hero)
 	{
-		// 物傷
-		if (PhysicalDamage > 0)
-		{
-			float Injury = ags->ArmorConvertToInjuryPersent(hero->CurrentArmor);
-			float Damage = PhysicalDamage * Injury;
-			hero->CurrentHP -= Damage;
-		}
-		// 法傷
-		if (MagicDamage > 0)
-		{
-			float Damage = MagicDamage * (1 - hero->CurrentMagicInjured);
-			hero->CurrentHP -= Damage;
-		}
-		hero->BuffQueue.Append(Buffs);
+		AttackCollision.Add(hero);
 	}
+}
+
+bool AFlySkillActor::Injury_Validate()
+{
+	return true;
+}
+
+void AFlySkillActor::Injury_Implementation()
+{
+	AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
+	for (AHeroCharacter* hero : AttackCollision)
+	{
+		// 如果不同隊才造成傷害
+		if (hero && hero->TeamId != this->TeamId)
+		{
+			// 物傷
+			if (PhysicalDamage > 0)
+			{
+				float Injury = ags->ArmorConvertToInjuryPersent(hero->CurrentArmor);
+				float Damage = PhysicalDamage * Injury;
+				hero->CurrentHP -= Damage;
+			}
+			// 法傷
+			if (MagicDamage > 0)
+			{
+				float Damage = MagicDamage * (1 - hero->CurrentMagicInjured);
+				hero->CurrentHP -= Damage;
+			}
+			hero->BuffQueue.Append(Buffs);
+		}
+	}
+	AttackCollision.Empty();
 }
 
 // Called when the game starts or when spawned
@@ -103,7 +123,14 @@ void AFlySkillActor::BeginPlay()
 void AFlySkillActor::Tick( float DeltaTime )
 {
 	Super::Tick( DeltaTime );
-
+	if (!IsReadyToStart)
+	{
+		return;
+	}
+	if (AttackCollision.Num() > 0)
+	{
+		Injury();
+	}
 	float move = DeltaTime * MoveSpeed;
 	FVector ourpos = GetActorLocation();
 	FVector dstpos;
