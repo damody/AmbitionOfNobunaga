@@ -16,6 +16,7 @@
 #include "AONGameState.h"
 #include "HeroActionx.h"
 #include "MouseEffect.h"
+#include "SceneObject.h"
 
 
 ARTS_HUD::ARTS_HUD()
@@ -293,7 +294,7 @@ void ARTS_HUD::StopMovementHero(AHeroCharacter* hero)
 	}
 }
 
-void ARTS_HUD::HeroAttack(AHeroCharacter* hero)
+void ARTS_HUD::HeroAttackHero(AHeroCharacter* hero)
 {
 	bClickHero = true;
 	if(localController)
@@ -324,6 +325,35 @@ void ARTS_HUD::HeroAttack(AHeroCharacter* hero)
 				{
 					localController->SetHeroAction(EachHero, act);
 				}
+			}
+			//localController->AddHeroToAttackQueue(HeroGoAttack, hero);
+		}
+	}
+}
+
+void ARTS_HUD::HeroAttackSceneObject(ASceneObject* SceneObj)
+{
+	bClickHero = true;
+	if (localController)
+	{
+		if (CurrentSelection.Num() > 0)
+		{
+			AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
+			FHeroAction act;
+			act.ActionStatus = EHeroActionStatus::AttackSceneObject;
+			act.TargetActor = SceneObj;
+			act.SequenceNumber = SequenceNumber++;
+
+			for (AHeroCharacter* EachHero : CurrentSelection)
+			{
+				if (bLeftShiftDown)
+				{
+					localController->AppendHeroAction(EachHero, act);
+				}
+				else
+				{
+					localController->SetHeroAction(EachHero, act);
+				}
 
 			}
 			//localController->AddHeroToAttackQueue(HeroGoAttack, hero);
@@ -331,25 +361,6 @@ void ARTS_HUD::HeroAttack(AHeroCharacter* hero)
 	}
 }
 
-void ARTS_HUD::HeroMove(AHeroCharacter* hero, FVector dst)
-{
-	if(localController)
-	{
-		TArray<AHeroCharacter*> oneHero;
-		oneHero.Add(hero);
-		//localController->AddHeroToMoveQueue(dst, oneHero);
-	}
-}
-
-void ARTS_HUD::ClearHeroWant(AHeroCharacter* hero)
-{
-	if(localController)
-	{
-		TArray<AHeroCharacter*> oneHero;
-		oneHero.Add(hero);
-		//localController->AddHeroToClearWantQueue(oneHero);
-	}
-}
 
 void ARTS_HUD::ShowHeroSkillHint(int32 index)
 {

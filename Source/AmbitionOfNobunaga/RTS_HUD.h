@@ -26,6 +26,7 @@ enum class ERTSClickEnum : uint8
 class AAmbitionOfNobunagaPlayerController;
 class AHeroCharacter;
 class AEquipment;
+class ASceneObject;
 /**
  * 
  */
@@ -84,14 +85,11 @@ public:
 	void StopMovementHero(AHeroCharacter* hero);
 
 	UFUNCTION(BlueprintCallable, Category = "RTS")
-	void HeroAttack(AHeroCharacter* hero);
+	void HeroAttackHero(AHeroCharacter* hero);
 
 	UFUNCTION(BlueprintCallable, Category = "RTS")
-	void HeroMove(AHeroCharacter* hero, FVector dst);
-
-	UFUNCTION(BlueprintCallable, Category = "RTS")
-	void ClearHeroWant(AHeroCharacter* hero);
-
+	void HeroAttackSceneObject(ASceneObject* SceneObj);
+	
 	UFUNCTION(BlueprintCallable, Category = "RTS")
 	void ShowHeroSkillHint(int32 index);
 	

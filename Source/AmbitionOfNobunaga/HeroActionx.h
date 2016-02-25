@@ -25,7 +25,8 @@ enum class EHeroActionStatus : uint8
 	SpellToSelf,		// 不需指定目標的技能
 	MoveToPickup,		// 撿裝
 	MoveToThrowEqu,		// 丟裝
-	ThrowEquToActor		// 丟裝給人
+	ThrowEquToActor,	// 丟裝給人
+	AttackSceneObject	// 破壞場景物件
 };
 
 /**
@@ -44,7 +45,7 @@ struct FHeroAction
 
 	// for MoveToActor, FollowActor, AttackActor, MovingAttackActor, SpellToActor, ThrowEquToActor
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	AHeroCharacter* TargetActor;
+	AActor* TargetActor;
 
 	// for MoveToPickup
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

@@ -147,7 +147,8 @@ public:
 
 	// 做指向技
 	void DoAction_SpellToDirection(const FHeroAction& CurrentAction);
-	
+	void DoAction_AttackSceneObject(const FHeroAction& CurrentAction);
+
 	// 選人的地版光環
 	UPROPERTY(Category = Character, EditAnywhere, BlueprintReadOnly)
 	UDecalComponent * SelectionDecal;

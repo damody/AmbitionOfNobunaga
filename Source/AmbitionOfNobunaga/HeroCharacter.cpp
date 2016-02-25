@@ -15,6 +15,7 @@
 #include "AmbitionOfNobunagaPlayerController.h"
 #include "cmath"
 #include "PaperFlipbook.h"
+#include "SceneObject.h"
 
 AHeroCharacter::AHeroCharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(FObjectInitializer::Get())
@@ -412,7 +413,7 @@ void AHeroCharacter::OnMouseClicked(UPrimitiveComponent* TouchComp)
 		{
 			if(hud->CurrentSelection.Num() > 0)
 			{
-				hud->HeroAttack(this);
+				hud->HeroAttackHero(this);
 			}
 		}
 	}
@@ -549,6 +550,7 @@ bool AHeroCharacter::UseSkill(int32 index, FVector VFaceTo, FVector Pos)
 		{
 			FVector dir = Pos - GetActorLocation();
 			dir.Z = 0;
+			dir.Normalize();
 			SetActorRotation(dir.Rotation());
 		}
 	}
@@ -565,6 +567,8 @@ int32 AHeroCharacter::GetCurrentSkillIndex()
 
 bool AHeroCharacter::CheckCurrentActionFinish()
 {
+	AHeroCharacter* TargetActor = Cast<AHeroCharacter>(CurrentAction.TargetActor);
+	ASceneObject* TargetSceneActor = Cast<ASceneObject>(CurrentAction.TargetActor);
 	switch (BodyStatus)
 	{
 	case EHeroBodyStatus::Standing:
@@ -618,27 +622,14 @@ bool AHeroCharacter::CheckCurrentActionFinish()
 	case EHeroBodyStatus::Dazzing:
 		break;
 	case EHeroBodyStatus::AttackWating:
-	{
-		if (CurrentAction.TargetActor &&
-		        CurrentAction.TargetActor->CurrentHP <= 0)
-		{
-			return true;
-		}
-	}
-	break;
 	case EHeroBodyStatus::AttackBegining:
-	{
-		if (CurrentAction.TargetActor &&
-		        CurrentAction.TargetActor->CurrentHP <= 0)
-		{
-			return true;
-		}
-	}
-	break;
 	case EHeroBodyStatus::AttackEnding:
 	{
-		if (CurrentAction.TargetActor &&
-		        CurrentAction.TargetActor->CurrentHP <= 0)
+		if (TargetActor && TargetActor->CurrentHP <= 0)
+		{
+			return true;
+		}
+		if (TargetSceneActor && TargetSceneActor->CurrentHP <= 0)
 		{
 			return true;
 		}
@@ -689,6 +680,9 @@ void AHeroCharacter::DoAction(const FHeroAction& CurrentAction)
 	case EHeroActionStatus::MoveToThrowEqu:
 		break;
 	case EHeroActionStatus::ThrowEquToActor:
+		break;
+	case EHeroActionStatus::AttackSceneObject:
+		DoAction_AttackSceneObject(CurrentAction);
 		break;
 	default:
 		break;
@@ -801,13 +795,16 @@ void AHeroCharacter::PopAction()
 
 void AHeroCharacter::DoAction_AttackActor(const FHeroAction& CurrentAction)
 {
-	FVector dir = CurrentAction.TargetActor->GetActorLocation() - GetActorLocation();
+	AHeroCharacter* TargetActor = Cast<AHeroCharacter>(CurrentAction.TargetActor);
+	FVector dir = TargetActor->GetActorLocation() - GetActorLocation();
+	dir.Z = 0;
+	dir.Normalize();
 	SetActorRotation(dir.Rotation());
 	switch (BodyStatus)
 	{
 	case EHeroBodyStatus::Standing:
 	{
-		float DistanceToTargetActor = FVector::Dist(CurrentAction.TargetActor->GetActorLocation(), this->GetActorLocation());
+		float DistanceToTargetActor = FVector::Dist(TargetActor->GetActorLocation(), this->GetActorLocation());
 		if (CurrentAttackRadius > DistanceToTargetActor)
 		{
 			BodyStatus = EHeroBodyStatus::AttackWating;
@@ -818,14 +815,14 @@ void AHeroCharacter::DoAction_AttackActor(const FHeroAction& CurrentAction)
 			AAmbitionOfNobunagaPlayerController* acontrol =
 			    Cast<AAmbitionOfNobunagaPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
 			//AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
-			acontrol->CharacterMove(this, CurrentAction.TargetActor->GetActorLocation());
+			acontrol->CharacterMove(this, TargetActor->GetActorLocation());
 			BodyStatus = EHeroBodyStatus::Moving;
 		}
 	}
 	break;
 	case EHeroBodyStatus::Moving:
 	{
-		float DistanceToTargetActor = FVector::Dist(CurrentAction.TargetActor->GetActorLocation(), this->GetActorLocation());
+		float DistanceToTargetActor = FVector::Dist(TargetActor->GetActorLocation(), this->GetActorLocation());
 		if (CurrentAttackRadius > DistanceToTargetActor)
 		{
 			AAmbitionOfNobunagaPlayerController* acontrol =
@@ -841,8 +838,8 @@ void AHeroCharacter::DoAction_AttackActor(const FHeroAction& CurrentAction)
 			AAmbitionOfNobunagaPlayerController* acontrol =
 			    Cast<AAmbitionOfNobunagaPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
 			//AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
-			acontrol->CharacterMove(this, CurrentAction.TargetActor->GetActorLocation());
-			acontrol->CharacterMoveMulticast(this, CurrentAction.TargetActor->GetActorLocation());
+			acontrol->CharacterMove(this, TargetActor->GetActorLocation());
+			acontrol->CharacterMoveMulticast(this, TargetActor->GetActorLocation());
 		}
 	}
 	break;
@@ -866,7 +863,7 @@ void AHeroCharacter::DoAction_AttackActor(const FHeroAction& CurrentAction)
 		{
 			IsAttacked = true;
 			AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
-			float Injury = ags->ArmorConvertToInjuryPersent(CurrentAction.TargetActor->CurrentArmor);
+			float Injury = ags->ArmorConvertToInjuryPersent(TargetActor->CurrentArmor);
 			float Damage = this->CurrentAttack * Injury;
 
 			if (HeroBullet)
@@ -876,13 +873,13 @@ void AHeroCharacter::DoAction_AttackActor(const FHeroAction& CurrentAction)
 				if (bullet)
 				{
 					bullet->SetActorLocation(pos);
-					bullet->SetTartgetActor(CurrentAction.TargetActor);
+					bullet->SetTartgetActor(TargetActor);
 					bullet->Damage = Damage;
 				}
 			}
 			else
 			{
-				CurrentAction.TargetActor->CurrentHP -= Damage;
+				TargetActor->CurrentHP -= Damage;
 			}
 			BodyStatus = EHeroBodyStatus::AttackEnding;
 		}
@@ -966,6 +963,110 @@ void AHeroCharacter::DoAction_SpellToDirection(const FHeroAction& CurrentAction)
 		}
 	}
 	break;
+	default:
+		break;
+	}
+}
+
+void AHeroCharacter::DoAction_AttackSceneObject(const FHeroAction& CurrentAction)
+{
+ 	ASceneObject* TargetActor = Cast<ASceneObject>(CurrentAction.TargetActor);
+	FVector dir = TargetActor->GetActorLocation() - GetActorLocation();
+	dir.Z = 0;
+	dir.Normalize();
+	SetActorRotation(dir.Rotation());
+	switch (BodyStatus)
+	{
+	case EHeroBodyStatus::Standing:
+	{
+		float DistanceToTargetActor = FVector::Dist(TargetActor->GetActorLocation(), this->GetActorLocation());
+		if (CurrentAttackRadius > DistanceToTargetActor)
+		{
+			BodyStatus = EHeroBodyStatus::AttackWating;
+			IsAttacked = false;
+		}
+		else
+		{
+			AAmbitionOfNobunagaPlayerController* acontrol =
+				Cast<AAmbitionOfNobunagaPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
+			//AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
+			acontrol->CharacterMove(this, TargetActor->GetActorLocation());
+			BodyStatus = EHeroBodyStatus::Moving;
+		}
+	}
+	break;
+	case EHeroBodyStatus::Moving:
+	{
+		float DistanceToTargetActor = FVector::Dist(TargetActor->GetActorLocation(), this->GetActorLocation());
+		if (CurrentAttackRadius > DistanceToTargetActor)
+		{
+			AAmbitionOfNobunagaPlayerController* acontrol =
+				Cast<AAmbitionOfNobunagaPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
+			acontrol->CharacterStopMove(this);
+			BodyStatus = EHeroBodyStatus::AttackWating;
+			IsAttacked = false;
+		}
+		else if (FollowActorUpdateCounting > FollowActorUpdateTimeGap)
+		{
+			FollowActorUpdateCounting = 0;
+			AAmbitionOfNobunagaPlayerController* acontrol =
+				Cast<AAmbitionOfNobunagaPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
+			acontrol->CharacterMove(this, TargetActor->GetActorLocation());
+		}
+	}
+	break;
+	case EHeroBodyStatus::Dazzing:
+		break;
+	case EHeroBodyStatus::AttackWating:
+	{
+		if (AttackingCounting > CurrentAttackSpeedSecond)
+		{
+			AttackingCounting = 0;
+			BodyStatus = EHeroBodyStatus::AttackBegining;
+			PlayAttack = true;
+		}
+		// 播放攻擊動畫
+		// ...
+	}
+	break;
+	case EHeroBodyStatus::AttackBegining:
+	{
+		if (!IsAttacked && AttackingCounting > CurrentAttackingBeginingTimeLength)
+		{
+			IsAttacked = true;
+			float Damage = this->CurrentAttack;
+
+			if (HeroBullet)
+			{
+				FVector pos = GetActorLocation();
+				ABulletActor* bullet = GetWorld()->SpawnActor<ABulletActor>(HeroBullet);
+				if (bullet)
+				{
+					bullet->SetActorLocation(pos);
+					bullet->SetTartgetActor(TargetActor);
+					bullet->Damage = Damage;
+				}
+			}
+			else
+			{
+				TargetActor->CurrentHP -= Damage;
+			}
+			BodyStatus = EHeroBodyStatus::AttackEnding;
+		}
+	}
+	break;
+	case EHeroBodyStatus::AttackEnding:
+	{
+		if (AttackingCounting > CurrentAttackingBeginingTimeLength + CurrentAttackingEndingTimeLength)
+		{
+			BodyStatus = EHeroBodyStatus::Standing;
+		}
+	}
+	break;
+	case EHeroBodyStatus::SpellBegining:
+		break;
+	case EHeroBodyStatus::SpellEnding:
+		break;
 	default:
 		break;
 	}

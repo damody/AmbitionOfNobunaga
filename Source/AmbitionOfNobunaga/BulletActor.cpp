@@ -3,6 +3,7 @@
 #include "AmbitionOfNobunaga.h"
 #include "BulletActor.h"
 #include "HeroCharacter.h"
+#include "SceneObject.h"
 
 ABulletActor::ABulletActor(const FObjectInitializer& ObjectInitializer)
     : Super(FObjectInitializer::Get())
@@ -58,8 +59,16 @@ void ABulletActor::Tick(float DeltaTime)
         }
         if(BreakDistance > dis)
         {
-            AHeroCharacter* hero = Cast<AHeroCharacter>(TargetActor);
-            hero->CurrentHP -= Damage;
+            AHeroCharacter* Hero = Cast<AHeroCharacter>(TargetActor);
+			ASceneObject* SceneObj = Cast<ASceneObject>(TargetActor);
+			if (Hero)
+			{
+				Hero->CurrentHP -= Damage;
+			}
+			else if (SceneObj)
+			{
+				SceneObj->CurrentHP -= Damage;
+			}
             PrepareDestory = true;
 			if (!ActiveFlyParticleDied)
 			{
