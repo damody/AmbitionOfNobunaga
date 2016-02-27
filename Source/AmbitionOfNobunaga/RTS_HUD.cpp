@@ -362,11 +362,12 @@ void ARTS_HUD::HeroAttackSceneObject(ASceneObject* SceneObj)
 }
 
 
-void ARTS_HUD::ShowHeroSkillHint(int32 index)
+void ARTS_HUD::KeyboardCallUseSkill(int32 idx)
 {
-	if(CurrentSelection.Num() > 0)
+	bool res = CurrentSelection[0]->ShowSkillHint(idx);
+	if (res)
 	{
-		CurrentSelection[0]->ShowSkillHint(index);
+		RTSStatus = ERTSStatusEnum::SkillHint;
 	}
 }
 

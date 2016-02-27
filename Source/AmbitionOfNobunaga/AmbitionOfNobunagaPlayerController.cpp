@@ -25,6 +25,11 @@ void AAmbitionOfNobunagaPlayerController::BeginPlay()
 	if (Hud)
 	{
 		Hud->localController = this;
+		SkillMapping.Add(EKeys::Q);
+		SkillMapping.Add(EKeys::W);
+		SkillMapping.Add(EKeys::E);
+		SkillMapping.Add(EKeys::R);
+		SkillMapping.Add(EKeys::T);
 	}
 	bMouseRButton = false;
 	bMouseLButton = false;
@@ -50,18 +55,23 @@ bool AAmbitionOfNobunagaPlayerController::InputKey(FKey Key, EInputEvent EventTy
 			return bResult;
 		}
 	}
-	if (Key == EKeys::LeftShift)
+	if (EventType == IE_Pressed && Hud)
 	{
-		if (Hud)
+		int32 idx = SkillMapping.Find(Key);
+		if (idx != INDEX_NONE)
 		{
-			if (EventType == IE_Pressed)
-			{
-				Hud->bLeftShiftDown = true;
-			}
-			else if (EventType == IE_Released)
-			{
-				Hud->bLeftShiftDown = false;
-			}
+			Hud->KeyboardCallUseSkill(idx);
+		}
+	}
+	if (Key == EKeys::LeftShift && Hud)
+	{
+		if (EventType == IE_Pressed)
+		{
+			Hud->bLeftShiftDown = true;
+		}
+		else if (EventType == IE_Released)
+		{
+			Hud->bLeftShiftDown = false;
 		}
 	}
 	else if (Key == EKeys::RightShift)

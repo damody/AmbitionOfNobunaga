@@ -46,6 +46,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RTS")
 	FString FloorActorName;
 
+	// 有註冊的鍵盤事件
+	TArray<FKey> SkillMapping;
+
 	/** Navigate player to the given world location. */
 	
 	UFUNCTION(Server, WithValidation, Reliable, BlueprintCallable, Category = "AONGameState")

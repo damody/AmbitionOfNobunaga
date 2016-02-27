@@ -90,8 +90,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "RTS")
 	void HeroAttackSceneObject(ASceneObject* SceneObj);
 	
-	UFUNCTION(BlueprintCallable, Category = "RTS")
-	void ShowHeroSkillHint(int32 index);
+	// use skill callback by localcontroller
+	void KeyboardCallUseSkill(int32 idx);
 	
 	UFUNCTION(BlueprintCallable, Category = "RTS")
 	FVector GetCurrentDirection();
@@ -202,6 +202,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "RTS")
 	ERTSStatusEnum RTSStatus;
+
 
 	FString RButtonDownHitBox;
 	FString RButtonUpHitBox;
