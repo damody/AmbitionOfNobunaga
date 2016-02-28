@@ -24,7 +24,7 @@ void AAmbitionOfNobunagaPlayerController::BeginPlay()
 	Hud = Cast<ARTS_HUD>(this->GetHUD());
 	if (Hud)
 	{
-		Hud->localController = this;
+		Hud->LocalController = this;
 		SkillMapping.Add(EKeys::Q);
 		SkillMapping.Add(EKeys::W);
 		SkillMapping.Add(EKeys::E);

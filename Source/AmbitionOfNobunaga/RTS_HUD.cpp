@@ -21,7 +21,7 @@
 
 ARTS_HUD::ARTS_HUD()
 {
-	localController = NULL;
+	LocalController = NULL;
 	SequenceNumber = 1;
 }
 
@@ -280,24 +280,30 @@ bool ARTS_HUD::IsUIRegion(FVector2D pos)
 
 void ARTS_HUD::AssignSelectionHeroPickup(AEquipment* equ)
 {
-	if(localController && CurrentSelection.Num() > 0)
+	if(LocalController && CurrentSelection.Num() > 0)
 	{
-		WantPickup = equ;
-	}
-}
-
-void ARTS_HUD::StopMovementHero(AHeroCharacter* hero)
-{
-	if(localController)
-	{
-		//localController->AddHeroToStopMoveQueue(hero);
+		FHeroAction act;
+		act.ActionStatus = EHeroActionStatus::MoveToPickup;
+		act.TargetEquipment = equ;
+		act.SequenceNumber = SequenceNumber++;
+		for (AHeroCharacter* EachHero : CurrentSelection)
+		{
+			if (bLeftShiftDown)
+			{
+				LocalController->AppendHeroAction(EachHero, act);
+			}
+			else
+			{
+				LocalController->SetHeroAction(EachHero, act);
+			}
+		}
 	}
 }
 
 void ARTS_HUD::HeroAttackHero(AHeroCharacter* hero)
 {
 	bClickHero = true;
-	if(localController)
+	if(LocalController)
 	{
 		TArray<AHeroCharacter*> HeroGoAttack;
 		for(AHeroCharacter* EachHero : CurrentSelection)
@@ -319,14 +325,13 @@ void ARTS_HUD::HeroAttackHero(AHeroCharacter* hero)
 			{
 				if (bLeftShiftDown)
 				{
-					localController->AppendHeroAction(EachHero, act);
+					LocalController->AppendHeroAction(EachHero, act);
 				}
 				else
 				{
-					localController->SetHeroAction(EachHero, act);
+					LocalController->SetHeroAction(EachHero, act);
 				}
 			}
-			//localController->AddHeroToAttackQueue(HeroGoAttack, hero);
 		}
 	}
 }
@@ -334,7 +339,7 @@ void ARTS_HUD::HeroAttackHero(AHeroCharacter* hero)
 void ARTS_HUD::HeroAttackSceneObject(ASceneObject* SceneObj)
 {
 	bClickHero = true;
-	if (localController)
+	if (LocalController)
 	{
 		if (CurrentSelection.Num() > 0)
 		{
@@ -348,15 +353,14 @@ void ARTS_HUD::HeroAttackSceneObject(ASceneObject* SceneObj)
 			{
 				if (bLeftShiftDown)
 				{
-					localController->AppendHeroAction(EachHero, act);
+					LocalController->AppendHeroAction(EachHero, act);
 				}
 				else
 				{
-					localController->SetHeroAction(EachHero, act);
+					LocalController->SetHeroAction(EachHero, act);
 				}
 
 			}
-			//localController->AddHeroToAttackQueue(HeroGoAttack, hero);
 		}
 	}
 }
@@ -364,10 +368,13 @@ void ARTS_HUD::HeroAttackSceneObject(ASceneObject* SceneObj)
 
 void ARTS_HUD::KeyboardCallUseSkill(int32 idx)
 {
-	bool res = CurrentSelection[0]->ShowSkillHint(idx);
-	if (res)
+	if (CurrentSelection.Num() > 0)
 	{
-		RTSStatus = ERTSStatusEnum::SkillHint;
+		bool res = CurrentSelection[0]->ShowSkillHint(idx);
+		if (res)
+		{
+			RTSStatus = ERTSStatusEnum::SkillHint;
+		}
 	}
 }
 
@@ -421,7 +428,7 @@ void ARTS_HUD::OnRMouseDown(FVector2D pos)
 	{
 		//localController->AddHeroToClearWantQueue(CurrentSelection);
 	}
-	if(IsGameRegion(pos) && localController && !bClickHero)
+	if(IsGameRegion(pos) && LocalController && !bClickHero)
 	{
 		switch(RTSStatus)
 		{
@@ -445,11 +452,11 @@ void ARTS_HUD::OnRMouseDown(FVector2D pos)
 					{
 						if (bLeftShiftDown)
 						{
-							localController->AppendHeroAction(CurrentSelection[0], act);
+							LocalController->AppendHeroAction(CurrentSelection[0], act);
 						}
 						else
 						{
-							localController->SetHeroAction(CurrentSelection[0], act);
+							LocalController->SetHeroAction(CurrentSelection[0], act);
 						}
 						UWorld* const World = GetWorld();
 						AMouseEffect* actor = World->SpawnActor<AMouseEffect>(MouseEffect);
@@ -620,11 +627,11 @@ void ARTS_HUD::OnLMousePressed2(FVector2D pos)
 			AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
 			if (bLeftShiftDown)
 			{
-				localController->AppendHeroAction(CurrentSelection[0], act);
+				LocalController->AppendHeroAction(CurrentSelection[0], act);
 			}
 			else
 			{
-				localController->SetHeroAction(CurrentSelection[0], act);
+				LocalController->SetHeroAction(CurrentSelection[0], act);
 			}
 			RTSStatus = ERTSStatusEnum::ToNormal;
 		}

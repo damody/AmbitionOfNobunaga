@@ -676,6 +676,7 @@ void AHeroCharacter::DoAction(const FHeroAction& CurrentAction)
 	case EHeroActionStatus::SpellToSelf:
 		break;
 	case EHeroActionStatus::MoveToPickup:
+		DoAction_MoveToPickup(CurrentAction);
 		break;
 	case EHeroActionStatus::MoveToThrowEqu:
 		break;
@@ -970,7 +971,7 @@ void AHeroCharacter::DoAction_SpellToDirection(const FHeroAction& CurrentAction)
 
 void AHeroCharacter::DoAction_AttackSceneObject(const FHeroAction& CurrentAction)
 {
- 	ASceneObject* TargetActor = Cast<ASceneObject>(CurrentAction.TargetActor);
+	ASceneObject* TargetActor = Cast<ASceneObject>(CurrentAction.TargetActor);
 	FVector dir = TargetActor->GetActorLocation() - GetActorLocation();
 	dir.Z = 0;
 	dir.Normalize();
@@ -988,7 +989,7 @@ void AHeroCharacter::DoAction_AttackSceneObject(const FHeroAction& CurrentAction
 		else
 		{
 			AAmbitionOfNobunagaPlayerController* acontrol =
-				Cast<AAmbitionOfNobunagaPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
+			    Cast<AAmbitionOfNobunagaPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
 			//AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
 			acontrol->CharacterMove(this, TargetActor->GetActorLocation());
 			BodyStatus = EHeroBodyStatus::Moving;
@@ -1001,7 +1002,7 @@ void AHeroCharacter::DoAction_AttackSceneObject(const FHeroAction& CurrentAction
 		if (CurrentAttackRadius > DistanceToTargetActor)
 		{
 			AAmbitionOfNobunagaPlayerController* acontrol =
-				Cast<AAmbitionOfNobunagaPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
+			    Cast<AAmbitionOfNobunagaPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
 			acontrol->CharacterStopMove(this);
 			BodyStatus = EHeroBodyStatus::AttackWating;
 			IsAttacked = false;
@@ -1010,7 +1011,7 @@ void AHeroCharacter::DoAction_AttackSceneObject(const FHeroAction& CurrentAction
 		{
 			FollowActorUpdateCounting = 0;
 			AAmbitionOfNobunagaPlayerController* acontrol =
-				Cast<AAmbitionOfNobunagaPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
+			    Cast<AAmbitionOfNobunagaPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
 			acontrol->CharacterMove(this, TargetActor->GetActorLocation());
 		}
 	}
@@ -1063,6 +1064,57 @@ void AHeroCharacter::DoAction_AttackSceneObject(const FHeroAction& CurrentAction
 		}
 	}
 	break;
+	case EHeroBodyStatus::SpellBegining:
+		break;
+	case EHeroBodyStatus::SpellEnding:
+		break;
+	default:
+		break;
+	}
+}
+
+void AHeroCharacter::DoAction_MoveToPickup(const FHeroAction& CurrentAction)
+{
+	AEquipment* TargetActor = CurrentAction.TargetEquipment;
+	FVector dir = TargetActor->GetActorLocation() - GetActorLocation();
+	dir.Z = 0;
+	dir.Normalize();
+	SetActorRotation(dir.Rotation());
+	float DistanceToTargetActor = FVector::Dist(TargetActor->GetActorLocation(), this->GetActorLocation());
+	switch (BodyStatus)
+	{
+	case EHeroBodyStatus::Standing:
+	{
+		if (PickupObjectDistance > DistanceToTargetActor)
+		{
+
+		}
+		else
+		{
+			AAmbitionOfNobunagaPlayerController* acontrol =
+			    Cast<AAmbitionOfNobunagaPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
+			//AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
+			acontrol->CharacterMove(this, TargetActor->GetActorLocation());
+			BodyStatus = EHeroBodyStatus::Moving;
+		}
+	}
+	break;
+	case EHeroBodyStatus::Moving:
+	{
+		if (PickupObjectDistance > DistanceToTargetActor)
+		{
+
+		}
+	}
+	break;
+	case EHeroBodyStatus::Dazzing:
+		break;
+	case EHeroBodyStatus::AttackWating:
+		break;
+	case EHeroBodyStatus::AttackBegining:
+		break;
+	case EHeroBodyStatus::AttackEnding:
+		break;
 	case EHeroBodyStatus::SpellBegining:
 		break;
 	case EHeroBodyStatus::SpellEnding:

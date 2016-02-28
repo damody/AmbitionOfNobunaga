@@ -148,7 +148,7 @@ public:
 	// 做指向技
 	void DoAction_SpellToDirection(const FHeroAction& CurrentAction);
 	void DoAction_AttackSceneObject(const FHeroAction& CurrentAction);
-
+	void DoAction_MoveToPickup(const FHeroAction& CurrentAction);
 	// 選人的地版光環
 	UPROPERTY(Category = Character, EditAnywhere, BlueprintReadOnly)
 	UDecalComponent * SelectionDecal;
@@ -357,9 +357,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
 	bool isSelection;
 
+	// 撿東西的距離
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
 	float PickupObjectDistance;
 
+	// 最小移動距離
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
 	float MinimumDontMoveDistance;
 

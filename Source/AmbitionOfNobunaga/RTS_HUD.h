@@ -80,10 +80,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "RTS")
 	void AssignSelectionHeroPickup(AEquipment* equ);
-
-	UFUNCTION(BlueprintCallable, Category = "RTS")
-	void StopMovementHero(AHeroCharacter* hero);
-
+	
 	UFUNCTION(BlueprintCallable, Category = "RTS")
 	void HeroAttackHero(AHeroCharacter* hero);
 
@@ -210,7 +207,7 @@ public:
 	FString LButtonDownHitBox;
 	FString LButtonUpHitBox;
 
-	AAmbitionOfNobunagaPlayerController* localController;
+	AAmbitionOfNobunagaPlayerController* LocalController;
 
 	AEquipment* WantPickup;
 
