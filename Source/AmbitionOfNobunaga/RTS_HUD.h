@@ -7,6 +7,7 @@
 #include "MouseEffect.h"
 #include "RTS_HUD.generated.h"
 
+
 UENUM(BlueprintType)
 enum class ERTSStatusEnum : uint8
 {

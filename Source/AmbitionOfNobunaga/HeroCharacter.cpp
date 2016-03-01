@@ -362,13 +362,11 @@ void AHeroCharacter::PostEditChangeChainProperty(FPropertyChangedChainEvent& Pro
 
 bool AHeroCharacter::Pickup(AEquipment* equ)
 {
-	for(int32 idx = 0; idx < Equipments.Num(); ++idx)
+	if (HasEquipment(equ))
 	{
-		if(Equipments[idx] == equ)
-		{
-			return false;
-		}
+		return false;
 	}
+
 	for(int32 idx = 0; idx < Equipments.Num(); ++idx)
 	{
 		if(Equipments[idx] == NULL)
@@ -377,8 +375,21 @@ bool AHeroCharacter::Pickup(AEquipment* equ)
 			if(idx == 0)
 			{
 				Equipments[0]->AttachRootComponentTo(GetMesh(), TEXT("hand_rSocket"), EAttachLocation::SnapToTarget);
-				return false;
+				return true;
 			}
+			equ->ServerSetLocation(FVector(FMath::Rand(), 99999, 99999));
+			return true;
+		}
+	}
+	return false;
+}
+
+bool AHeroCharacter::HasEquipment(AEquipment* equ)
+{
+	for (int32 idx = 0; idx < Equipments.Num(); ++idx)
+	{
+		if (Equipments[idx] == equ)
+		{
 			return true;
 		}
 	}
@@ -567,6 +578,7 @@ int32 AHeroCharacter::GetCurrentSkillIndex()
 
 bool AHeroCharacter::CheckCurrentActionFinish()
 {
+	AEquipment* TargetEquipment = Cast<AEquipment>(CurrentAction.TargetEquipment);
 	AHeroCharacter* TargetActor = Cast<AHeroCharacter>(CurrentAction.TargetActor);
 	ASceneObject* TargetSceneActor = Cast<ASceneObject>(CurrentAction.TargetActor);
 	switch (BodyStatus)
@@ -599,6 +611,12 @@ bool AHeroCharacter::CheckCurrentActionFinish()
 		case EHeroActionStatus::SpellToSelf:
 			break;
 		case EHeroActionStatus::MoveToPickup:
+		{
+			if (HasEquipment(TargetEquipment))
+			{
+				return true;
+			}
+		}
 			break;
 		case EHeroActionStatus::MoveToThrowEqu:
 			break;
@@ -1087,13 +1105,15 @@ void AHeroCharacter::DoAction_MoveToPickup(const FHeroAction& CurrentAction)
 	{
 		if (PickupObjectDistance > DistanceToTargetActor)
 		{
-
+			if (Pickup(TargetActor))
+			{
+				TargetActor->ServerSetLocation(FVector(FMath::Rand(), 99999, 99999));
+			}
 		}
 		else
 		{
 			AAmbitionOfNobunagaPlayerController* acontrol =
-			    Cast<AAmbitionOfNobunagaPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
-			//AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
+				Cast<AAmbitionOfNobunagaPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
 			acontrol->CharacterMove(this, TargetActor->GetActorLocation());
 			BodyStatus = EHeroBodyStatus::Moving;
 		}
@@ -1103,7 +1123,13 @@ void AHeroCharacter::DoAction_MoveToPickup(const FHeroAction& CurrentAction)
 	{
 		if (PickupObjectDistance > DistanceToTargetActor)
 		{
-
+			if (Pickup(TargetActor))
+			{
+				AAmbitionOfNobunagaPlayerController* acontrol =
+					Cast<AAmbitionOfNobunagaPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
+				acontrol->CharacterStopMove(this);
+				BodyStatus = EHeroBodyStatus::Standing;
+			}
 		}
 	}
 	break;

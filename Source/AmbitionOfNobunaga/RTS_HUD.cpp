@@ -17,6 +17,7 @@
 #include "HeroActionx.h"
 #include "MouseEffect.h"
 #include "SceneObject.h"
+#include "Equipment.h"
 
 
 ARTS_HUD::ARTS_HUD()

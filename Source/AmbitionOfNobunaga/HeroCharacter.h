@@ -82,6 +82,8 @@ public:
 #endif // WITH_EDITOR
 	bool Pickup(AEquipment* equ);
 
+	bool HasEquipment(AEquipment* equ);
+
 	// for UI
 	UFUNCTION()
 	void OnMouseClicked(UPrimitiveComponent* TouchComp);
