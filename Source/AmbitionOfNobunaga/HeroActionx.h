@@ -59,7 +59,7 @@ struct FHeroAction
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector		TargetVec2;
 
-	// for SpellToPosition, SpellToDirection
+	// for SpellToPosition, SpellToDirection, MoveToThrowEqu
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32		TargetIndex1;
 

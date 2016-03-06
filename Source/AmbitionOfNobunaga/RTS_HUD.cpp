@@ -691,6 +691,7 @@ void ARTS_HUD::OnLMouseReleased(FVector2D pos)
 			if(CurrentSelection.Num() > 0)
 			{
 				SelectedHero(CurrentSelection[0]);
+				// 網路連線設定 owner
 				//CurrentSelection[0]->SetOwner(localController);
 			}
 		}
@@ -702,7 +703,20 @@ void ARTS_HUD::OnLMouseReleased(FVector2D pos)
 		                                 CurrentSelection.Num()));
 		if(CurrentSelection.Num() > 0)
 		{
-			//localController->AddHeroToThrowQueue(CurrentMouseHit, CurrentSelection[0], EquipmentIndex);
+			FHeroAction act;
+			act.ActionStatus = EHeroActionStatus::MoveToThrowEqu;
+			act.TargetVec1 = CurrentMouseHit;
+			act.TargetIndex1 = EquipmentIndex;
+			act.SequenceNumber = SequenceNumber++;
+			AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
+			if (bLeftShiftDown)
+			{
+				LocalController->AppendHeroAction(CurrentSelection[0], act);
+			}
+			else
+			{
+				LocalController->SetHeroAction(CurrentSelection[0], act);
+			}
 			RTSStatus = ERTSStatusEnum::Normal;
 			ThrowTexture = NULL;
 		}

@@ -384,6 +384,27 @@ bool AHeroCharacter::Pickup(AEquipment* equ)
 	return false;
 }
 
+bool AHeroCharacter::ThrowEquipment(AEquipment* equ, FVector pos)
+{
+	FVector origin, extent;
+	equ->GetActorBounds(true, origin, extent);
+	pos.Z += extent.Z;
+	for (int32 idx = 0; idx < Equipments.Num(); ++idx)
+	{
+		if (Equipments[idx] == equ)
+		{
+			if (idx == 0)
+			{
+				Equipments[0]->DetachRootComponentFromParent();
+			}
+			Equipments[idx] = NULL;
+		}
+	}
+	equ->ServerSetLocation(pos);
+	equ = NULL;
+	return true;
+}
+
 bool AHeroCharacter::HasEquipment(AEquipment* equ)
 {
 	for (int32 idx = 0; idx < Equipments.Num(); ++idx)
@@ -617,9 +638,15 @@ bool AHeroCharacter::CheckCurrentActionFinish()
 				return true;
 			}
 		}
-			break;
+		break;
 		case EHeroActionStatus::MoveToThrowEqu:
-			break;
+		{
+			if (Equipments[CurrentAction.TargetIndex1] == NULL)
+			{
+				return true;
+			}
+		}
+		break;
 		case EHeroActionStatus::ThrowEquToActor:
 			break;
 		default:
@@ -697,6 +724,7 @@ void AHeroCharacter::DoAction(const FHeroAction& CurrentAction)
 		DoAction_MoveToPickup(CurrentAction);
 		break;
 	case EHeroActionStatus::MoveToThrowEqu:
+		DoAction_MoveToThrowEqu(CurrentAction);
 		break;
 	case EHeroActionStatus::ThrowEquToActor:
 		break;
@@ -1107,13 +1135,12 @@ void AHeroCharacter::DoAction_MoveToPickup(const FHeroAction& CurrentAction)
 		{
 			if (Pickup(TargetActor))
 			{
-				TargetActor->ServerSetLocation(FVector(FMath::Rand(), 99999, 99999));
 			}
 		}
 		else
 		{
 			AAmbitionOfNobunagaPlayerController* acontrol =
-				Cast<AAmbitionOfNobunagaPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
+			    Cast<AAmbitionOfNobunagaPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
 			acontrol->CharacterMove(this, TargetActor->GetActorLocation());
 			BodyStatus = EHeroBodyStatus::Moving;
 		}
@@ -1126,10 +1153,68 @@ void AHeroCharacter::DoAction_MoveToPickup(const FHeroAction& CurrentAction)
 			if (Pickup(TargetActor))
 			{
 				AAmbitionOfNobunagaPlayerController* acontrol =
-					Cast<AAmbitionOfNobunagaPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
+				    Cast<AAmbitionOfNobunagaPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
 				acontrol->CharacterStopMove(this);
 				BodyStatus = EHeroBodyStatus::Standing;
 			}
+		}
+	}
+	break;
+	case EHeroBodyStatus::Dazzing:
+		break;
+	case EHeroBodyStatus::AttackWating:
+		break;
+	case EHeroBodyStatus::AttackBegining:
+		break;
+	case EHeroBodyStatus::AttackEnding:
+		break;
+	case EHeroBodyStatus::SpellBegining:
+		break;
+	case EHeroBodyStatus::SpellEnding:
+		break;
+	default:
+		break;
+	}
+}
+
+void AHeroCharacter::DoAction_MoveToThrowEqu(const FHeroAction& CurrentAction)
+{
+	AEquipment* TargetActor = Equipments[CurrentAction.TargetIndex1];
+	float DistanceToTargetActor = FVector::Dist(CurrentAction.TargetVec1,  GetActorLocation());
+	switch (BodyStatus)
+	{
+	case EHeroBodyStatus::Standing:
+	{
+		if (PickupObjectDistance > DistanceToTargetActor)
+		{
+			ThrowEquipment(TargetActor, CurrentAction.TargetVec1);
+		}
+		else
+		{
+			LastMoveTarget = CurrentAction.TargetVec1;
+			AAmbitionOfNobunagaPlayerController* acontrol =
+			    Cast<AAmbitionOfNobunagaPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
+			acontrol->CharacterMove(this, CurrentAction.TargetVec1);
+			BodyStatus = EHeroBodyStatus::Moving;
+		}
+	}
+	break;
+	case EHeroBodyStatus::Moving:
+	{
+		if (LastMoveTarget != CurrentAction.TargetVec1)
+		{
+			LastMoveTarget = CurrentAction.TargetVec1;
+			AAmbitionOfNobunagaPlayerController* acontrol =
+				Cast<AAmbitionOfNobunagaPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
+			acontrol->CharacterMove(this, CurrentAction.TargetVec1);
+		}
+		if (PickupObjectDistance > DistanceToTargetActor && LastMoveTarget == CurrentAction.TargetVec1)
+		{
+			ThrowEquipment(TargetActor, CurrentAction.TargetVec1);
+			AAmbitionOfNobunagaPlayerController* acontrol =
+			    Cast<AAmbitionOfNobunagaPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
+			acontrol->CharacterStopMove(this);
+			BodyStatus = EHeroBodyStatus::Standing;
 		}
 	}
 	break;
