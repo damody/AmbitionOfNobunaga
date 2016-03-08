@@ -916,6 +916,20 @@ void AHeroCharacter::DoAction_AttackActor(const FHeroAction& CurrentAction)
 			if (HeroBullet)
 			{
 				FVector pos = GetActorLocation();
+				{
+					static const FName MyProperty(TEXT("BreakDistance"));
+
+					UClass* MyClass = HeroBullet;
+
+					for (TFieldIterator<UFloatProperty> Property(HeroBullet); Property; ++Property)
+					{
+						// "Converting" bool to string
+						float value = Property->GetPropertyValue_InContainer(HeroBullet->GetDefaultObject());
+						GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Magenta,
+							Property->GetFName().GetPlainNameString() + FString::Printf(L":  %.1f", value));
+					}
+
+				}
 				ABulletActor* bullet = GetWorld()->SpawnActor<ABulletActor>(HeroBullet);
 				if (bullet)
 				{
