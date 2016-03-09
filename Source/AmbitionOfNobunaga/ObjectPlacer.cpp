@@ -31,20 +31,21 @@ void AObjectPlacer::PostEditChangeProperty(struct FPropertyChangedEvent& e)
 	if (PropertyName == GET_MEMBER_NAME_CHECKED(AObjectPlacer, ClickToUpdate))
 	{
 		//various uproperty tricks, see link
-	}
-	if (GWorld)
-	{
-		static int32 Index = 0;
-		FActorSpawnParameters SpawnPar;
-		SpawnPar.Name = *FString::Printf(TEXT("Spawned %d"), Index++);
-		AActor* Item = GWorld->SpawnActor<AActor>(WantPlacing, SpawnPar);
-		if (!Item)
+		ClickToUpdate = false;
+		if (GWorld)
 		{
-			UE_LOG(LogAmbitionOfNobunaga, Warning, TEXT("Could not spawn."));
-		}
-		else
-		{
-			Item->SetActorLocation(GetActorLocation());
+			static int32 Index = 0;
+			FActorSpawnParameters SpawnPar;
+			SpawnPar.Name = *FString::Printf(TEXT("Spawned %d"), Index++);
+			AActor* Item = GWorld->SpawnActor<AActor>(WantPlacing, SpawnPar);
+			if (!Item)
+			{
+				UE_LOG(LogAmbitionOfNobunaga, Warning, TEXT("Could not spawn."));
+			}
+			else
+			{
+				Item->SetActorLocation(GetActorLocation());
+			}
 		}
 	}
 
