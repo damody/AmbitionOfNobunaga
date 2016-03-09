@@ -23,6 +23,11 @@ void UMapObject::SetString(const FString& name, FString value)
 	StrMapData.Add(name) = value;
 }
 
+void UMapObject::SetTexture2D(const FString& name, UTexture2D* value)
+{
+	Tex2DMapData.Add(name) = value;
+}
+
 bool UMapObject::GetFloat(const FString& name, float& value)
 {
 	float* ans = FloatMapData.Find(name);
@@ -48,6 +53,17 @@ bool UMapObject::GetInt(const FString& name, int32& value)
 bool UMapObject::GetString(const FString& name, FString& value)
 {
 	FString* ans = StrMapData.Find(name);
+	if (ans)
+	{
+		value = *ans;
+		return true;
+	}
+	return false;
+}
+
+bool UMapObject::GetTexture2D(const FString& name, UTexture2D*& value)
+{
+	UTexture2D** ans = Tex2DMapData.Find(name);
 	if (ans)
 	{
 		value = *ans;

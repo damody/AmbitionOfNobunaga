@@ -14,6 +14,8 @@ class AMBITIONOFNOBUNAGA_API UMapObject : public UObject
 	GENERATED_BODY()
 
 public:
+	// Set value function
+
 	UFUNCTION(Category = "ObjectLibrary", BlueprintCallable)
 	static UMapObject* NewMapObject();
 
@@ -27,6 +29,11 @@ public:
 	void SetString(const FString& name, FString value);
 
 	UFUNCTION(Category = "ObjectLibrary", BlueprintCallable)
+	void SetTexture2D(const FString& name, UTexture2D* value);
+
+	// Get value function
+
+	UFUNCTION(Category = "ObjectLibrary", BlueprintCallable)
 	bool GetFloat(const FString& name, float& value);
 	
 	UFUNCTION(Category = "ObjectLibrary", BlueprintCallable)
@@ -35,7 +42,11 @@ public:
 	UFUNCTION(Category = "ObjectLibrary", BlueprintCallable)
 	bool GetString(const FString& name, FString& value);
 
+	UFUNCTION(Category = "ObjectLibrary", BlueprintCallable)
+	bool GetTexture2D(const FString& name, UTexture2D*& value);
+
 	TMap<FString, float> FloatMapData;
 	TMap<FString, int> IntMapData;
 	TMap<FString, FString> StrMapData;
+	TMap<FString, UTexture2D*> Tex2DMapData;
 };

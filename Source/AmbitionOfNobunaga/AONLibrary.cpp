@@ -48,17 +48,29 @@ UMapObject* UAONLibrary::GetAllProperty(TSubclassOf<UObject> ObjectType)
 	for (TFieldIterator<UFloatProperty> Property(ObjectType); Property; ++Property)
 	{
 		res->SetFloat(Property->GetFName().GetPlainNameString(),
-			Property->GetPropertyValue_InContainer(ObjectType->GetDefaultObject()));
+		              Property->GetPropertyValue_InContainer(ObjectType->GetDefaultObject()));
 	}
 	for (TFieldIterator<UIntProperty> Property(ObjectType); Property; ++Property)
 	{
 		res->SetInt(Property->GetFName().GetPlainNameString(),
-			Property->GetPropertyValue_InContainer(ObjectType->GetDefaultObject()));
+		            Property->GetPropertyValue_InContainer(ObjectType->GetDefaultObject()));
 	}
 	for (TFieldIterator<UStrProperty> Property(ObjectType); Property; ++Property)
 	{
 		res->SetString(Property->GetFName().GetPlainNameString(),
-			Property->GetPropertyValue_InContainer(ObjectType->GetDefaultObject()));
+		               Property->GetPropertyValue_InContainer(ObjectType->GetDefaultObject()));
+	}
+
+
+	for (TFieldIterator<UProperty> TexPropertyit(ObjectType); TexPropertyit; ++TexPropertyit)
+	{
+		UProperty* TexProperty = *TexPropertyit;
+		UTexture2D* tex = TexProperty->ContainerPtrToValuePtr<UTexture2D>(ObjectType->GetDefaultObject());
+		if (tex)
+		{
+			res->SetTexture2D(TexProperty->GetFName().GetPlainNameString(), tex);
+		}
+
 	}
 	return res;
 }
