@@ -35,7 +35,6 @@ AHeroCharacter::AHeroCharacter(const FObjectInitializer& ObjectInitializer)
 	// FRotator = rotation Y Z X
 	HeadEffectSprite->SetWorldRotation(FQuat(FRotator(0, 0, 90)));
 	HeadEffectSprite->SetWorldScale3D(FVector(0.5, 0.5, 0.5));
-	ConstructorHelpers::FClassFinder<APawn> PlayerPawnBPClass(TEXT("/Game/AllLogic/Blueprints/TopDownCharacter"));
 	ConstructorHelpers::FObjectFinder<UPaperFlipbook> Flipbook(TEXT("/Game/AllLogic/Hero/Skill/Dazzing_Flipbook"));
 	HeadEffectSprite->SetFlipbook(Flipbook.Object);
 	HeadEffectSprite->AttachParent = GetCapsuleComponent();

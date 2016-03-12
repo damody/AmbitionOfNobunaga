@@ -10,10 +10,4 @@ AAmbitionOfNobunagaGameMode::AAmbitionOfNobunagaGameMode()
 	// use our custom PlayerController class
 	PlayerControllerClass = AAmbitionOfNobunagaPlayerController::StaticClass();
 
-	// set default pawn class to our Blueprinted character
-	static ConstructorHelpers::FClassFinder<APawn> PlayerPawnBPClass(TEXT("/Game/AllLogic/Blueprints/TopDownCharacter"));
-	if (PlayerPawnBPClass.Class != NULL)
-	{
-		DefaultPawnClass = PlayerPawnBPClass.Class;
-	}
 }
