@@ -17,6 +17,9 @@
 #include "PaperFlipbook.h"
 #include "SceneObject.h"
 
+TSubclassOf<ADamageEffect> AHeroCharacter::ShowDamageEffect;
+
+
 AHeroCharacter::AHeroCharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(FObjectInitializer::Get())
 {
@@ -223,7 +226,7 @@ void AHeroCharacter::Tick(float DeltaTime)
 	{
 		BuffQueue[i]->Duration -= DeltaTime;
 		// 如果暈了
-		if (BuffQueue[i]->Dazzing && BuffQueue[i]->Duration > DazzingLeftCounting)
+		if (BuffQueue[i]->BuffKind == EHeroBuffKind::Dazzing && BuffQueue[i]->Duration > DazzingLeftCounting)
 		{
 			DazzingLeftCounting = BuffQueue[i]->Duration;
 			BodyStatus = EHeroBodyStatus::Dazzing;
@@ -596,6 +599,11 @@ int32 AHeroCharacter::GetCurrentSkillIndex()
 	return CurrentSkillIndex;
 }
 
+void AHeroCharacter::SetDamageEffect(TSubclassOf<ADamageEffect> DamageKind)
+{
+	ShowDamageEffect = DamageKind;
+}
+
 bool AHeroCharacter::CheckCurrentActionFinish()
 {
 	AEquipment* TargetEquipment = Cast<AEquipment>(CurrentAction.TargetEquipment);
@@ -860,7 +868,6 @@ void AHeroCharacter::DoAction_AttackActor(const FHeroAction& CurrentAction)
 		{
 			AAmbitionOfNobunagaPlayerController* acontrol =
 			    Cast<AAmbitionOfNobunagaPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
-			//AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
 			acontrol->CharacterMove(this, TargetActor->GetActorLocation());
 			BodyStatus = EHeroBodyStatus::Moving;
 		}
@@ -873,7 +880,6 @@ void AHeroCharacter::DoAction_AttackActor(const FHeroAction& CurrentAction)
 		{
 			AAmbitionOfNobunagaPlayerController* acontrol =
 			    Cast<AAmbitionOfNobunagaPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
-			//AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
 			acontrol->CharacterStopMove(this);
 			BodyStatus = EHeroBodyStatus::AttackWating;
 			IsAttacked = false;
@@ -883,7 +889,6 @@ void AHeroCharacter::DoAction_AttackActor(const FHeroAction& CurrentAction)
 			FollowActorUpdateCounting = 0;
 			AAmbitionOfNobunagaPlayerController* acontrol =
 			    Cast<AAmbitionOfNobunagaPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
-			//AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
 			acontrol->CharacterMove(this, TargetActor->GetActorLocation());
 			acontrol->CharacterMoveMulticast(this, TargetActor->GetActorLocation());
 		}
@@ -926,6 +931,18 @@ void AHeroCharacter::DoAction_AttackActor(const FHeroAction& CurrentAction)
 			}
 			else
 			{
+				// 顯示傷害文字
+				ADamageEffect* TempDamageText = GetWorld()->SpawnActor<ADamageEffect>(ShowDamageEffect);
+				if (TempDamageText)
+				{
+					TempDamageText->OriginPosition = TargetActor->GetActorLocation();
+					TempDamageText->SetString(FString::FromInt((int32)Damage));
+					FVector scaleSize(TempDamageText->ScaleSize, TempDamageText->ScaleSize, TempDamageText->ScaleSize);
+					TempDamageText->SetActorScale3D(scaleSize);
+					FVector dir = TargetActor->GetActorLocation() - GetActorLocation();
+					dir.Normalize();
+					TempDamageText->FlyDirection = dir;
+				}
 				TargetActor->CurrentHP -= Damage;
 			}
 			BodyStatus = EHeroBodyStatus::AttackEnding;

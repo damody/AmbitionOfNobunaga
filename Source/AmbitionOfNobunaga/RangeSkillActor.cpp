@@ -84,6 +84,22 @@ void ARangeSkillActor::Injury_Implementation()
 			{
 				float Injury = ags->ArmorConvertToInjuryPersent(hero->CurrentArmor);
 				float Damage = PhysicalDamage * Injury;
+
+				// 顯示傷害文字
+				ADamageEffect* TempDamageText = GetWorld()->SpawnActor<ADamageEffect>(AHeroCharacter::ShowDamageEffect);
+				if (TempDamageText)
+				{
+					FVector pos = hero->GetActorLocation();
+					pos.X += 10;
+					TempDamageText->OriginPosition = pos;
+					TempDamageText->SetString(FString::FromInt((int32)PhysicalDamage));
+					FVector scaleSize(TempDamageText->ScaleSize, TempDamageText->ScaleSize, TempDamageText->ScaleSize);
+					TempDamageText->SetActorScale3D(scaleSize);
+					FVector dir = hero->GetActorLocation() - GetActorLocation();
+					dir.Normalize();
+					TempDamageText->FlyDirection = dir;
+				}
+
 				hero->CurrentHP -= Damage;
 			}
 			// 法傷
@@ -91,6 +107,21 @@ void ARangeSkillActor::Injury_Implementation()
 			{
 				float Damage = MagicDamage * (1 - hero->CurrentMagicInjured);
 				hero->CurrentHP -= Damage;
+
+				// 顯示傷害文字
+				ADamageEffect* TempDamageText = GetWorld()->SpawnActor<ADamageEffect>(AHeroCharacter::ShowDamageEffect);
+				if (TempDamageText)
+				{
+					FVector pos = hero->GetActorLocation();
+					pos.X -= 10;
+					TempDamageText->OriginPosition = pos;
+					TempDamageText->SetString(FString::FromInt((int32)Damage));
+					FVector scaleSize(TempDamageText->ScaleSize, TempDamageText->ScaleSize, TempDamageText->ScaleSize);
+					TempDamageText->SetActorScale3D(scaleSize);
+					FVector dir = hero->GetActorLocation() - GetActorLocation();
+					dir.Normalize();
+					TempDamageText->FlyDirection = dir;
+				}
 			}
 			hero->BuffQueue.Append(UHeroBuff::CloneArray(Buffs));
 		}

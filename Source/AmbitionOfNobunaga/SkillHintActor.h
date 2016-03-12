@@ -60,17 +60,17 @@ public:
 	FVector SkillPos;
 
 	UPROPERTY(Category = "SkillHint", VisibleAnywhere, BlueprintReadOnly)
-	bool UseDirectionSkill;
+	uint32 UseDirectionSkill: 1;
 
 	UPROPERTY(Category = "SkillHint", VisibleAnywhere, BlueprintReadOnly)
-	bool UseRangeSkill;
+	uint32 UseRangeSkill: 1;
 	
 	UPROPERTY(Category = "SkillHint", EditAnywhere, BlueprintReadOnly)
 	UTexture2D* MouseIcon;
 	
 	// 是否固定長度
 	UPROPERTY(Category = "FlySkill", EditAnywhere, BlueprintReadOnly, meta = (EditCondition = "UseDirectionSkill"))
-	bool IsFixdLength;
+	uint32 IsFixdLength: 1;
 
 	// 技能最遠距離
 	UPROPERTY(Category = "FlySkill", EditAnywhere, BlueprintReadOnly, meta = (EditCondition = "UseDirectionSkill"))

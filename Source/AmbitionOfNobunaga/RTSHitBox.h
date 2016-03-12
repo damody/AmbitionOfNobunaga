@@ -55,7 +55,7 @@ public:
 	FString       Name;
 
     /** Wether or not this hitbox should prevent hit checks to other hitboxes.  */
-    bool bConsumesInput;
+	uint32 bConsumesInput: 1;
 
     /** The priority of this hitbox. Higher boxes are given priority. */
     int32 Priority;

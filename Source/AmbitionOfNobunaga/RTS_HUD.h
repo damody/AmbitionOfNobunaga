@@ -160,22 +160,22 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RTS")
 	FVector2D	HPBarOffset;
 
-	bool ClickedSelected;
+	uint32 ClickedSelected: 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "RTS")
-	bool bClickHero;
+	uint32 bClickHero: 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "RTS")
-	bool bMouseRButton;
+	uint32 bMouseRButton: 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "RTS")
-	bool bMouseLButton;
+	uint32 bMouseLButton: 1;
 
-	bool bNeedMouseRDown;
-	bool bNeedMouseLDown;
+	uint32 bNeedMouseRDown: 1;
+	uint32 bNeedMouseLDown: 1;
 
-	bool bLeftShiftDown;
-	bool bRightShiftDown;
+	uint32 bLeftShiftDown: 1;
+	uint32 bRightShiftDown: 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "RTS")
 	UTexture2D* NothingTexture;

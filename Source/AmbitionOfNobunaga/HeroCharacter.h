@@ -9,6 +9,7 @@
 #include "HeroActionx.h"
 #include "HeroBuff.h"
 #include "PaperFlipbookComponent.h"
+#include "DamageEffect.h"
 #include "HeroCharacter.generated.h"
 
 
@@ -131,6 +132,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Hero")
 	int32 GetCurrentSkillIndex();
 
+	UFUNCTION(BlueprintCallable, Category = "Hero")
+	static void SetDamageEffect(TSubclassOf<ADamageEffect> DamageKind);
+
 	// 確定當前動作做完了沒
 	bool CheckCurrentActionFinish();
 
@@ -154,6 +158,8 @@ public:
 	void DoAction_AttackSceneObject(const FHeroAction& CurrentAction);
 	void DoAction_MoveToPickup(const FHeroAction& CurrentAction);
 	void DoAction_MoveToThrowEqu(const FHeroAction& CurrentAction);
+
+
 	// 選人的地版光環
 	UPROPERTY(Category = Character, EditAnywhere, BlueprintReadOnly)
 	UDecalComponent * SelectionDecal;
@@ -171,6 +177,8 @@ public:
 
 	UPROPERTY(Category = Character, EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<ABulletActor> HeroBullet;
+
+	static TSubclassOf<ADamageEffect> ShowDamageEffect;
 
 	// 英雄名
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")

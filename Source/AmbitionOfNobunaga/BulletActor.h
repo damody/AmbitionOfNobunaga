@@ -43,16 +43,16 @@ public:
 	float DestoryCount;
 
 	UPROPERTY(Category = "Bullet", EditAnywhere, BlueprintReadWrite)
-	bool  ActiveFlyParticleDied;
+	uint32  ActiveFlyParticleDied: 1;
 
 	UPROPERTY(Category = "Bullet", EditAnywhere, BlueprintReadWrite)
-	bool  ActiveBulletParticleDied;
+	uint32  ActiveBulletParticleDied: 1;
 
 	UPROPERTY(Category = "Bullet", EditAnywhere, BlueprintReadWrite)
-	bool  DiedInHeroBody;
+	uint32  DiedInHeroBody: 1;
 
 	UPROPERTY(Category = "Bullet", EditAnywhere, BlueprintReadWrite)
-	bool  PrepareDestory;
+	uint32  PrepareDestory: 1;
 
 	UPROPERTY(Category = "Bullet", EditAnywhere, BlueprintReadWrite)
 	AActor* TargetActor;

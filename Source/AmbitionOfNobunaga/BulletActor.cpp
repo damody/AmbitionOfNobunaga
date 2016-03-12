@@ -61,6 +61,19 @@ void ABulletActor::Tick(float DeltaTime)
         {
             AHeroCharacter* Hero = Cast<AHeroCharacter>(TargetActor);
 			ASceneObject* SceneObj = Cast<ASceneObject>(TargetActor);
+
+			// Εγ¥ά¶Λ®`¤ε¦r
+			ADamageEffect* TempDamageText = GetWorld()->SpawnActor<ADamageEffect>(AHeroCharacter::ShowDamageEffect);
+			if (TempDamageText)
+			{
+				TempDamageText->OriginPosition = TargetActor->GetActorLocation();
+				TempDamageText->SetString(FString::FromInt((int32)Damage));
+				FVector scaleSize(TempDamageText->ScaleSize, TempDamageText->ScaleSize, TempDamageText->ScaleSize);
+				TempDamageText->SetActorScale3D(scaleSize);
+				FVector dir = TargetActor->GetActorLocation() - GetActorLocation();
+				dir.Normalize();
+				TempDamageText->FlyDirection = dir;
+			}
 			if (Hero)
 			{
 				Hero->CurrentHP -= Damage;

@@ -51,16 +51,13 @@ public:
 	// 大頭貼
 	UPROPERTY(Category = "HeroBuff", EditAnywhere, BlueprintReadOnly)
 	UTexture2D * Head;
-	// 是否暈炫
-	UPROPERTY(Category = "HeroBuff", EditAnywhere, BlueprintReadOnly)
-	bool Dazzing;
 	
 	UPROPERTY(Category = "HeroBuff", EditAnywhere, BlueprintReadOnly)
 	EHeroBuffKind BuffKind;
 
 	// 是否能疊加
 	UPROPERTY(Category = "HeroBuff", EditAnywhere, BlueprintReadOnly)
-	bool CanSuperposition;
+	uint32 CanSuperposition:1;
 	// 疊加層數
 	UPROPERTY(Category = "HeroBuff", EditAnywhere, BlueprintReadOnly)
 	int32 Superposition;

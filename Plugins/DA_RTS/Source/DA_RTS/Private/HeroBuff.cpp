@@ -27,7 +27,6 @@ UHeroBuff* UHeroBuff::Clone()
 	data->Priority = Priority;
 	data->Name = Name;
 	data->Head = Head;
-	data->Dazzing = Dazzing;
 	data->BuffKind = BuffKind;
 	data->CanSuperposition = CanSuperposition;
 	data->Superposition = Superposition;

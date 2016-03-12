@@ -55,7 +55,7 @@ public:
 	float DamageTime;
 
 	UPROPERTY(Category = "RangeSkill", EditAnywhere, BlueprintReadWrite)
-	bool  HasDamaged;
+	uint32  HasDamaged: 1;
 
 	UPROPERTY(Category = "RangeSkill", EditAnywhere, BlueprintReadWrite)
 	float DestroyDelay;
@@ -64,13 +64,13 @@ public:
 	float DestoryCount;
 
 	UPROPERTY(Category = "RangeSkill", EditAnywhere, BlueprintReadWrite)
-	bool  PrepareDestory;
+	uint32  PrepareDestory: 1;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "FightRole")
 	TArray<AHeroCharacter*> AttackCollision;
 
 	UPROPERTY(Category = "RangeSkill", EditAnywhere, BlueprintReadOnly)
-	bool IsFixdLength;
+	uint32 IsFixdLength: 1;
 	
 	UPROPERTY(Category = "RangeSkill", EditAnywhere, BlueprintReadOnly)
 	float PhysicalDamage;
@@ -85,5 +85,5 @@ public:
 	TArray<UHeroBuff*> Buffs;
 
 	UPROPERTY(Category = "RangeSkill", EditAnywhere, BlueprintReadWrite)
-	bool IsReadyToStart;
+	uint32 IsReadyToStart: 1;
 };

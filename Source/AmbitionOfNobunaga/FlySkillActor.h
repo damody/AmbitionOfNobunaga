@@ -12,37 +12,38 @@ UCLASS()
 class AMBITIONOFNOBUNAGA_API AFlySkillActor : public AActor
 {
 	GENERATED_UCLASS_BODY()
-	
-public:	
+
+public:
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif
 	UFUNCTION()
-	void OnBeginAttackOverlap(AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	void OnBeginAttackOverlap(AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
+	                          const FHitResult& SweepResult);
 
 	UFUNCTION(Server, WithValidation, Reliable)
 	void Injury();
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	
+
 	// Called every frame
 	virtual void Tick( float DeltaSeconds ) override;
 
 	UPROPERTY(Category = "Equipment", VisibleAnywhere, BlueprintReadOnly)
-	class UCapsuleComponent* CapsuleComponent;
+	class UCapsuleComponent * CapsuleComponent;
 
 	UPROPERTY(Category = "FlySkill", VisibleAnywhere, BlueprintReadOnly)
-	UParticleSystemComponent* BulletParticle;
+	UParticleSystemComponent * BulletParticle;
 
 	UPROPERTY(Category = "FlySkill", EditAnywhere, BlueprintReadWrite)
 	float MoveSpeed;
 
 	UPROPERTY(Category = "FlySkill", EditAnywhere, BlueprintReadWrite, Replicated)
-	int32 TeamId;	
+	int32 TeamId;
 
 	UPROPERTY(Category = "FlySkill", VisibleAnywhere, BlueprintReadOnly)
-	USceneComponent* Scene;
+	USceneComponent * Scene;
 
 	UPROPERTY(Category = "Bullet", EditAnywhere, BlueprintReadWrite)
 	float DestroyDelay;
@@ -51,11 +52,11 @@ public:
 	float DestoryCount;
 
 	UPROPERTY(Category = "Bullet", EditAnywhere, BlueprintReadWrite)
-	bool  PrepareDestory;
+	uint32  PrepareDestory: 1;
 
 	UPROPERTY(Category = "FlySkill", EditAnywhere, BlueprintReadOnly)
-	bool IsFixdLength;
-	
+	uint32 IsFixdLength: 1;
+
 	UPROPERTY(Category = "FlySkill", EditAnywhere, BlueprintReadOnly)
 	float PhysicalDamage;
 
@@ -63,16 +64,18 @@ public:
 	float MagicDamage;
 
 	UPROPERTY(Category = "FlySkill", EditAnywhere, BlueprintReadOnly)
-	bool UseTargetLocation;
+	uint32 UseTargetLocation: 1;
 
 	UPROPERTY(Category = "FlySkill", EditAnywhere, BlueprintReadOnly)
-	bool UseTargetActor;
+	uint32 UseTargetActor: 1;
 
-	UPROPERTY(Category = "FlySkill", EditAnywhere, BlueprintReadWrite, Replicated, meta = (EditCondition = "UseTargetLocation"))
+	UPROPERTY(Category = "FlySkill", EditAnywhere, BlueprintReadWrite, Replicated,
+	          meta = (EditCondition = "UseTargetLocation"))
 	FVector TargetLocation;
 
-	UPROPERTY(Category = "FlySkill", EditAnywhere, BlueprintReadWrite, Replicated, meta = (EditCondition = "UseTargetActor"))
-	AActor* TargetActor;
+	UPROPERTY(Category = "FlySkill", EditAnywhere, BlueprintReadWrite, Replicated,
+	          meta = (EditCondition = "UseTargetActor"))
+	AActor * TargetActor;
 
 	UPROPERTY(Category = "FlySkill", VisibleAnywhere, BlueprintReadOnly)
 	TArray<AHeroCharacter*> AttackCollision;
