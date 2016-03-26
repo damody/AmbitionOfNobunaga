@@ -10,6 +10,7 @@
 #include "IHeadMountedDisplay.h"
 #include "Engine.h"
 #include "Equipment.h"
+#include "AONGameState.h"
 
 
 AAmbitionOfNobunagaPlayerController::AAmbitionOfNobunagaPlayerController()
@@ -290,17 +291,37 @@ void AAmbitionOfNobunagaPlayerController::OnMouseLButtonReleased()
 
 // network function
 
-bool AAmbitionOfNobunagaPlayerController::SetHeroAction_Validate(AHeroCharacter* hero, const FHeroAction& action)
+void AAmbitionOfNobunagaPlayerController::SetHeroActionImpl(AHeroCharacter* hero, const FHeroAction& action)
+{
+// 	hero->ActionQueue.Empty();
+// 	hero->ActionQueue.Add(action);
+	if (Role < ROLE_Authority)
+	{
+		ServerSetHeroAction(hero, action);
+	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Magenta, TEXT("FHeroBindAction"));
+		AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
+		ags->SetHeroAction(hero, action);
+	}
+}
+
+bool AAmbitionOfNobunagaPlayerController::ServerSetHeroAction_Validate(AHeroCharacter* hero, const FHeroAction& action)
 {
 	return true;
 }
 
-void AAmbitionOfNobunagaPlayerController::SetHeroAction_Implementation(AHeroCharacter* hero, const FHeroAction& action)
+void AAmbitionOfNobunagaPlayerController::ServerSetHeroAction_Implementation(AHeroCharacter* hero, const FHeroAction& action)
 {
 	UE_LOG(LogAmbitionOfNobunaga, Log, TEXT("%s SetHeroAction"), *GetFullName());
-	//GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Magenta, TEXT("SetHeroAction"));
-	hero->ActionQueue.Empty();
-	hero->ActionQueue.Add(action);
+	if (Role == ROLE_Authority)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Magenta, TEXT("FHeroBindAction"));
+		AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
+		ags->SetHeroAction(hero, action);
+	
+	}
 }
 
 bool AAmbitionOfNobunagaPlayerController::AppendHeroAction_Validate(AHeroCharacter* hero, const FHeroAction& action)
@@ -330,33 +351,14 @@ void AAmbitionOfNobunagaPlayerController::ClearHeroAction_Implementation(AHeroCh
 	hero->ActionQueue.Empty();
 }
 
-bool AAmbitionOfNobunagaPlayerController::CharacterMoveMulticast_Validate(AHeroCharacter* actor, const FVector& pos)
+void AAmbitionOfNobunagaPlayerController::CharacterMoveImpl(AHeroCharacter* actor, const FVector& pos)
 {
-	return true;
-}
-
-void AAmbitionOfNobunagaPlayerController::CharacterMoveMulticast_Implementation(AHeroCharacter* actor,
-        const FVector& pos)
-{
-	//if (Role != ROLE_Authority)
+	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Magenta, TEXT("WalkAI->MoveToLocation OK"));
+	//actor->WalkAI->MoveToLocation(pos);
+	actor->AddMovementInput(pos - actor->GetActorLocation());
+	if (Role < ROLE_Authority)
 	{
-		UE_LOG(LogAmbitionOfNobunaga, Log, TEXT("%s CharacterMoveMulticast"), *GetFullName());
-		GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Magenta, TEXT("CharacterMoveMulticast"));
-		if (actor->WalkAI)
-		{
-			if (EPathFollowingRequestResult::Failed == actor->WalkAI->MoveToLocation(pos))
-			{
-				UE_LOG(LogAmbitionOfNobunaga, Log, TEXT("%s WalkAI->MoveToLocation FAIL"), *GetFullName());
-			}
-			else
-			{
-				UE_LOG(LogAmbitionOfNobunaga, Log, TEXT("%s WalkAI->MoveToLocation OK"), *GetFullName());
-			}
-		}
-		else
-		{
-			UE_LOG(LogAmbitionOfNobunaga, Log, TEXT("%s WalkAI->MoveToLocation FAIL"), *GetFullName());
-		}
+		CharacterMove(actor, pos);
 	}
 }
 
@@ -367,21 +369,7 @@ bool AAmbitionOfNobunagaPlayerController::CharacterMove_Validate(AHeroCharacter*
 
 void AAmbitionOfNobunagaPlayerController::CharacterMove_Implementation(AHeroCharacter* actor, const FVector& pos)
 {
-	UE_LOG(LogAmbitionOfNobunaga, Log, TEXT("%s CharacterMove"), *GetFullName());
-	//GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Magenta, TEXT("CharacterMove"));
-	if (actor->WalkAI)
-	{
-		UE_LOG(LogAmbitionOfNobunaga, Log, TEXT("%s WalkAI->MoveToLocation OK"), *GetFullName());
-		actor->WalkAI->MoveToLocation(pos);
-	}
-	else
-	{
-		UE_LOG(LogAmbitionOfNobunaga, Log, TEXT("%s WalkAI->MoveToLocation FAIL"), *GetFullName());
-	}
-	if (Role == ROLE_Authority)
-	{
-		//CharacterMoveMulticast(actor, pos);
-	}
+	CharacterMoveImpl(actor, pos);
 }
 
 bool AAmbitionOfNobunagaPlayerController::CharacterStopMove_Validate(AHeroCharacter* actor)

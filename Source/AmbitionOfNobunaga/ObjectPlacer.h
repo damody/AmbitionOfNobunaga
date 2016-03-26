@@ -20,9 +20,9 @@ public:
 	
 	// Called every frame
 	virtual void Tick( float DeltaSeconds ) override;
-
+#if WITH_EDITOR
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& e) override;
-
+#endif
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hero")
 	TSubclassOf<AActor> WantPlacing;
 

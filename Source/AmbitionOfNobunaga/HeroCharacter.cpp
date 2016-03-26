@@ -94,25 +94,22 @@ AHeroCharacter::AHeroCharacter(const FObjectInitializer& ObjectInitializer)
 	GetCapsuleComponent()->OnClicked.AddDynamic(this, &AHeroCharacter::OnMouseClicked);
 }
 
-// Called when the game starts or when spawned
-void AHeroCharacter::BeginPlay()
+void AHeroCharacter::PostInitializeComponents()
 {
-	Super::BeginPlay();
+	Super::PostInitializeComponents();
 	WalkAI = nullptr;
-	if (Role == ROLE_Authority)
+	//if (Role == ROLE_Authority)
 	{
-		// Get current location of the Player Proxy
-		FVector Location = GetActorLocation();
-		FRotator Rotation = GetActorRotation();
-
-		FActorSpawnParameters SpawnParams;
-		SpawnParams.Owner = this;
-		SpawnParams.Instigator = Instigator;
-		SpawnParams.bNoCollisionFail = true;
-
 		WalkAI = GetWorld()->SpawnActor<AAIController>(GetActorLocation(), GetActorRotation());
 		WalkAI->Possess(this);
 	}
+}
+
+// Called when the game starts or when spawned
+void AHeroCharacter::BeginPlay()
+{
+	Super::BeginPlay();	
+	
 	HeadEffectSprite->DetachFromParent();
 	HeadEffectSprite->SetVisibility(false);
 	SelectionDecal->SetVisibility(false);
@@ -268,7 +265,6 @@ void AHeroCharacter::Tick(float DeltaTime)
 			}
 		}
 	}
-
 	// 是否有動作？
 	if (ActionQueue.Num() > 0 && !IsDead)
 	{
@@ -669,6 +665,15 @@ bool AHeroCharacter::CheckCurrentActionFinish()
 		{
 			return true;
 		}
+		else
+		{
+			FVector dir = CurrentAction.TargetVec1 - this->GetActorLocation();
+			dir.Z = 0;
+			dir.Normalize();
+			this->AddActorWorldOffset(dir*20);
+			GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Magenta, GetFullName() + 
+				FString::Printf(TEXT("%s Dis %f"), *dir.ToString(), Distance));
+		}
 	}
 	break;
 	case EHeroBodyStatus::Dazzing:
@@ -806,7 +811,8 @@ void AHeroCharacter::DoAction_MoveToPositionImpl(const FHeroAction& CurrentActio
 		BodyStatus = EHeroBodyStatus::Moving;
 		if (Distance > MinimumDontMoveDistance)
 		{
-			acontrol->CharacterMove(this, CurrentAction.TargetVec1);
+			//this->WalkAI->MoveToLocation(CurrentAction.TargetVec1);
+			acontrol->CharacterMoveImpl(this, CurrentAction.TargetVec1);
 			GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Magenta,
 			                                 FString::Printf(L"Distance:%.1f %.1f", Distance, MinimumDontMoveDistance));
 		}
@@ -815,7 +821,8 @@ void AHeroCharacter::DoAction_MoveToPositionImpl(const FHeroAction& CurrentActio
 	case EHeroBodyStatus::Moving:
 		if (LastMoveTarget != CurrentAction.TargetVec1)
 		{
-			acontrol->CharacterMove(this, CurrentAction.TargetVec1);
+			//this->WalkAI->MoveToLocation(CurrentAction.TargetVec1);
+			acontrol->CharacterMoveImpl(this, CurrentAction.TargetVec1);
 		}
 		break;
 	case EHeroBodyStatus::Dazzing:
@@ -890,7 +897,6 @@ void AHeroCharacter::DoAction_AttackActor(const FHeroAction& CurrentAction)
 			AAmbitionOfNobunagaPlayerController* acontrol =
 			    Cast<AAmbitionOfNobunagaPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
 			acontrol->CharacterMove(this, TargetActor->GetActorLocation());
-			acontrol->CharacterMoveMulticast(this, TargetActor->GetActorLocation());
 		}
 	}
 	break;
@@ -1259,5 +1265,5 @@ void AHeroCharacter::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& Out
 	DOREPLIFETIME(AHeroCharacter, CurrentHP);
 	DOREPLIFETIME(AHeroCharacter, BodyStatus);
 	DOREPLIFETIME(AHeroCharacter, ActionQueue);
+	DOREPLIFETIME(AHeroCharacter, CurrentAction);
 }
-

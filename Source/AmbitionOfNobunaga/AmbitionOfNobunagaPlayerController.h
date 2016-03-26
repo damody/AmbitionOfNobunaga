@@ -5,9 +5,12 @@
 #include "HeroActionx.h"
 #include "AmbitionOfNobunagaPlayerController.generated.h"
 
+
 class ARTS_HUD;
 class AHeroCharacter;
 class AEquipment;
+
+
 
 UCLASS()
 class AAmbitionOfNobunagaPlayerController : public APlayerController
@@ -50,21 +53,23 @@ public:
 	TArray<FKey> SkillMapping;
 
 	/** Navigate player to the given world location. */
+
+	void CharacterMoveImpl(AHeroCharacter* hero, const FVector& action);
 	
-	UFUNCTION(Server, WithValidation, Reliable, BlueprintCallable, Category = "AONGameState")
-	void CharacterMove(AHeroCharacter* hero, const FVector& action);
-
-	UFUNCTION(NetMulticast, WithValidation, Reliable, BlueprintCallable, Category = "AONGameState")
-	void CharacterMoveMulticast(AHeroCharacter* hero, const FVector& action);
-
+	UFUNCTION(Server, WithValidation, Reliable, Category = "AONGameState")
+	void CharacterMove(AHeroCharacter* hero, const FVector& pos);
+	
 	UFUNCTION(Server, WithValidation, Reliable, BlueprintCallable, Category = "AONGameState")
 	void CharacterStopMove(AHeroCharacter* hero);
 
 	UFUNCTION(Server, WithValidation, Reliable, BlueprintCallable, Category = "AONGameState")
-	void HeroUseSkill(AHeroCharacter* hero, int32 index, const FVector& VFaceTo, const FVector& Pos);
+	void HeroUseSkill(AHeroCharacter* hero, int32 index, const FVector& VFaceTo, const FVector& pos);
+
+	void SetHeroActionImpl(AHeroCharacter* hero, const FHeroAction& action);
 
 	UFUNCTION(Server, WithValidation, Reliable, BlueprintCallable, Category = "AONGameState")
-	void SetHeroAction(AHeroCharacter* hero, const FHeroAction& action);
+	void ServerSetHeroAction(AHeroCharacter* hero, const FHeroAction& action);
+
 
 	UFUNCTION(Server, WithValidation, Reliable, BlueprintCallable, Category = "AONGameState")
 	void AppendHeroAction(AHeroCharacter* hero, const FHeroAction& action);
@@ -81,6 +86,8 @@ public:
 	void OnMouseLButtonPressed1();
 	void OnMouseLButtonPressed2();
 	void OnMouseLButtonReleased();
+
+	
 };
 
 

@@ -70,7 +70,11 @@ void AAONGameState::CharacterMove_Implementation(AHeroCharacter* actor, const FV
 	//NavSys->SimpleMoveToLocation(actor->GetController(), pos);
 	if (actor->WalkAI)
 	{
-		actor->WalkAI->MoveToLocation(pos);
+		//actor->WalkAI->MoveToLocation(pos);
+	}
+	else
+	{
+		UE_LOG(LogAmbitionOfNobunaga, Log, TEXT("%s WalkAI->MoveToLocation FAIL"), *(actor->GetFullName()));
 	}
 }
 

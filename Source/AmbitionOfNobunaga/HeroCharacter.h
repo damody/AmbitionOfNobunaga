@@ -74,6 +74,8 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaSeconds) override;
 
+	virtual void PostInitializeComponents() override;
+
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* InputComponent) override;
 #if WITH_EDITOR
@@ -529,7 +531,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Current", Replicated)
 	TArray<UHeroBuff*> BuffQueue;
 
-	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Current")
 	AAIController* WalkAI;
 
 	FVector LastMoveTarget;

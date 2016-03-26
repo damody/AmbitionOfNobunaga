@@ -10,7 +10,7 @@ public class AmbitionOfNobunaga : ModuleRules
             "Paper2D", "AIModule",
             "UMG", "RHI",
             "RenderCore", "SlateCore", "HeadMountedDisplay",
-            "DA_RTS"});
+            "DA_RTS", "Networking", });
         if (UEBuildConfiguration.bBuildEditor)
         {
             PublicDependencyModuleNames.AddRange(new string[] { "UnrealEd", "DA_RTS_Editor" });

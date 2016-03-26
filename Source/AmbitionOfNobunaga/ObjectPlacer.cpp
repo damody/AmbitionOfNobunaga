@@ -24,7 +24,7 @@ void AObjectPlacer::Tick( float DeltaTime )
 	Super::Tick( DeltaTime );
 
 }
-
+#if WITH_EDITOR
 void AObjectPlacer::PostEditChangeProperty(struct FPropertyChangedEvent& e)
 {
 	FName PropertyName = (e.Property != NULL) ? e.Property->GetFName() : NAME_None;
@@ -51,3 +51,5 @@ void AObjectPlacer::PostEditChangeProperty(struct FPropertyChangedEvent& e)
 
 	Super::PostEditChangeProperty(e);
 }
+
+#endif // #if WITH_EDITOR

@@ -26,7 +26,7 @@ public class AmbitionOfNobunagaServerTarget : TargetRules
     public override bool GetSupportedPlatforms(ref List<UnrealTargetPlatform> OutPlatforms)
     {
         // It is valid for only server platforms
-        return UnrealBuildTool.UnrealBuildTool.GetAllServerPlatforms(ref OutPlatforms, false);
+        return UnrealBuildTool.UnrealBuildTool.GetAllServerPlatforms(ref OutPlatforms, true);
     }
  
     public override List<UnrealTargetPlatform> GUBP_GetPlatforms_MonolithicOnly(UnrealTargetPlatform HostPlatform)
@@ -35,7 +35,7 @@ public class AmbitionOfNobunagaServerTarget : TargetRules
         {
             return new List<UnrealTargetPlatform>();
         }
-        return new List<UnrealTargetPlatform> { HostPlatform, UnrealTargetPlatform.Win32, UnrealTargetPlatform.Linux };
+        return new List<UnrealTargetPlatform> { UnrealTargetPlatform.Win64, UnrealTargetPlatform.Linux };
     }
  
     public override List<UnrealTargetConfiguration> GUBP_GetConfigs_MonolithicOnly(UnrealTargetPlatform HostPlatform, UnrealTargetPlatform Platform)

@@ -6,6 +6,18 @@
 #include "HeroActionx.h"
 #include "AONGameState.generated.h"
 
+USTRUCT()
+struct FHeroBindAction
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	AHeroCharacter* hero;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FHeroAction action;
+};
+
 /**
  * 有需要全地圖大招可以改這裡的參數
  * if any hero need big spell, you can modify this parameter
@@ -19,7 +31,7 @@ public:
 	UFUNCTION(NetMulticast, WithValidation, Reliable, BlueprintCallable, Category = "AONGameState")
 	void SetObjectLocation(AActor* actor, const FVector& pos);
 
-	UFUNCTION(Server, WithValidation, Reliable, BlueprintCallable, Category = "AONGameState")
+	UFUNCTION(NetMulticast, WithValidation, Reliable, BlueprintCallable, Category = "AONGameState")
 	void CharacterMove(AHeroCharacter* hero, const FVector& action);
 
 	UFUNCTION(Server, WithValidation, Reliable, BlueprintCallable, Category = "AONGameState")
@@ -28,7 +40,7 @@ public:
 	UFUNCTION(Server, WithValidation, Reliable, BlueprintCallable, Category = "AONGameState")
 	void HeroUseSkill(AHeroCharacter* hero, int32 index, const FVector& VFaceTo, const FVector& Pos);
 
-	UFUNCTION(Server, WithValidation, Reliable, BlueprintCallable, Category = "AONGameState")
+	UFUNCTION(NetMulticast, WithValidation, Reliable, BlueprintCallable, Category = "AONGameState")
 	void SetHeroAction(AHeroCharacter* hero, const FHeroAction& action);
 
 	UFUNCTION(Server, WithValidation, Reliable, BlueprintCallable, Category = "AONGameState")
@@ -64,4 +76,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "AONGameState")
 	float ArmorConvertToInjuryPersent(float armor);
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<FHeroBindAction> LastAction;
 };
