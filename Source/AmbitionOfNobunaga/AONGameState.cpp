@@ -57,8 +57,6 @@ void AAONGameState::ClearHeroAction_Implementation(AHeroCharacter* hero, const F
 	hero->ActionQueue.Empty();
 }
 
-
-
 bool AAONGameState::CharacterMove_Validate(AHeroCharacter* actor, const FVector& pos)
 {
 	return true;
@@ -70,7 +68,7 @@ void AAONGameState::CharacterMove_Implementation(AHeroCharacter* actor, const FV
 	//NavSys->SimpleMoveToLocation(actor->GetController(), pos);
 	if (actor->WalkAI)
 	{
-		//actor->WalkAI->MoveToLocation(pos);
+		actor->WalkAI->MoveToLocation(pos);
 	}
 	else
 	{
@@ -85,7 +83,14 @@ bool AAONGameState::CharacterStopMove_Validate(AHeroCharacter* actor)
 
 void AAONGameState::CharacterStopMove_Implementation(AHeroCharacter* actor)
 {
-	actor->GetController()->StopMovement();
+	if (actor->WalkAI)
+	{
+		actor->WalkAI->StopMovement();
+	}
+	else
+	{
+		UE_LOG(LogAmbitionOfNobunaga, Log, TEXT("%s WalkAI->StopMovement FAIL"), *(actor->GetFullName()));
+	}
 }
 
 bool AAONGameState::HeroUseSkill_Validate(AHeroCharacter* hero, int32 index, const FVector& VFaceTo, const FVector& Pos)

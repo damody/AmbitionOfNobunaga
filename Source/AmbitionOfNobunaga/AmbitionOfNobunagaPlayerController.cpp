@@ -291,17 +291,14 @@ void AAmbitionOfNobunagaPlayerController::OnMouseLButtonReleased()
 
 // network function
 
-void AAmbitionOfNobunagaPlayerController::SetHeroActionImpl(AHeroCharacter* hero, const FHeroAction& action)
+void AAmbitionOfNobunagaPlayerController::SetHeroAction(AHeroCharacter* hero, const FHeroAction& action)
 {
-// 	hero->ActionQueue.Empty();
-// 	hero->ActionQueue.Add(action);
 	if (Role < ROLE_Authority)
 	{
 		ServerSetHeroAction(hero, action);
 	}
 	else
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Magenta, TEXT("FHeroBindAction"));
 		AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
 		ags->SetHeroAction(hero, action);
 	}
@@ -312,90 +309,156 @@ bool AAmbitionOfNobunagaPlayerController::ServerSetHeroAction_Validate(AHeroChar
 	return true;
 }
 
-void AAmbitionOfNobunagaPlayerController::ServerSetHeroAction_Implementation(AHeroCharacter* hero, const FHeroAction& action)
+void AAmbitionOfNobunagaPlayerController::ServerSetHeroAction_Implementation(AHeroCharacter* hero,
+        const FHeroAction& action)
 {
-	UE_LOG(LogAmbitionOfNobunaga, Log, TEXT("%s SetHeroAction"), *GetFullName());
 	if (Role == ROLE_Authority)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Magenta, TEXT("FHeroBindAction"));
+		UE_LOG(LogAmbitionOfNobunaga, Log, TEXT("%s SetHeroAction"), *GetFullName());
 		AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
 		ags->SetHeroAction(hero, action);
-	
 	}
 }
 
-bool AAmbitionOfNobunagaPlayerController::AppendHeroAction_Validate(AHeroCharacter* hero, const FHeroAction& action)
+void AAmbitionOfNobunagaPlayerController::AppendHeroAction(AHeroCharacter* hero, const FHeroAction& action)
 {
-	return true;
-}
-
-void AAmbitionOfNobunagaPlayerController::AppendHeroAction_Implementation(AHeroCharacter* hero,
-        const FHeroAction& action)
-{
-	UE_LOG(LogAmbitionOfNobunaga, Log, TEXT("%s AppendHeroAction"), *GetFullName());
-	//GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Magenta, TEXT("AppendHeroAction"));
-	hero->ActionQueue.Add(action);
-}
-
-
-bool AAmbitionOfNobunagaPlayerController::ClearHeroAction_Validate(AHeroCharacter* hero, const FHeroAction& action)
-{
-	return true;
-}
-
-void AAmbitionOfNobunagaPlayerController::ClearHeroAction_Implementation(AHeroCharacter* hero,
-        const FHeroAction& action)
-{
-	UE_LOG(LogAmbitionOfNobunaga, Log, TEXT("%s ClearHeroAction"), *GetFullName());
-	//GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Magenta, TEXT("ClearHeroAction"));
-	hero->ActionQueue.Empty();
-}
-
-void AAmbitionOfNobunagaPlayerController::CharacterMoveImpl(AHeroCharacter* actor, const FVector& pos)
-{
-	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Magenta, TEXT("WalkAI->MoveToLocation OK"));
-	//actor->WalkAI->MoveToLocation(pos);
-	actor->AddMovementInput(pos - actor->GetActorLocation());
 	if (Role < ROLE_Authority)
 	{
-		CharacterMove(actor, pos);
+		ServerAppendHeroAction(hero, action);
+	}
+	else
+	{
+		AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
+		ags->AppendHeroAction(hero, action);
 	}
 }
 
-bool AAmbitionOfNobunagaPlayerController::CharacterMove_Validate(AHeroCharacter* actor, const FVector& pos)
+bool AAmbitionOfNobunagaPlayerController::ServerAppendHeroAction_Validate(AHeroCharacter* hero, const FHeroAction& action)
 {
 	return true;
 }
 
-void AAmbitionOfNobunagaPlayerController::CharacterMove_Implementation(AHeroCharacter* actor, const FVector& pos)
+void AAmbitionOfNobunagaPlayerController::ServerAppendHeroAction_Implementation(AHeroCharacter* hero,
+        const FHeroAction& action)
 {
-	CharacterMoveImpl(actor, pos);
+	if (Role < ROLE_Authority)
+	{
+		UE_LOG(LogAmbitionOfNobunaga, Log, TEXT("%s ClearHeroAction"), *GetFullName());
+		AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
+		ags->AppendHeroAction(hero, action);
+	}
 }
 
-bool AAmbitionOfNobunagaPlayerController::CharacterStopMove_Validate(AHeroCharacter* actor)
+void AAmbitionOfNobunagaPlayerController::ClearHeroAction(AHeroCharacter* hero, const FHeroAction& action)
+{
+	if (Role < ROLE_Authority)
+	{
+		ServerClearHeroAction(hero, action);
+	}
+	else
+	{
+		AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
+		ags->ClearHeroAction(hero, action);
+	}
+}
+
+bool AAmbitionOfNobunagaPlayerController::ServerClearHeroAction_Validate(AHeroCharacter* hero, const FHeroAction& action)
 {
 	return true;
 }
 
-void AAmbitionOfNobunagaPlayerController::CharacterStopMove_Implementation(AHeroCharacter* actor)
+void AAmbitionOfNobunagaPlayerController::ServerClearHeroAction_Implementation(AHeroCharacter* hero,
+        const FHeroAction& action)
 {
-	UE_LOG(LogAmbitionOfNobunaga, Log, TEXT("%s CharacterStopMove"), *GetFullName());
-	//GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Magenta, TEXT("CharacterStopMove"));
-	actor->GetController()->StopMovement();
+	if (Role < ROLE_Authority)
+	{
+		UE_LOG(LogAmbitionOfNobunaga, Log, TEXT("%s ClearHeroAction"), *GetFullName());
+		AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
+		ags->ClearHeroAction(hero, action);
+	}
 }
 
-bool AAmbitionOfNobunagaPlayerController::HeroUseSkill_Validate(AHeroCharacter* hero, int32 index,
+void AAmbitionOfNobunagaPlayerController::CharacterMove(AHeroCharacter* hero, const FVector& pos)
+{
+	if (Role < ROLE_Authority)
+	{
+		ServerCharacterMove(hero, pos);
+	}
+	else
+	{
+		AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
+		ags->CharacterMove(hero, pos);
+	}
+}
+
+bool AAmbitionOfNobunagaPlayerController::ServerCharacterMove_Validate(AHeroCharacter* hero, const FVector& pos)
+{
+	return true;
+}
+
+void AAmbitionOfNobunagaPlayerController::ServerCharacterMove_Implementation(AHeroCharacter* hero, const FVector& pos)
+{
+	if (Role == ROLE_Authority)
+	{
+		AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
+		ags->CharacterMove(hero, pos);
+	}
+}
+
+void AAmbitionOfNobunagaPlayerController::CharacterStopMove(AHeroCharacter* hero)
+{
+	if (Role < ROLE_Authority)
+	{
+		ServerCharacterStopMove(hero);
+	}
+	else
+	{
+		AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
+		ags->CharacterStopMove(hero);
+	}
+}
+
+bool AAmbitionOfNobunagaPlayerController::ServerCharacterStopMove_Validate(AHeroCharacter* actor)
+{
+	return true;
+}
+
+void AAmbitionOfNobunagaPlayerController::ServerCharacterStopMove_Implementation(AHeroCharacter* hero)
+{
+	if (Role == ROLE_Authority)
+	{
+		AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
+		ags->CharacterStopMove(hero);
+	}
+}
+
+void AAmbitionOfNobunagaPlayerController::HeroUseSkill(AHeroCharacter* hero, int32 index, const FVector& VFaceTo,
+        const FVector& Pos)
+{
+	if (Role < ROLE_Authority)
+	{
+		ServerHeroUseSkill(hero, index, VFaceTo, Pos);
+	}
+	else
+	{
+		AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
+		ags->HeroUseSkill(hero, index, VFaceTo, Pos);
+	}
+}
+
+bool AAmbitionOfNobunagaPlayerController::ServerHeroUseSkill_Validate(AHeroCharacter* hero, int32 index,
         const FVector& VFaceTo, const FVector& Pos)
 {
 	return true;
 }
 
-void AAmbitionOfNobunagaPlayerController::HeroUseSkill_Implementation(AHeroCharacter* hero, int32 index,
-        const FVector& VFaceTo,
-        const FVector& Pos)
+void AAmbitionOfNobunagaPlayerController::ServerHeroUseSkill_Implementation(AHeroCharacter* hero, int32 index,
+        const FVector& VFaceTo, const FVector& Pos)
 {
-	UE_LOG(LogAmbitionOfNobunaga, Log, TEXT("%s HeroUseSkill"), *GetFullName());
-	//GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Magenta, TEXT("HeroUseSkill"));
-	hero->UseSkill(index, VFaceTo, Pos);
+	if (Role == ROLE_Authority)
+	{
+		UE_LOG(LogAmbitionOfNobunaga, Log, TEXT("%s HeroUseSkill"), *GetFullName());
+		AAONGameState* ags = Cast<AAONGameState>(UGameplayStatics::GetGameState(GetWorld()));
+		ags->HeroUseSkill(hero, index, VFaceTo, Pos);
+	}
 }
-

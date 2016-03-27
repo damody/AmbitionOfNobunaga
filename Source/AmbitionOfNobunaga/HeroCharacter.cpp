@@ -665,15 +665,6 @@ bool AHeroCharacter::CheckCurrentActionFinish()
 		{
 			return true;
 		}
-		else
-		{
-			FVector dir = CurrentAction.TargetVec1 - this->GetActorLocation();
-			dir.Z = 0;
-			dir.Normalize();
-			this->AddActorWorldOffset(dir*20);
-			GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Magenta, GetFullName() + 
-				FString::Printf(TEXT("%s Dis %f"), *dir.ToString(), Distance));
-		}
 	}
 	break;
 	case EHeroBodyStatus::Dazzing:
@@ -811,8 +802,7 @@ void AHeroCharacter::DoAction_MoveToPositionImpl(const FHeroAction& CurrentActio
 		BodyStatus = EHeroBodyStatus::Moving;
 		if (Distance > MinimumDontMoveDistance)
 		{
-			//this->WalkAI->MoveToLocation(CurrentAction.TargetVec1);
-			acontrol->CharacterMoveImpl(this, CurrentAction.TargetVec1);
+			acontrol->CharacterMove(this, CurrentAction.TargetVec1);
 			GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Magenta,
 			                                 FString::Printf(L"Distance:%.1f %.1f", Distance, MinimumDontMoveDistance));
 		}
@@ -821,8 +811,7 @@ void AHeroCharacter::DoAction_MoveToPositionImpl(const FHeroAction& CurrentActio
 	case EHeroBodyStatus::Moving:
 		if (LastMoveTarget != CurrentAction.TargetVec1)
 		{
-			//this->WalkAI->MoveToLocation(CurrentAction.TargetVec1);
-			acontrol->CharacterMoveImpl(this, CurrentAction.TargetVec1);
+			acontrol->CharacterMove(this, CurrentAction.TargetVec1);
 		}
 		break;
 	case EHeroBodyStatus::Dazzing:

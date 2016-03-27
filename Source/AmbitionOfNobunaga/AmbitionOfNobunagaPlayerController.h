@@ -53,29 +53,41 @@ public:
 	TArray<FKey> SkillMapping;
 
 	/** Navigate player to the given world location. */
-
-	void CharacterMoveImpl(AHeroCharacter* hero, const FVector& action);
-	
-	UFUNCTION(Server, WithValidation, Reliable, Category = "AONGameState")
+	UFUNCTION(BlueprintCallable, Category = "AONGameState")
 	void CharacterMove(AHeroCharacter* hero, const FVector& pos);
 	
-	UFUNCTION(Server, WithValidation, Reliable, BlueprintCallable, Category = "AONGameState")
+	UFUNCTION(Server, WithValidation, Reliable, Category = "AONGameState")
+	void ServerCharacterMove(AHeroCharacter* hero, const FVector& pos);
+	
+	UFUNCTION(BlueprintCallable, Category = "AONGameState")
 	void CharacterStopMove(AHeroCharacter* hero);
 
 	UFUNCTION(Server, WithValidation, Reliable, BlueprintCallable, Category = "AONGameState")
+	void ServerCharacterStopMove(AHeroCharacter* hero);
+
+	UFUNCTION(BlueprintCallable, Category = "AONGameState")
 	void HeroUseSkill(AHeroCharacter* hero, int32 index, const FVector& VFaceTo, const FVector& pos);
 
-	void SetHeroActionImpl(AHeroCharacter* hero, const FHeroAction& action);
+	UFUNCTION(Server, WithValidation, Reliable, BlueprintCallable, Category = "AONGameState")
+	void ServerHeroUseSkill(AHeroCharacter* hero, int32 index, const FVector& VFaceTo, const FVector& pos);
+
+	UFUNCTION(BlueprintCallable, Category = "AONGameState")
+	void SetHeroAction(AHeroCharacter* hero, const FHeroAction& action);
 
 	UFUNCTION(Server, WithValidation, Reliable, BlueprintCallable, Category = "AONGameState")
 	void ServerSetHeroAction(AHeroCharacter* hero, const FHeroAction& action);
 
-
-	UFUNCTION(Server, WithValidation, Reliable, BlueprintCallable, Category = "AONGameState")
+	UFUNCTION(BlueprintCallable, Category = "AONGameState")
 	void AppendHeroAction(AHeroCharacter* hero, const FHeroAction& action);
 
 	UFUNCTION(Server, WithValidation, Reliable, BlueprintCallable, Category = "AONGameState")
+	void ServerAppendHeroAction(AHeroCharacter* hero, const FHeroAction& action);
+
+	UFUNCTION(BlueprintCallable, Category = "AONGameState")
 	void ClearHeroAction(AHeroCharacter* hero, const FHeroAction& action);
+
+	UFUNCTION(Server, WithValidation, Reliable, BlueprintCallable, Category = "AONGameState")
+	void ServerClearHeroAction(AHeroCharacter* hero, const FHeroAction& action);
 
 	FVector2D GetMouseScreenPosition();
 

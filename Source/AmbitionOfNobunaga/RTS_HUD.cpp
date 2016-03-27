@@ -295,7 +295,7 @@ void ARTS_HUD::AssignSelectionHeroPickup(AEquipment* equ)
 			}
 			else
 			{
-				LocalController->SetHeroActionImpl(EachHero, act);
+				LocalController->SetHeroAction(EachHero, act);
 			}
 		}
 	}
@@ -330,7 +330,7 @@ void ARTS_HUD::HeroAttackHero(AHeroCharacter* hero)
 				}
 				else
 				{
-					LocalController->SetHeroActionImpl(EachHero, act);
+					LocalController->SetHeroAction(EachHero, act);
 				}
 			}
 		}
@@ -358,7 +358,7 @@ void ARTS_HUD::HeroAttackSceneObject(ASceneObject* SceneObj)
 				}
 				else
 				{
-					LocalController->SetHeroActionImpl(EachHero, act);
+					LocalController->SetHeroAction(EachHero, act);
 				}
 
 			}
@@ -457,7 +457,7 @@ void ARTS_HUD::OnRMouseDown(FVector2D pos)
 						}
 						else
 						{
-							LocalController->SetHeroActionImpl(CurrentSelection[0], act);
+							LocalController->SetHeroAction(CurrentSelection[0], act);
 						}
 						UWorld* const World = GetWorld();
 						AMouseEffect* actor = World->SpawnActor<AMouseEffect>(MouseEffect);
@@ -632,7 +632,7 @@ void ARTS_HUD::OnLMousePressed2(FVector2D pos)
 			}
 			else
 			{
-				LocalController->SetHeroActionImpl(CurrentSelection[0], act);
+				LocalController->SetHeroAction(CurrentSelection[0], act);
 			}
 			RTSStatus = ERTSStatusEnum::ToNormal;
 		}
@@ -715,7 +715,7 @@ void ARTS_HUD::OnLMouseReleased(FVector2D pos)
 			}
 			else
 			{
-				LocalController->SetHeroActionImpl(CurrentSelection[0], act);
+				LocalController->SetHeroAction(CurrentSelection[0], act);
 			}
 			RTSStatus = ERTSStatusEnum::Normal;
 			ThrowTexture = NULL;
