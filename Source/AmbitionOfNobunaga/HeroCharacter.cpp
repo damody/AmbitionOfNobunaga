@@ -100,7 +100,7 @@ void AHeroCharacter::PostInitializeComponents()
 	WalkAI = nullptr;
 	//if (Role == ROLE_Authority)
 	{
-		WalkAI = GetWorld()->SpawnActor<AAIController>(GetActorLocation(), GetActorRotation());
+		WalkAI = GetWorld()->SpawnActor<AAIController>();
 		WalkAI->Possess(this);
 	}
 }
@@ -110,6 +110,9 @@ void AHeroCharacter::BeginPlay()
 {
 	Super::BeginPlay();	
 	
+	AAmbitionOfNobunagaPlayerController* acontrol =
+		Cast<AAmbitionOfNobunagaPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
+	WalkAI->SetOwner(acontrol);
 	HeadEffectSprite->DetachFromParent();
 	HeadEffectSprite->SetVisibility(false);
 	SelectionDecal->SetVisibility(false);
@@ -268,6 +271,8 @@ void AHeroCharacter::Tick(float DeltaTime)
 	// 是否有動作？
 	if (ActionQueue.Num() > 0 && !IsDead)
 	{
+		GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::Magenta, 
+			FString::Printf(L"ActionQueue %d", ActionQueue.Num()));
 		// 動作駐列最上層動作是否為當前動作
 		if (ActionQueue[0] != CurrentAction)
 		{
@@ -661,9 +666,18 @@ bool AHeroCharacter::CheckCurrentActionFinish()
 	{
 		// 移動到夠接近就 Pop 掉
 		float Distance = FVector::Dist(CurrentAction.TargetVec1, this->GetActorLocation());
-		if (Distance < MinimumDontMoveDistance && this->GetVelocity().Size() < 5)
+		if (Distance < MinimumDontMoveDistance/* && this->GetVelocity().Size() < 5*/)
 		{
 			return true;
+		}
+		else
+		{
+			FVector dir = CurrentAction.TargetVec1 - this->GetActorLocation();
+			dir.Z = 0;
+			dir.Normalize();
+			this->AddMovementInput(dir);
+			GEngine->AddOnScreenDebugMessage(-1, 0.01f, FColor::Magenta, GetFullName() +
+				FString::Printf(TEXT("%s Dis %f"), *dir.ToString(), Distance));
 		}
 	}
 	break;
@@ -809,10 +823,7 @@ void AHeroCharacter::DoAction_MoveToPositionImpl(const FHeroAction& CurrentActio
 	}
 	break;
 	case EHeroBodyStatus::Moving:
-		if (LastMoveTarget != CurrentAction.TargetVec1)
-		{
 			acontrol->CharacterMove(this, CurrentAction.TargetVec1);
-		}
 		break;
 	case EHeroBodyStatus::Dazzing:
 		break;

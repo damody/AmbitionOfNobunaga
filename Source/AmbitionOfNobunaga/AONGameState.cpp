@@ -64,11 +64,14 @@ bool AAONGameState::CharacterMove_Validate(AHeroCharacter* actor, const FVector&
 
 void AAONGameState::CharacterMove_Implementation(AHeroCharacter* actor, const FVector& pos)
 {
-	//UNavigationSystem* const NavSys = GetWorld()->GetNavigationSystem();
-	//NavSys->SimpleMoveToLocation(actor->GetController(), pos);
+	UNavigationSystem* const NavSys = GetWorld()->GetNavigationSystem();
+// 	if (NavSys && actor->GetController())
+// 	{
+// 		NavSys->SimpleMoveToLocation(actor->GetController(), pos);
+// 	}
 	if (actor->WalkAI)
 	{
-		actor->WalkAI->MoveToLocation(pos);
+		//actor->WalkAI->MoveToLocation(pos);
 	}
 	else
 	{
@@ -99,7 +102,7 @@ bool AAONGameState::HeroUseSkill_Validate(AHeroCharacter* hero, int32 index, con
 }
 
 void AAONGameState::HeroUseSkill_Implementation(AHeroCharacter* hero, int32 index, const FVector& VFaceTo,
-	const FVector& Pos)
+        const FVector& Pos)
 {
 	hero->UseSkill(index, VFaceTo, Pos);
 }
